@@ -204,12 +204,11 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(asyncio.to_thread(agents.knowledge.reindex)),
     ]
 
-    if True:
-        # Always start simulator so /api/demo inject works; pause when not in sim mode.
-        sim = Simulator(pipeline)
-        sim.paused = settings.rootiq_mode != "sim" or settings.sim_paused
-        app.state.simulator = sim
-        app.state.tasks.append(asyncio.create_task(sim.run()))
+    # Always start simulator so /api/demo inject works; pause when not in sim mode.
+    sim = Simulator(pipeline)
+    sim.paused = settings.rootiq_mode != "sim" or settings.sim_paused
+    app.state.simulator = sim
+    app.state.tasks.append(asyncio.create_task(sim.run()))
 
     yield
 
@@ -233,6 +232,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api")
 app.include_router(topology.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
+app.include_router(demo.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")
 app.include_router(agents_api.router, prefix="/api")
