@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     llm_base_url: str = ""  # provider "custom": any OpenAI-compatible server (Ollama, vLLM, HF endpoint...)
     custom_llm_api_key: str = ""  # optional for the custom provider
+    # Demo / sim spine (used by /api/demo and collectors.simulator)
+    rootiq_mode: str = "sim"  # sim | live
+    sim_paused: bool = False
     # Multi-agent layer
     rootiq_execution_enabled: bool = True  # False -> live-lab remediation becomes a dry run
     agent_timeout_s: float = 8.0

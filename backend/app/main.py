@@ -6,7 +6,8 @@ from pathlib import Path
 from fastapi import FastAPI
 
 from app.agents.runtime import AgentRuntime
-from app.api import actions, agents as agents_api, events, health, incidents, topology, vendors, ws
+from app.api import actions, agents as agents_api, demo, events, health, incidents, topology, vendors, ws
+from app.collectors.simulator import Simulator
 from app.core.config import settings
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
@@ -80,6 +81,7 @@ def build_snapshot(app: FastAPI) -> dict:
         "topology": snap,
         "incidents": app.state.incidents.list_incidents(),
         "alerts": list(app.state.pipeline.alerts),
+        "demo": app.state.demo,
     }
 
 
@@ -103,6 +105,12 @@ async def lifespan(app: FastAPI):
     history = History(str(_history_path()))
     audit = AuditLog()
 
+    demo_state = {
+        "mode": "sim" if settings.rootiq_mode == "sim" else "live",
+        "scenario": None,
+        "state": "idle",
+        "injectedAt": None,
+    }
 
     agents = AgentRuntime(
         graph=graph, history=history, topology=topo, correlator=correlator, detector=detector, audit=audit
@@ -180,6 +188,7 @@ async def lifespan(app: FastAPI):
     app.state.agents = agents
     app.state.history = history
     app.state.pipeline = pipeline
+    app.state.demo = demo_state
     def refresh_graph():
         fresh = TopologyGraph(topo.raw)
         correlator.g = fresh
@@ -194,6 +203,13 @@ async def lifespan(app: FastAPI):
         # build the RAG index in the background so the first incident is not slowed down
         asyncio.create_task(asyncio.to_thread(agents.knowledge.reindex)),
     ]
+
+    if True:
+        # Always start simulator so /api/demo inject works; pause when not in sim mode.
+        sim = Simulator(pipeline)
+        sim.paused = settings.rootiq_mode != "sim" or settings.sim_paused
+        app.state.simulator = sim
+        app.state.tasks.append(asyncio.create_task(sim.run()))
 
     yield
 
