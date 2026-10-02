@@ -7,7 +7,6 @@ from fastapi import FastAPI
 
 from app.agents.runtime import AgentRuntime
 from app.api import actions, agents as agents_api, demo, events, health, incidents, topology, vendors, ws
-from app.collectors.simulator import Simulator
 from app.core.config import settings
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
@@ -106,7 +105,7 @@ async def lifespan(app: FastAPI):
     audit = AuditLog()
 
     demo_state = {
-        "mode": "sim" if settings.rootiq_mode == "sim" else "live",
+        "mode": "live",
         "scenario": None,
         "state": "idle",
         "injectedAt": None,
@@ -203,12 +202,6 @@ async def lifespan(app: FastAPI):
         # build the RAG index in the background so the first incident is not slowed down
         asyncio.create_task(asyncio.to_thread(agents.knowledge.reindex)),
     ]
-
-    # Always start simulator so /api/demo inject works; pause when not in sim mode.
-    sim = Simulator(pipeline)
-    sim.paused = settings.rootiq_mode != "sim" or settings.sim_paused
-    app.state.simulator = sim
-    app.state.tasks.append(asyncio.create_task(sim.run()))
 
     yield
 

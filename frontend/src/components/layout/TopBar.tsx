@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOps } from '@/store/useOps';
-import { api } from '@/lib/api';
 import { applyLang, type Lang } from '@/lib/theme';
 import clsx from 'clsx';
 
@@ -10,7 +9,7 @@ export function TopBar() {
   const wsStatus = useOps((s) => s.wsStatus);
   const lastUpdate = useOps((s) => s.lastUpdate);
   const demo = useOps((s) => s.demo);
-  const mode = demo?.mode ?? 'sim';
+  const mode = demo?.mode ?? 'live';
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -28,10 +27,6 @@ export function TopBar() {
     applyLang(next);
   };
 
-  const toggleMode = () => {
-    void api.setMode(mode === 'sim' ? 'live' : 'sim').catch(console.error);
-  };
-
   return (
     <header
       className="flex items-center justify-between border-b border-noc-line bg-noc-panel px-5"
@@ -43,17 +38,9 @@ export function TopBar() {
           <span className="rq-kicker !normal-case !tracking-normal">{t('topbar.operations')}</span>
         </div>
         <span className="rq-divider-v h-4" />
-        <button
-          type="button"
-          onClick={toggleMode}
-          title="Hot-switch mode"
-          className={clsx(
-            'mode-badge',
-            mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim',
-          )}
-        >
+        <span className="mode-badge mode-badge--live" title="Live EVE-NG telemetry">
           {mode === 'live' ? t('topbar.live') : t('topbar.sim')}
-        </button>
+        </span>
       </div>
       <div className="flex items-center gap-4 text-xs text-[var(--text-2)]">
         <span className="flex items-center gap-2">

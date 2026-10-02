@@ -20,8 +20,6 @@ export const api = {
   incidents: () => j<Incident[]>('/api/incidents'),
   inject: (s: Scenario) => j<DemoState>(`/api/demo/inject/${s}`, { method: 'POST' }),
   reset: () => j<DemoState>('/api/demo/reset', { method: 'POST' }),
-  setMode: (mode: 'live' | 'sim') =>
-    j<DemoState>('/api/demo/mode', { method: 'POST', body: JSON.stringify({ mode }) }),
   incidentReplay: (id: string) =>
     j<{ incidentId: string; steps: Array<{ ts: number; kind: string; label: string; entityId?: string; value?: number }> }>(
       `/api/incidents/${id}/replay`,

@@ -26,7 +26,7 @@ export const useOps = create<OpsState>((set) => ({
   incidents: {},
   alerts: [],
   agentSteps: [],
-  demo: { mode: 'sim', scenario: null, state: 'idle' },
+  demo: { mode: 'live', scenario: null, state: 'idle' },
   wsStatus: 'connecting',
   lastUpdate: 0,
   selection: null,
@@ -82,6 +82,8 @@ export const useOps = create<OpsState>((set) => ({
           return { incidents: { ...s.incidents, [m.data.id]: m.data }, lastUpdate };
         case 'agent_step':
           return { agentSteps: [...s.agentSteps, m.data].slice(-400), lastUpdate };
+        case 'topology':
+          return { topology: m.data, lastUpdate };
         case 'demo':
           return { demo: m.data, lastUpdate };
       }

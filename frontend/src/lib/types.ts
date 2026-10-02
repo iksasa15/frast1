@@ -383,6 +383,7 @@ export interface CopilotAnswer {
 export type WsMessage =
   | { type: 'agent_step'; ts: number; data: AgentStep }
   | { type: 'snapshot'; ts: number; data: Snapshot }
+  | { type: 'topology'; ts: number; data: Topology }
   | { type: 'link'; ts: number; data: Pick<TopoLink, 'id' | 'status' | 'utilization' | 'latencyMs' | 'packetLoss'> }
   | { type: 'node'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'service'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
