@@ -305,7 +305,8 @@ export interface Snapshot {
   topology: Topology;
   incidents: Incident[];
   alerts: RawAlert[];
-  demo: DemoState;
+  /** Present when backend exposes /api/demo; live-only backends omit this. */
+  demo?: DemoState;
 }
 
 export interface AgentStats {

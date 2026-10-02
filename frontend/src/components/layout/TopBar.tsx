@@ -10,6 +10,7 @@ export function TopBar() {
   const wsStatus = useOps((s) => s.wsStatus);
   const lastUpdate = useOps((s) => s.lastUpdate);
   const demo = useOps((s) => s.demo);
+  const mode = demo?.mode ?? 'sim';
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export function TopBar() {
   };
 
   const toggleMode = () => {
-    void api.setMode(demo.mode === 'sim' ? 'live' : 'sim').catch(console.error);
+    void api.setMode(mode === 'sim' ? 'live' : 'sim').catch(console.error);
   };
 
   return (
@@ -48,10 +49,10 @@ export function TopBar() {
           title="Hot-switch mode"
           className={clsx(
             'mode-badge',
-            demo.mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim',
+            mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim',
           )}
         >
-          {demo.mode === 'live' ? t('topbar.live') : t('topbar.sim')}
+          {mode === 'live' ? t('topbar.live') : t('topbar.sim')}
         </button>
       </div>
       <div className="flex items-center gap-4 text-xs text-[var(--text-2)]">

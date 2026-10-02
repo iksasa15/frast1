@@ -40,7 +40,7 @@ export const useOps = create<OpsState>((set) => ({
           return {
             topology: m.data.topology,
             alerts: m.data.alerts,
-            demo: m.data.demo,
+            demo: m.data.demo ?? s.demo,
             lastUpdate,
             incidents: Object.fromEntries(m.data.incidents.map((i) => [i.id, i])),
           };

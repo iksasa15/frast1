@@ -14,18 +14,19 @@ export function SettingsPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [theme, setThemeState] = useState<Theme>(() => getTheme());
   const demo = useOps((s) => s.demo);
+  const mode = demo?.mode ?? 'sim';
 
   useEffect(() => {
     setName(localStorage.getItem(KEY) || 'Ahmed');
   }, []);
 
-  const setMode = async (mode: 'live' | 'sim') => {
+  const setMode = async (next: 'live' | 'sim') => {
     setBusy(true);
     setMsg(null);
     try {
-      await api.setMode(mode);
+      await api.setMode(next);
       setMsg(
-        mode === 'sim'
+        next === 'sim'
           ? 'Switched to Simulation — badge shows Simulation.'
           : 'Switched to Live lab — ensure collector/agent are healthy.',
       );
@@ -110,12 +111,12 @@ export function SettingsPage() {
           show <span className="font-semibold text-[var(--brand-text)]">Simulation</span>.
         </p>
         <div className="flex items-center gap-2">
-          <span className={clsx('mode-badge', demo.mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim')}>
-            {demo.mode === 'live' ? t('topbar.live') : t('topbar.sim')}
+          <span className={clsx('mode-badge', mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim')}>
+            {mode === 'live' ? t('topbar.live') : t('topbar.sim')}
           </span>
           <button
             type="button"
-            disabled={busy || demo.mode === 'sim'}
+            disabled={busy || mode === 'sim'}
             onClick={() => void setMode('sim')}
             className="rq-btn-primary px-3 disabled:opacity-40"
           >
@@ -123,7 +124,7 @@ export function SettingsPage() {
           </button>
           <button
             type="button"
-            disabled={busy || demo.mode === 'live'}
+            disabled={busy || mode === 'live'}
             onClick={() => void setMode('live')}
             className="rq-btn-secondary px-3 disabled:opacity-40"
           >

@@ -62,14 +62,14 @@ export function Timeline() {
   }, [incidents]);
 
   const marks = useMemo(
-    () => marksFor(active, demo.injectedAt).filter((m) => m.at),
-    [active, demo.injectedAt],
+    () => marksFor(active, demo?.injectedAt).filter((m) => m.at),
+    [active, demo?.injectedAt],
   );
 
   const origin = useMemo(() => {
-    const first = marks[0]?.at ?? active?.openedAt ?? demo.injectedAt;
+    const first = marks[0]?.at ?? active?.openedAt ?? demo?.injectedAt;
     return first ? new Date(first).getTime() : Date.now();
-  }, [marks, active, demo.injectedAt]);
+  }, [marks, active, demo?.injectedAt]);
 
   const windowMs = 5 * 60 * 1000;
   const now = Date.now();

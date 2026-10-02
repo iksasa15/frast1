@@ -20,6 +20,7 @@ export function OperationsPage() {
   const select = useOps((s) => s.select);
   const incidents = useOps((s) => s.incidents);
   const demo = useOps((s) => s.demo);
+  const demoState = demo?.state ?? 'idle';
 
   const active = useMemo(() => {
     const list = Object.values(incidents);
@@ -27,7 +28,7 @@ export function OperationsPage() {
       .filter((i) => i.status !== 'resolved')
       .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
     if (open[0]) return open[0];
-    if (demo.state === 'recovered') {
+    if (demoState === 'recovered') {
       return (
         list
           .filter((i) => i.status === 'resolved')
@@ -35,7 +36,7 @@ export function OperationsPage() {
       );
     }
     return null;
-  }, [incidents, demo.state]);
+  }, [incidents, demoState]);
 
   const focus = useMemo(() => {
     const f: Record<string, Focus> = {};
@@ -104,7 +105,7 @@ export function OperationsPage() {
         <div className="pointer-events-auto flex max-w-full flex-wrap items-start justify-center gap-2">
           <DemoControls />
           <MttdStopwatch
-            injectedAt={demo.injectedAt ?? active?.timings.injectedAt}
+            injectedAt={demo?.injectedAt ?? active?.timings.injectedAt}
             analyzedAt={active?.timings.analyzedAt}
           />
         </div>
@@ -120,7 +121,7 @@ export function OperationsPage() {
         </div>
       </div>
 
-      {!active && demo.state !== 'recovered' && (
+      {!active && demoState !== 'recovered' && (
         <div
           className="pointer-events-none absolute top-14 z-10 flex items-center gap-2 border border-[var(--ok)] bg-[var(--ok-soft)] px-3 py-1.5 text-xs text-ok"
           style={{ insetInlineEnd: '12px' }}

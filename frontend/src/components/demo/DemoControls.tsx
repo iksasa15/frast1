@@ -12,7 +12,7 @@ export function DemoControls() {
   const demo = useOps((s) => s.demo);
   const [scenario, setScenario] = useState<Scenario>('uplink-congestion');
   const [error, setError] = useState<string | null>(null);
-  const busy = demo.state !== 'idle';
+  const busy = (demo?.state ?? 'idle') !== 'idle';
 
   const run = async (fn: () => Promise<unknown>) => {
     setError(null);
@@ -69,7 +69,7 @@ export function DemoControls() {
         </button>
 
         <span className="rq-mono text-[10px] text-[var(--text-3)]">
-          {demo.scenario ? `${demo.scenario} · ${demo.state}` : demo.state}
+          {demo?.scenario ? `${demo.scenario} · ${demo.state}` : demo?.state ?? 'idle'}
         </span>
       </div>
 
