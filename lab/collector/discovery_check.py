@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import getpass
 import json
+import socket
 from pathlib import Path
 
 from discovery import Discoverer, Seed
@@ -20,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device-type", default="cisco_ios")
     parser.add_argument("--port", type=int, default=22)
     parser.add_argument("--site", default="eve-ng-lab")
-    parser.add_argument("--collector-id", default="COLLECTOR-01")
+    parser.add_argument("--collector-id", default=socket.gethostname())
     parser.add_argument("--output", default="/tmp/rootiq-discovery.json")
     return parser.parse_args()
 

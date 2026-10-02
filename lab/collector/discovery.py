@@ -113,6 +113,7 @@ class Discoverer:
                 conn = self.connector(seed)
                 prompt = conn.find_prompt().rstrip("#>").strip()
                 version = conn.send_command("show version")
+                vlan_brief = conn.send_command("show vlan brief")
                 cdp = conn.send_command("show cdp neighbors detail")
                 lldp = conn.send_command("show lldp neighbors detail")
                 conn.disconnect()
@@ -120,7 +121,14 @@ class Discoverer:
                 errors.append(f"{seed.host}: {type(exc).__name__}: {exc}")
                 continue
             node_id = slug(prompt or seed.host)
-            nodes[node_id] = self._node(node_id, prompt or seed.host, seed.host, version)
+            is_switch = bool(re.search(r"^\s*\d+\s+\S+\s+(?:active|act/unsup)\b", vlan_brief, re.I | re.M))
+            nodes[node_id] = self._node(
+                node_id,
+                prompt or seed.host,
+                seed.host,
+                version,
+                "switch" if is_switch else "router",
+            )
             for neighbor in self._dedupe(parse_cdp(cdp) + parse_lldp(lldp)):
                 observations.append((node_id, neighbor))
                 remote_id = slug(neighbor["name"])
@@ -129,8 +137,9 @@ class Discoverer:
                 if neighbor["managementIp"] and neighbor["managementIp"] not in attempted and creds:
                     queue.append(Seed(neighbor["managementIp"], creds.username, creds.password, creds.device_type, creds.port))
         local_id = slug(collector_id or socket.gethostname())
-        nodes.setdefault(local_id, self._node(local_id, collector_id, "", "Linux collector", "collector"))
-        observations.extend((local_id, n) for n in self._local_lldp(errors))
+        nodes[local_id] = self._node(local_id, collector_id or socket.gethostname(), "", "Linux collector", "collector")
+        local_observations = [(local_id, n) for n in self._local_lldp(errors)]
+        observations = local_observations + observations
         for _, n in observations:
             nid = slug(n["name"])
             nodes.setdefault(nid, self._node(nid, n["name"], n["managementIp"], n["platform"], classify(n["platform"], n["capabilities"])))
@@ -191,6 +200,22 @@ class Discoverer:
         for local_id, item in observations:
             remote_id = slug(item["name"])
             if local_id not in nodes or remote_id not in nodes or local_id == remote_id:
+                continue
+            # The same physical link is commonly reported from both ends. One
+            # end may advertise a MAC as its port ID, so exact endpoint tuples
+            # are not sufficient for de-duplication. A matching observed local
+            # interface on the same node pair is authoritative.
+            duplicate = False
+            for link in links.values():
+                if {link["source"], link["target"]} != {local_id, remote_id}:
+                    continue
+                known_local_port = (
+                    link["sourcePort"] if link["source"] == local_id else link["targetPort"]
+                )
+                if normalize_port(known_local_port) == normalize_port(item["localPort"]):
+                    duplicate = True
+                    break
+            if duplicate:
                 continue
             endpoints = tuple(sorted(((local_id, normalize_port(item["localPort"])),
                                       (remote_id, normalize_port(item["remotePort"])))))
