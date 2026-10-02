@@ -179,7 +179,18 @@ class Discoverer:
                     if isinstance(chassis, list):
                         chassis = chassis[0] if chassis else {}
                     name, chassis_data = next(iter(chassis.items()), ("unknown", {}))
-                    remote_port, _ = next(iter(detail.get("port", {}).items()), ("unknown", {}))
+                    port_data = detail.get("port", {})
+                    if isinstance(port_data, list):
+                        port_data = port_data[0] if port_data else {}
+                    remote_port = "unknown"
+                    if isinstance(port_data, dict):
+                        port_id = port_data.get("id")
+                        if isinstance(port_id, dict):
+                            remote_port = str(port_id.get("value") or port_id.get("id") or "unknown")
+                        elif port_id:
+                            remote_port = str(port_id)
+                        elif port_data:
+                            remote_port = str(next(iter(port_data)))
                     out.append({"name": name, "localPort": local_port, "remotePort": remote_port,
                                 "managementIp": "", "platform": str(chassis_data.get("descr", "")),
                                 "capabilities": "", "protocol": "lldp"})
