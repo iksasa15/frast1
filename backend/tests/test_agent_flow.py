@@ -191,12 +191,12 @@ async def test_live_mode_executes_through_the_whitelisted_lab_agent(tmp_path, mo
 async def test_execution_agent_refuses_without_approval_or_verdict(tmp_path):
     s = build_stack(tmp_path)
     inc = await run_scenario(s)
-    ok_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="Ahmed", mode="sim")
+    ok_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="Ahmed", mode="live")
     with pytest.raises(PermissionError):  # action is still pending (not approved by a human)
-        await s.agents.execution.execute(inc.action, inc.id, "uplink-congestion", "sim", ok_verdict)
-    bad_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="system", mode="sim")
+        await s.agents.execution.execute(inc.action, inc.id, "uplink-congestion", ok_verdict)
+    bad_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="system", mode="live")
     with pytest.raises(PermissionError):
-        await s.agents.execution.execute({**inc.action, "approvalStatus": "approved"}, inc.id, "x", "sim", bad_verdict)
+        await s.agents.execution.execute({**inc.action, "approvalStatus": "approved"}, inc.id, "x", bad_verdict)
     assert s.sim.recovering is False
 
 

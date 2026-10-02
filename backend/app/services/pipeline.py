@@ -13,7 +13,6 @@ class Pipeline:
         self.state = state
         self.detector = detector
         self.incidents = incidents
-        self.known = set(topo.nodes) | set(topo.links) | set(topo.services)
         self.alerts: deque = deque(maxlen=200)
         self._seq = count(1)
         self.recorder = None
@@ -28,7 +27,8 @@ class Pipeline:
             link = self.topo.port_to_link.get((ev.source_id, ev.interface))
             if link:
                 ev.source_id, ev.source_type = link, "link"
-        if ev.source_id not in self.known:
+        known = set(self.topo.nodes) | set(self.topo.links) | set(self.topo.services)
+        if ev.source_id not in known:
             raise HTTPException(status_code=422, detail=f"unknown sourceId {ev.source_id}")
         if self.agents is not None and "non_finite" in self.agents.telemetry.observe(ev):
             raise HTTPException(status_code=422, detail="non-finite value rejected by telemetry agent")

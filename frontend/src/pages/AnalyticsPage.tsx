@@ -139,7 +139,7 @@ export function AnalyticsPage() {
             {(data?.runs?.length ?? 0) === 0 && (
               <tr>
                 <td colSpan={6} className="px-3 py-8 text-center text-slate-500">
-                  No runs yet — complete a demo loop first.
+                  No completed live incidents yet.
                 </td>
               </tr>
             )}

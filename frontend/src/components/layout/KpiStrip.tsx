@@ -13,11 +13,12 @@ export function KpiStrip() {
 
   const { mttd, mttr } = useMemo(() => {
     const resolved = Object.values(incidents)
-      .filter((i) => i.status === 'resolved' && i.timings.injectedAt)
+      .filter((i) => i.status === 'resolved' && (i.timings.firstAnomalyAt ?? i.timings.detectedAt))
       .sort((a, b) => (b.resolvedAt ?? '').localeCompare(a.resolvedAt ?? ''));
     const last = resolved[0];
-    if (!last?.timings.injectedAt) return { mttd: null as number | null, mttr: null as number | null };
-    const inj = new Date(last.timings.injectedAt).getTime();
+    const started = last?.timings.firstAnomalyAt ?? last?.timings.detectedAt;
+    if (!started) return { mttd: null as number | null, mttr: null as number | null };
+    const inj = new Date(started).getTime();
     const det = last.timings.detectedAt ? new Date(last.timings.detectedAt).getTime() : null;
     const rec = last.timings.recoveredAt
       ? new Date(last.timings.recoveredAt).getTime()

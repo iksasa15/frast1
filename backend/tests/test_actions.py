@@ -12,10 +12,8 @@ async def test_reject_requires_reason_unit():
     incidents = Incidents()
     svc = ActionService(
         incidents=incidents,
-        demo_ref=lambda: {"mode": "sim"},
         detector=type("D", (), {"active": {}})(),
         history=type("H", (), {"record": lambda self, e: None})(),
-        simulator_ref=lambda: None,
         audit=AuditLog(),
     )
     svc.actions["ACT-1"] = {

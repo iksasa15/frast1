@@ -1,6 +1,6 @@
 import pytest
 
-from app.collectors.simulator import Simulator
+from tests.simulator_fixture import Simulator
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
 from app.intelligence.graph import TopologyGraph
@@ -21,7 +21,7 @@ async def test_pipeline_sim_uplink_alerts(tmp_path):
     demo = {"mode": "sim", "scenario": None, "state": "idle", "injectedAt": None}
     history = History(str(tmp_path / "history.json"))
     incidents = IncidentService(
-        correlator, graph, demo_ref=lambda: demo, history=history, topology=topo
+        correlator, graph, history=history, topology=topo
     )
     pipeline = Pipeline(topo, state, detector, incidents)
     sim = Simulator(pipeline)

@@ -4,8 +4,9 @@ import subprocess
 
 from fastapi import FastAPI, Header, HTTPException
 
-TOKEN = os.environ.get("LAB_AGENT_TOKEN", "change-me-agent")
-APP = "rootiq@10.10.20.10"
+TOKEN = os.environ["LAB_AGENT_TOKEN"]
+APP = os.environ["ROOTIQ_APP_SSH_TARGET"]
+IPERF_TARGET = os.environ["ROOTIQ_IPERF_TARGET"]
 app = FastAPI(title="RootIQ Lab Agent")
 procs: dict[str, subprocess.Popen] = {}
 
@@ -18,7 +19,7 @@ def auth(token: str | None):
 def start_iperf():
     stop_iperf()
     procs["iperf"] = subprocess.Popen(
-        ["iperf3", "-c", "10.10.20.10", "-u", "-b", "15M", "-t", "900"],
+        ["iperf3", "-c", IPERF_TARGET, "-u", "-b", "15M", "-t", "900"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

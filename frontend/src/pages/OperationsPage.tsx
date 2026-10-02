@@ -2,9 +2,7 @@ import { useMemo } from 'react';
 import { TopologyCanvas } from '@/components/topology/TopologyCanvas';
 import { DeviceInspector } from '@/components/topology/DeviceInspector';
 import { LinkInspector } from '@/components/topology/LinkInspector';
-import { DemoControls } from '@/components/demo/DemoControls';
 import { AlertStorm } from '@/components/demo/AlertStorm';
-import { MttdStopwatch } from '@/components/demo/MttdStopwatch';
 import { ServicesPanel } from '@/components/demo/ServicesPanel';
 import { IncidentPanel } from '@/components/incidents/IncidentPanel';
 import { useOps } from '@/store/useOps';
@@ -19,7 +17,6 @@ export function OperationsPage() {
   const selection = useOps((s) => s.selection);
   const select = useOps((s) => s.select);
   const incidents = useOps((s) => s.incidents);
-  const demo = useOps((s) => s.demo);
 
   const active = useMemo(() => {
     const list = Object.values(incidents);
@@ -27,16 +24,12 @@ export function OperationsPage() {
       .filter((i) => i.status !== 'resolved')
       .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
     if (open[0]) return open[0];
-    // Keep last resolved visible after recovery (presenter + e2e)
-    if (demo.state === 'recovered') {
-      return (
-        list
-          .filter((i) => i.status === 'resolved')
-          .sort((a, b) => (b.resolvedAt ?? '').localeCompare(a.resolvedAt ?? ''))[0] ?? null
-      );
-    }
-    return null;
-  }, [incidents, demo.state]);
+    return (
+      list
+        .filter((i) => i.status === 'resolved')
+        .sort((a, b) => (b.resolvedAt ?? '').localeCompare(a.resolvedAt ?? ''))[0] ?? null
+    );
+  }, [incidents]);
 
   const focus = useMemo(() => {
     const f: Record<string, Focus> = {};
@@ -82,14 +75,9 @@ export function OperationsPage() {
       />
 
       <AlertStorm incident={active} />
-      <MttdStopwatch
-        injectedAt={demo.injectedAt ?? active?.timings.injectedAt}
-        analyzedAt={active?.timings.analyzedAt}
-      />
       <ServicesPanel services={topology.services} dnsSuppressed={dnsSuppressed} />
-      <DemoControls />
 
-      {!active && demo.state !== 'recovered' && (
+      {!active && (
         <div className="pointer-events-none absolute start-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-ok/30 bg-ok/10 px-4 py-2 text-sm text-ok">
           <ShieldCheck className="size-4" />
           {t('incident.empty')}

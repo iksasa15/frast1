@@ -4,6 +4,15 @@ import type { Topology } from './types';
 export const staticTopology: Topology = {
   site: raw.site,
   vantage: raw.vantage,
+  discovery: {
+    state: 'waiting',
+    source: 'test-fixture',
+    observedAt: null,
+    receivedAt: null,
+    collectorId: null,
+    errors: [],
+    staleAfterSeconds: 180,
+  },
   nodes: raw.nodes.map((n) => ({
     ...n,
     type: n.type as Topology['nodes'][number]['type'],

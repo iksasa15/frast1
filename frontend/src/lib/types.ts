@@ -30,7 +30,7 @@ export interface TopoLink {
   sourcePort: string;
   target: string;
   targetPort: string;
-  role: 'uplink' | 'access' | 'backup';
+  role: 'uplink' | 'access' | 'backup' | 'discovered';
   speedMbps: number;
   status: Health;
   utilization: number;
@@ -54,6 +54,15 @@ export interface Topology {
   nodes: TopoNode[];
   links: TopoLink[];
   services: Service[];
+  discovery: {
+    state: 'waiting' | 'live' | 'degraded';
+    source: string;
+    observedAt: string | null;
+    receivedAt: string | null;
+    collectorId: string | null;
+    errors: string[];
+    staleAfterSeconds: number;
+  };
 }
 
 export type IncidentStatus =
@@ -260,7 +269,6 @@ export interface Incident {
   knowledge?: { similar: KnowledgeHit[]; references: KnowledgeHit[] } | null;
   vendorContext?: VendorContext | null;
   timings: {
-    injectedAt?: string;
     firstAnomalyAt?: string;
     detectedAt?: string;
     analyzedAt?: string;
@@ -280,18 +288,10 @@ export interface RawAlert {
   ts: string;
 }
 
-export interface DemoState {
-  mode: 'live' | 'sim';
-  scenario: string | null;
-  state: 'idle' | 'injected' | 'remediating' | 'recovered';
-  injectedAt?: string;
-}
-
 export interface Snapshot {
   topology: Topology;
   incidents: Incident[];
   alerts: RawAlert[];
-  demo: DemoState;
 }
 
 export interface AgentStats {
@@ -373,4 +373,4 @@ export type WsMessage =
   | { type: 'service'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'alert'; ts: number; data: RawAlert }
   | { type: 'incident'; ts: number; data: Incident }
-  | { type: 'demo'; ts: number; data: DemoState };
+  | { type: 'topology'; ts: number; data: Topology };

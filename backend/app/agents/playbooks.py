@@ -22,7 +22,7 @@ PLAYBOOKS: dict[str, dict] = {
         "preconditions": [
             "Root cause is a link with sustained utilization above the critical threshold",
             "Policy UPLINK-QOS is defined on the router (see lab/configs/r1.cfg)",
-            "Lab or simulation mode (never a production device)",
+            "Isolated live lab only (never a production device)",
         ],
         "steps": [
             {"n": 1, "kind": "read", "title": "Snapshot interface counters and current service-policy on {label}"},

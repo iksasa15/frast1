@@ -49,9 +49,8 @@ class LearningAgent(Agent):
 
     def kpis(self, inc) -> dict:
         t = inc.timings
-        inj, det, ana, rec = (_ts(t.get(k)) for k in ("injectedAt", "detectedAt", "analyzedAt", "recoveredAt"))
-        first = _ts(t.get("firstAnomalyAt"))
-        base = inj or first
+        det, ana, rec = (_ts(t.get(k)) for k in ("detectedAt", "analyzedAt", "recoveredAt"))
+        base = _ts(t.get("firstAnomalyAt")) or det
         d = lambda a, b: round(b - a, 2) if a is not None and b is not None else None
         return {
             "timeToDetect": d(base, det),
@@ -64,7 +63,6 @@ class LearningAgent(Agent):
     def _timeline(self, inc) -> list[dict]:
         t = inc.timings
         rows = [
-            ("injectedAt", "Fault injected"),
             ("firstAnomalyAt", "First anomaly detected"),
             ("analyzedAt", "Root cause ranked"),
             ("rejectedAt", "Engineer rejected the first recommendation"),
@@ -84,7 +82,7 @@ class LearningAgent(Agent):
                 out.append(e)
         return out
 
-    def build(self, inc, demo: dict | None = None) -> dict:
+    def build(self, inc) -> dict:
         rc = inc.root_cause or {}
         kind = kind_for_entity(rc.get("entityId") or "")
         kpis = self.kpis(inc)
@@ -197,10 +195,10 @@ class LearningAgent(Agent):
         ]
         return "\n".join(L)
 
-    async def close_out(self, inc, demo: dict | None = None) -> dict:
+    async def close_out(self, inc) -> dict:
         async with self.step("close_out", inc.id) as st:
             root = (inc.root_cause or {}).get("entityId")
-            pm = self.build(inc, demo)
+            pm = self.build(inc)
             self.postmortems[inc.id] = pm
             if root:
                 self.rt.history.record(root)

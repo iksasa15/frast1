@@ -68,7 +68,7 @@ class TopologyAgent(Agent):
     def reconcile(self, observed: list[dict]) -> dict:
         """Compare CDP/LLDP neighbours against the declared topology.
 
-        `observed` items: {"device", "port", "neighbor", "neighborPort"} (ids as in topology.json).
+        `observed` items use IDs from the active discovery snapshot.
         """
         topo = self.rt.topology
         if topo is None:

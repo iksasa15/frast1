@@ -7,7 +7,7 @@ from app.services.hub import hub
 
 
 class IncidentState:
-    def __init__(self, id_: str, title: str, opened_at: str, injected_at: str | None):
+    def __init__(self, id_: str, title: str, opened_at: str):
         self.id = id_
         self.title = title
         self.status = "open"
@@ -21,7 +21,6 @@ class IncidentState:
         self.last_activity = 0.0
         self.opened_epoch = datetime.now(timezone.utc).timestamp()
         self.timings = {
-            "injectedAt": injected_at,
             "firstAnomalyAt": opened_at,
             "detectedAt": opened_at,
         }
@@ -89,11 +88,10 @@ def _kind_for(root_id: str) -> str:
 
 class IncidentService:
     def __init__(
-        self, correlator, graph, demo_ref, history, persist=None, topology=None, actions=None, agents=None
+        self, correlator, graph, history, persist=None, topology=None, actions=None, agents=None
     ):
         self.correlator = correlator
         self.graph = graph
-        self.demo_ref = demo_ref
         self.history = history
         self.persist = persist
         self.topology = topology
@@ -104,29 +102,19 @@ class IncidentService:
         self.agents = agents or AgentRuntime(
             graph=graph, history=history, topology=topology, correlator=correlator
         )
-        self.agents.bind(incidents=self, demo_ref=demo_ref)
+        self.agents.bind(incidents=self)
 
     def _open_list(self) -> list[IncidentState]:
         return [i for i in self.open.values() if i.status != "resolved"]
 
     async def on_anomaly(self, anomaly):
         ts = anomaly.last_seen
-        demo = self.demo_ref()
-        # During remediation / post-recover, ignore residual noise so a second
-        # incident cannot steal the UI before reset (E2E ×3 stability).
-        if demo.get("state") in ("remediating", "recovered"):
-            return
         pick = self.agents.correlation.pick(anomaly.entity_id, ts, self._open_list())
         opened_new = pick is None
         if pick is None:
             iid = f"INC-{next(self._seq):04d}"
             now = datetime.now(timezone.utc).isoformat()
-            pick = IncidentState(
-                iid,
-                title="Correlated incident · 1 symptoms",
-                opened_at=now,
-                injected_at=demo.get("injectedAt"),
-            )
+            pick = IncidentState(iid, title="Correlated incident · 1 symptoms", opened_at=now)
             pick.status = "investigating"
             self.open[iid] = pick
             pick.timings["firstAnomalyAt"] = now

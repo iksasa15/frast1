@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from app.agents.runtime import AgentRuntime
-from app.collectors.simulator import Simulator
+from tests.simulator_fixture import Simulator
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
 from app.intelligence.graph import TopologyGraph
@@ -33,11 +33,11 @@ def build_stack(tmp_path, mode: str = "sim") -> SimpleNamespace:
     )
     holder: dict = {}
     incidents = IncidentService(
-        correlator, graph, demo_ref=lambda: demo, history=history, topology=topo, agents=agents
+        correlator, graph, history=history, topology=topo, agents=agents
     )
     actions = ActionService(
-        incidents, demo_ref=lambda: demo, detector=detector, history=history,
-        simulator_ref=lambda: holder.get("sim"), audit=audit, agents=agents,
+        incidents, detector=detector, history=history, audit=audit, agents=agents,
+        execution_adapter_ref=lambda: holder.get("sim") if mode != "live" else None,
     )
     incidents.actions = actions
     agents.bind(state=state)

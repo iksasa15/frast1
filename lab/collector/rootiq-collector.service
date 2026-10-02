@@ -2,9 +2,9 @@
 Description=RootIQ Collector
 After=network-online.target
 [Service]
-Environment=ROOTIQ_BACKEND=http://192.168.100.20:8000
-Environment=ROOTIQ_INGEST_TOKEN=change-me-ingest
-ExecStart=/home/rootiq/rq/bin/python /home/rootiq/rootiq/lab/collector/collector.py
+EnvironmentFile=/etc/rootiq/collector.env
+WorkingDirectory=/opt/rootiq/lab/collector
+ExecStart=/opt/rootiq/collector-venv/bin/python /opt/rootiq/lab/collector/collector.py
 Restart=always
 RestartSec=2
 [Install]

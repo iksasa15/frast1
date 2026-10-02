@@ -325,7 +325,7 @@ class CopilotAgent(Agent):
                 sources.append({"source": "knowledge/vendors + knowledge/problems.json", "title": "vendor knowledge base"})
             elif intent == "impact" and inc is None and entity:
                 text, facts = self._entity_impact(entity, ar)
-                sources.append({"source": "configs/topology.json", "title": "topology graph"})
+                sources.append({"source": "live discovery snapshot", "title": "topology graph"})
             elif need_inc and inc is None:
                 text = ("لا توجد حادثة نشطة حاليًا. الأنظمة سليمة أو تم حل كل الحوادث." if ar else "There is no active incident right now.")
                 confidence = "n/a"

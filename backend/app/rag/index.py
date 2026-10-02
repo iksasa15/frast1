@@ -301,12 +301,12 @@ class KnowledgeIndex:
                 for i in n["interfaces"]
             )
             self.add_text(
-                f"topology:node:{n['id']}", "topology", "configs/topology.json", f"Device {n['label']}",
+                f"topology:node:{n['id']}", "topology", "live discovery snapshot", f"Device {n['label']}",
                 f"Device {n['label']} ({n['type']}, {n.get('vendor', 'n/a')}) management IP {n['managementIp']}. Interfaces: {ifs}.",
             )
         for l in raw["links"]:
             self.add_text(
-                f"topology:link:{l['id']}", "topology", "configs/topology.json", f"Link {l['id']}",
+                f"topology:link:{l['id']}", "topology", "live discovery snapshot", f"Link {l['id']}",
                 f"Link {l['id']} connects {l['source'].upper()} {l['sourcePort']} to {l['target'].upper()} {l['targetPort']} (role {l.get('role', 'n/a')}).",
             )
         for s in raw["services"]:
@@ -318,7 +318,7 @@ class KnowledgeIndex:
                 except Exception:
                     chain = ""
             self.add_text(
-                f"topology:service:{s['id']}", "topology", "configs/topology.json", f"Service {s['label']}",
+                f"topology:service:{s['id']}", "topology", "live discovery snapshot", f"Service {s['label']}",
                 f"Service {s['id']} ({s['label']}) runs on {s['host']} port {s['port']} and depends on {deps}.{chain}",
             )
 

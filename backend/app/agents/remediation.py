@@ -52,9 +52,7 @@ class RemediationAgent(Agent):
             risk = _bump(risk)
         if len(inc.impact_path) >= WIDE_BLAST_ELEMENTS:
             factors.append(f"Wide blast radius: {len(inc.impact_path)} downstream element(s)")
-        mode = (self.rt.demo_ref() or {}).get("mode")
-        if mode == "live":
-            factors.append("Live lab mode: the change is applied to running (virtual) devices")
+        factors.append("Live lab: an approved change is applied to running virtual devices")
 
         vendor_commands = self._vendor_commands(getattr(inc, "vendor_context", None))
         plan = {

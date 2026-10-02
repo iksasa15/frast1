@@ -3,12 +3,12 @@ import asyncio
 
 import pytest
 
-from app.collectors.simulator import Simulator
+from tests.simulator_fixture import Simulator
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
 from app.intelligence.graph import TopologyGraph
 from app.intelligence.history import History
-from app.services.action_service import ActionService, EXPECTED_ROOT
+from app.services.action_service import ActionService
 from app.services.audit import AuditLog
 from app.services.incident_service import IncidentService
 from app.services.pipeline import Pipeline
@@ -17,6 +17,7 @@ from app.services.topology_service import TopologyService
 
 
 SCENARIOS = ["uplink-congestion", "dns-failure", "server-spike"]
+EXPECTED_ROOT = {"uplink-congestion": "link-r1-sw1", "dns-failure": "svc-dns", "server-spike": "app01"}
 
 
 @pytest.mark.asyncio
@@ -30,15 +31,14 @@ async def test_scenario_root_cause(scenario, tmp_path):
     history = History(str(tmp_path / "h.json"))
     demo = {"mode": "sim", "scenario": None, "state": "idle", "injectedAt": None}
     incidents = IncidentService(
-        correlator, graph, demo_ref=lambda: demo, history=history, topology=topo
+        correlator, graph, history=history, topology=topo
     )
     actions = ActionService(
         incidents,
-        demo_ref=lambda: demo,
         detector=detector,
         history=history,
-        simulator_ref=lambda: sim,
         audit=AuditLog(),
+        execution_adapter_ref=lambda: sim,
     )
     incidents.actions = actions
     pipeline = Pipeline(topo, state, detector, incidents)

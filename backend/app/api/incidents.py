@@ -44,7 +44,6 @@ def replay_incident(incident_id: str, request: Request):
             }
         )
 
-    add(t.get("injectedAt"), "injected", "Fault injected")
     add(t.get("firstAnomalyAt") or t.get("detectedAt"), "anomaly", "First anomaly")
     add(inc.get("openedAt"), "opened", f"Incident {inc.get('id')} opened")
     for ev in inc.get("evidence") or []:

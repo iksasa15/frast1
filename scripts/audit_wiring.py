@@ -3,7 +3,7 @@ numbers and files stated in the docs, the notebook, the GitHub automation and th
 
     python scripts/audit_wiring.py            # from the repository root, with the backend requirements installed
 
-Exit code 1 if anything is out of step. Runs headless (simulator mode, no secrets, no network) and is part of CI.
+Exit code 1 if anything is out of step. Runs headless with explicit test fixtures and is part of CI.
 """
 import json
 import os
@@ -13,7 +13,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-os.environ["ROOTIQ_MODE"] = "sim"
+os.environ.setdefault("INGEST_TOKEN", "audit-only-ingest-token")
+os.environ.setdefault("LAB_AGENT_TOKEN", "audit-only-agent-token")
+os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///:memory:")
 sys.path.insert(0, str(ROOT / "backend"))
 os.chdir(ROOT / "backend")
 

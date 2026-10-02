@@ -1,4 +1,4 @@
-import type { AgentInfo, AgentsResponse, AgentStep, CopilotAnswer, DemoState, Incident, Topology } from './types';
+import type { AgentInfo, AgentsResponse, AgentStep, CopilotAnswer, Incident, Topology } from './types';
 
 async function j<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, {
@@ -9,8 +9,6 @@ async function j<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export type Scenario = 'uplink-congestion' | 'dns-failure' | 'server-spike';
-
 export const api = {
   topology: () => j<Topology>('/api/topology'),
   saveLayout: (positions: Record<string, { x: number; y: number }>) =>
@@ -18,10 +16,6 @@ export const api = {
   linkMetrics: (id: string) =>
     j<Record<string, [number, number][]>>(`/api/links/${id}/metrics?minutes=5`),
   incidents: () => j<Incident[]>('/api/incidents'),
-  inject: (s: Scenario) => j<DemoState>(`/api/demo/inject/${s}`, { method: 'POST' }),
-  reset: () => j<DemoState>('/api/demo/reset', { method: 'POST' }),
-  setMode: (mode: 'live' | 'sim') =>
-    j<DemoState>('/api/demo/mode', { method: 'POST', body: JSON.stringify({ mode }) }),
   incidentReplay: (id: string) =>
     j<{ incidentId: string; steps: Array<{ ts: number; kind: string; label: string; entityId?: string; value?: number }> }>(
       `/api/incidents/${id}/replay`,

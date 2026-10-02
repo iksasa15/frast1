@@ -1,4 +1,5 @@
 {
+  "_comment": "TEST FIXTURE ONLY. Production never loads this file; live topology comes from POST /api/topology/discovery.",
   "version": 1,
   "site": "RootIQ Lab",
   "vantage": "collector01",

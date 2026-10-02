@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AgentStep, DemoState, Incident, RawAlert, Topology, WsMessage } from '@/lib/types';
+import type { AgentStep, Incident, RawAlert, Topology, WsMessage } from '@/lib/types';
 import type { WsStatus } from '@/lib/ws';
 
 type Point = { t: number; util: number; lat: number; loss: number };
@@ -11,7 +11,6 @@ interface OpsState {
   incidents: Record<string, Incident>;
   alerts: RawAlert[];
   agentSteps: AgentStep[];
-  demo: DemoState;
   wsStatus: WsStatus;
   lastUpdate: number;
   selection: Selection;
@@ -26,7 +25,6 @@ export const useOps = create<OpsState>((set) => ({
   incidents: {},
   alerts: [],
   agentSteps: [],
-  demo: { mode: 'sim', scenario: null, state: 'idle' },
   wsStatus: 'connecting',
   lastUpdate: 0,
   selection: null,
@@ -40,7 +38,6 @@ export const useOps = create<OpsState>((set) => ({
           return {
             topology: m.data.topology,
             alerts: m.data.alerts,
-            demo: m.data.demo,
             lastUpdate,
             incidents: Object.fromEntries(m.data.incidents.map((i) => [i.id, i])),
           };
@@ -82,8 +79,8 @@ export const useOps = create<OpsState>((set) => ({
           return { incidents: { ...s.incidents, [m.data.id]: m.data }, lastUpdate };
         case 'agent_step':
           return { agentSteps: [...s.agentSteps, m.data].slice(-400), lastUpdate };
-        case 'demo':
-          return { demo: m.data, lastUpdate };
+        case 'topology':
+          return { topology: m.data, lastUpdate };
       }
     }),
 }));

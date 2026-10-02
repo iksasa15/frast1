@@ -11,10 +11,9 @@ type Mark = {
   color: string;
 };
 
-function marksFor(inc: Incident | null, demoInjected?: string | null): Mark[] {
+function marksFor(inc: Incident | null): Mark[] {
   const t = inc?.timings ?? {};
   return [
-    { key: 'inj', label: 'Injected', symbol: '▲', at: demoInjected ?? t.injectedAt, color: '#38bdf8' },
     { key: 'ano', label: 'First anomaly', symbol: '●', at: t.firstAnomalyAt ?? t.detectedAt, color: '#eab308' },
     { key: 'open', label: 'Incident opened', symbol: '●', at: inc?.openedAt, color: '#f97316' },
     { key: 'rca', label: 'Root cause', symbol: '◆', at: t.analyzedAt, color: '#ef4444' },
@@ -51,7 +50,6 @@ function rel(origin: number, iso?: string) {
 export function Timeline() {
   const incidents = useOps((s) => s.incidents);
   const alerts = useOps((s) => s.alerts);
-  const demo = useOps((s) => s.demo);
   const select = useOps((s) => s.select);
 
   const active = useMemo(() => {
@@ -61,15 +59,12 @@ export function Timeline() {
     return pick ?? null;
   }, [incidents]);
 
-  const marks = useMemo(
-    () => marksFor(active, demo.injectedAt).filter((m) => m.at),
-    [active, demo.injectedAt],
-  );
+  const marks = useMemo(() => marksFor(active).filter((m) => m.at), [active]);
 
   const origin = useMemo(() => {
-    const first = marks[0]?.at ?? active?.openedAt ?? demo.injectedAt;
+    const first = marks[0]?.at ?? active?.openedAt;
     return first ? new Date(first).getTime() : Date.now();
-  }, [marks, active, demo.injectedAt]);
+  }, [marks, active]);
 
   const windowMs = 5 * 60 * 1000;
   const now = Date.now();
@@ -120,7 +115,7 @@ export function Timeline() {
 
       <div className="flex flex-wrap gap-2 px-1">
         {marks.length === 0 && (
-          <span className="text-[11px] text-slate-500">Waiting for inject / incident milestones…</span>
+          <span className="text-[11px] text-slate-500">Waiting for live incident milestones…</span>
         )}
         {marks.map((m) => (
           <div
