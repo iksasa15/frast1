@@ -16,7 +16,7 @@ interface Props {
   incidentId?: string;
 }
 
-const SUGGEST_EN = ['What happened?', 'Why is this the root cause?', 'Why not DNS?', 'What should I do?', 'Which services are affected?', 'Is the collector feed healthy?'];
+const SUGGEST_EN = ['What happened?', 'Why is this the root cause?', 'Why not DNS?', 'What should I do?', 'Which services are affected?', 'How do I reset the demo?'];
 const SUGGEST_AR = ['ما الذي حدث؟', 'لماذا هذا هو السبب الجذري؟', 'لماذا ليس DNS هو السبب؟', 'ماذا أفعل الآن؟', 'ما الخدمات المتأثرة؟', 'ما هي عتبات الكشف؟'];
 
 export function CopilotPanel({ incidentId }: Props) {

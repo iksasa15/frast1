@@ -6,10 +6,12 @@ import { useOpsSocket } from '@/hooks/useOpsSocket';
 import { useHotkeys } from '@/hooks/useHotkeys';
 import { useCallback, useEffect, useState } from 'react';
 import { useOps } from '@/store/useOps';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 export function Shell() {
   useOpsSocket();
+  const { t } = useTranslation();
   const [presenter, setPresenter] = useState(false);
   const incidents = useOps((s) => s.incidents);
   const wsStatus = useOps((s) => s.wsStatus);
@@ -21,7 +23,11 @@ export function Shell() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('presenter-mode', presenter);
-    return () => document.documentElement.classList.remove('presenter-mode');
+    document.documentElement.dataset.presenter = presenter ? 'on' : 'off';
+    return () => {
+      document.documentElement.classList.remove('presenter-mode');
+      document.documentElement.dataset.presenter = 'off';
+    };
   }, [presenter]);
 
   useEffect(() => {
@@ -55,8 +61,8 @@ export function Shell() {
     <div
       className={clsx('h-full grid', presenter && 'presenter')}
       style={{
-        gridTemplateColumns: presenter ? '0 1fr' : '72px 1fr',
-        gridTemplateRows: '56px 1fr 180px',
+        gridTemplateColumns: presenter ? '0 1fr' : 'var(--rail-w) 1fr',
+        gridTemplateRows: 'var(--topbar-h) 1fr var(--timeline-h)',
       }}
     >
       <aside className="row-span-3 border-e border-noc-line bg-noc-panel">
@@ -65,16 +71,23 @@ export function Shell() {
 
       <TopBar />
 
-      <main className="relative min-h-0 overflow-hidden">
+      <main className="relative min-h-0 overflow-hidden bg-[var(--bg-canvas)]">
         {wsStatus === 'closed' && (
-          <div className="absolute inset-x-0 top-0 z-50 bg-crit/20 px-3 py-1 text-center text-xs text-crit">
-            Reconnecting…
+          <div
+            className="absolute inset-x-0 top-0 z-50 border-b px-3 py-1.5 text-center text-xs"
+            style={{
+              background: 'var(--crit-soft)',
+              borderColor: 'var(--crit)',
+              color: 'var(--crit)',
+            }}
+          >
+            {t('reconnecting')}
           </div>
         )}
         <Outlet />
       </main>
 
-      <footer className="col-start-2 min-h-0 overflow-hidden border-t border-noc-line bg-noc-panel px-3">
+      <footer className="col-start-2 min-h-0 overflow-hidden border-t border-noc-line bg-noc-panel">
         <Timeline />
       </footer>
     </div>

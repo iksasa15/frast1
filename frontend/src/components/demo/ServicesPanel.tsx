@@ -6,11 +6,14 @@ interface Props {
   dnsSuppressed?: boolean;
 }
 
+/** Service health list — parent places it (no absolute positioning). */
 export function ServicesPanel({ services, dnsSuppressed }: Props) {
   return (
-    <div className="absolute bottom-3 right-[440px] z-20 w-56 rounded-xl border border-noc-line bg-noc-panel/95 p-3 shadow-xl">
-      <div className="mb-2 text-[10px] uppercase tracking-wider text-slate-500">Services</div>
-      <ul className="space-y-2">
+    <div className="rq-panel rq-panel--quiet">
+      <div className="rq-slab-title">
+        <span>Services</span>
+      </div>
+      <ul>
         {services.map((s) => {
           const color = STATUS_COLOR[s.status];
           const http = s.metrics?.http_latency_ms;
@@ -18,7 +21,7 @@ export function ServicesPanel({ services, dnsSuppressed }: Props) {
           const dnsLat = s.metrics?.dns_latency_ms;
           const detail =
             s.id === 'svc-web' && dnsSuppressed
-              ? 'impacted via DNS dependency'
+              ? 'via DNS dependency'
               : s.id === 'svc-web' && http != null
                 ? `http ${http.toFixed?.(0) ?? http}ms`
                 : s.id === 'svc-dns' && dns != null
@@ -27,14 +30,13 @@ export function ServicesPanel({ services, dnsSuppressed }: Props) {
           return (
             <li
               key={s.id}
-              className="rounded-lg border px-2 py-1.5"
-              style={{ borderColor: `${color}55` }}
+              className="flex items-center gap-2 border-b border-[var(--border-subtle)] px-3 py-1.5 last:border-b-0"
             >
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">{s.label}</span>
-                <span className="size-2 rounded-full" style={{ background: color }} />
+              <span className="size-1.5 shrink-0" style={{ background: color }} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-medium text-[var(--text-1)]">{s.label}</div>
+                <div className="rq-mono truncate text-[10px] text-[var(--text-3)]">{detail}</div>
               </div>
-              <div className="mt-0.5 font-mono text-[10px] text-slate-400">{detail}</div>
             </li>
           );
         })}

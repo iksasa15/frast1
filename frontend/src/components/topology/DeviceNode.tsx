@@ -3,7 +3,8 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { Router, Network, Server, Radar } from 'lucide-react';
 import clsx from 'clsx';
 import type { Iface, Side, TopoNode } from '@/lib/types';
-import { STATUS_COLOR } from '@/lib/colors';
+import { STATUS_COLOR, CAUSE_COLOR, IMPACT_COLOR } from '@/lib/colors';
+import { zoneOf } from '@/lib/zones';
 
 export type Focus = 'cause' | 'impact' | null;
 export type DeviceNodeT = Node<{ device: TopoNode; focus: Focus }, 'device'>;
@@ -24,32 +25,60 @@ function handleStyle(side: Side, idx: number, total: number): CSSProperties {
 export function DeviceNode({ data, selected }: NodeProps<DeviceNodeT>) {
   const { device, focus } = data;
   const Icon = ICON[device.type];
+  const zone = zoneOf(device.zone);
   const bySide = device.interfaces.reduce<Partial<Record<Side, Iface[]>>>((acc, i) => {
     (acc[i.side] ??= []).push(i);
     return acc;
   }, {});
 
+  const statusBorder =
+    focus === 'cause' ? CAUSE_COLOR : focus === 'impact' ? IMPACT_COLOR : STATUS_COLOR[device.status];
+
   return (
     <div
       className={clsx(
-        'min-w-[160px] rounded-xl border-2 bg-noc-panel/95 px-4 py-3 shadow-lg transition-colors',
-        selected && 'ring-2 ring-info',
+        'min-w-[148px] border bg-noc-panel px-3 py-2.5 transition-colors',
+        selected && 'outline outline-1 outline-[var(--brand)] outline-offset-2',
         focus === 'cause' && 'rootiq-cause',
       )}
       style={{
-        borderColor:
-          focus === 'cause'
-            ? '#ef4444'
-            : focus === 'impact'
-              ? '#f59e0b'
-              : STATUS_COLOR[device.status],
+        borderColor: statusBorder,
+        borderWidth: focus === 'cause' ? 3 : 1,
+        borderRadius: 0,
+        borderLeftWidth: zone && focus !== 'cause' ? 3 : undefined,
+        borderLeftColor: zone && focus !== 'cause' ? zone.color : undefined,
+        boxShadow: zone ? `inset 0 0 0 1px ${zone.color}22` : undefined,
       }}
     >
       <div className="flex items-center gap-2">
-        <Icon className="size-5" style={{ color: STATUS_COLOR[device.status] }} />
+        <Icon
+          className="size-5"
+          style={{ color: zone?.color ?? STATUS_COLOR[device.status] }}
+          strokeWidth={1.75}
+        />
         <span className="font-semibold tracking-wide">{device.label}</span>
       </div>
-      <div className="mt-1 font-mono text-[11px] text-slate-400">{device.managementIp}</div>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <span className="font-mono text-[11px] text-[var(--text-3)]">{device.managementIp}</span>
+        {zone && (
+          <span
+            className="shrink-0 text-[9px] font-semibold uppercase tracking-wider"
+            style={{ color: zone.color }}
+          >
+            {zone.id === 'building-a'
+              ? 'A'
+              : zone.id === 'building-b'
+                ? 'B'
+                : zone.id === 'datacenter'
+                  ? 'DC'
+                  : zone.id === 'demo'
+                    ? 'LAB'
+                    : zone.id === 'edge'
+                      ? 'EDGE'
+                      : 'CORE'}
+          </span>
+        )}
+      </div>
       {(Object.keys(bySide) as Side[]).flatMap((side) =>
         (bySide[side] ?? []).map((i, idx) => (
           <Handle

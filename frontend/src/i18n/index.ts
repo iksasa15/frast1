@@ -5,7 +5,7 @@ import ar from './ar.json';
 
 void i18n.use(initReactI18next).init({
   resources: { en: { translation: en }, ar: { translation: ar } },
-  lng: localStorage.getItem('rootiq.lang') || 'en',
+  lng: localStorage.getItem('rootiq.lang') || 'ar',
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
 });

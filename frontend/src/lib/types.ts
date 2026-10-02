@@ -16,6 +16,8 @@ export interface TopoNode {
   id: string;
   type: NodeType;
   label: string;
+  /** Campus zone / building id for map coloring (e.g. building-a, datacenter). */
+  zone?: string;
   vendor?: string;
   managementIp: string;
   position: { x: number; y: number };
@@ -30,7 +32,7 @@ export interface TopoLink {
   sourcePort: string;
   target: string;
   targetPort: string;
-  role: 'uplink' | 'access' | 'backup' | 'discovered';
+  role: 'uplink' | 'access' | 'backup';
   speedMbps: number;
   status: Health;
   utilization: number;
@@ -54,15 +56,6 @@ export interface Topology {
   nodes: TopoNode[];
   links: TopoLink[];
   services: Service[];
-  discovery: {
-    state: 'waiting' | 'live' | 'degraded';
-    source: string;
-    observedAt: string | null;
-    receivedAt: string | null;
-    collectorId: string | null;
-    errors: string[];
-    staleAfterSeconds: number;
-  };
 }
 
 export type IncidentStatus =
@@ -187,12 +180,20 @@ export interface VendorProblem {
   fixes: VendorFix[];
 }
 
+export interface AiReference {
+  text: string;
+  source: 'llm' | string;
+  gap: string;
+  agent?: string;
+}
+
 export interface VendorContext {
   rootEntity: string;
   kind: string;
   devices: VendorDevice[];
   problems: VendorProblem[];
   known: number;
+  aiReference?: AiReference | null;
 }
 
 export interface ActionPlan {
@@ -266,9 +267,14 @@ export interface Incident {
   acknowledgedBy?: string | null;
   acknowledgedAt?: string | null;
   verification?: Verification | null;
-  knowledge?: { similar: KnowledgeHit[]; references: KnowledgeHit[] } | null;
+  knowledge?: {
+    similar: KnowledgeHit[];
+    references: KnowledgeHit[];
+    aiReference?: AiReference | null;
+  } | null;
   vendorContext?: VendorContext | null;
   timings: {
+    injectedAt?: string;
     firstAnomalyAt?: string;
     detectedAt?: string;
     analyzedAt?: string;
@@ -288,10 +294,18 @@ export interface RawAlert {
   ts: string;
 }
 
+export interface DemoState {
+  mode: 'live' | 'sim';
+  scenario: string | null;
+  state: 'idle' | 'injected' | 'remediating' | 'recovered';
+  injectedAt?: string;
+}
+
 export interface Snapshot {
   topology: Topology;
   incidents: Incident[];
   alerts: RawAlert[];
+  demo: DemoState;
 }
 
 export interface AgentStats {
@@ -373,4 +387,4 @@ export type WsMessage =
   | { type: 'service'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'alert'; ts: number; data: RawAlert }
   | { type: 'incident'; ts: number; data: Incident }
-  | { type: 'topology'; ts: number; data: Topology };
+  | { type: 'demo'; ts: number; data: DemoState };

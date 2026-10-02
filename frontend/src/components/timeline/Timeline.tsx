@@ -11,19 +11,20 @@ type Mark = {
   color: string;
 };
 
-function marksFor(inc: Incident | null): Mark[] {
+function marksFor(inc: Incident | null, demoInjected?: string | null): Mark[] {
   const t = inc?.timings ?? {};
   return [
-    { key: 'ano', label: 'First anomaly', symbol: '●', at: t.firstAnomalyAt ?? t.detectedAt, color: '#eab308' },
-    { key: 'open', label: 'Incident opened', symbol: '●', at: inc?.openedAt, color: '#f97316' },
-    { key: 'rca', label: 'Root cause', symbol: '◆', at: t.analyzedAt, color: '#ef4444' },
+    { key: 'inj', label: 'Injected', symbol: '▲', at: demoInjected ?? t.injectedAt, color: 'var(--warn)' },
+    { key: 'ano', label: 'First anomaly', symbol: '●', at: t.firstAnomalyAt ?? t.detectedAt, color: 'var(--text-2)' },
+    { key: 'open', label: 'Incident opened', symbol: '●', at: inc?.openedAt, color: 'var(--warn)' },
+    { key: 'rca', label: 'Root cause', symbol: '◆', at: t.analyzedAt, color: 'var(--crit)' },
     {
       key: 'rej',
       label: 'Rejected',
       symbol: '✕',
       // reject replaces pending action — use rejectedAt (not current action status)
       at: t.rejectedAt,
-      color: '#94a3b8',
+      color: 'var(--crit)',
     },
     {
       key: 'apr',
@@ -32,10 +33,10 @@ function marksFor(inc: Incident | null): Mark[] {
       at: inc?.action?.approvalStatus === 'approved' || inc?.action?.approvalStatus === 'executed'
         ? t.decidedAt
         : undefined,
-      color: '#22c55e',
+      color: 'var(--brand)',
     },
-    { key: 'exe', label: 'Executed', symbol: '⚙', at: t.executedAt, color: '#a78bfa' },
-    { key: 'rec', label: 'Recovered', symbol: '★', at: t.recoveredAt ?? inc?.resolvedAt, color: '#22c55e' },
+    { key: 'exe', label: 'Executed', symbol: '⚙', at: t.executedAt, color: 'var(--text-2)' },
+    { key: 'rec', label: 'Recovered', symbol: '★', at: t.recoveredAt ?? inc?.resolvedAt, color: 'var(--ok)' },
   ];
 }
 
@@ -50,6 +51,7 @@ function rel(origin: number, iso?: string) {
 export function Timeline() {
   const incidents = useOps((s) => s.incidents);
   const alerts = useOps((s) => s.alerts);
+  const demo = useOps((s) => s.demo);
   const select = useOps((s) => s.select);
 
   const active = useMemo(() => {
@@ -59,12 +61,15 @@ export function Timeline() {
     return pick ?? null;
   }, [incidents]);
 
-  const marks = useMemo(() => marksFor(active).filter((m) => m.at), [active]);
+  const marks = useMemo(
+    () => marksFor(active, demo.injectedAt).filter((m) => m.at),
+    [active, demo.injectedAt],
+  );
 
   const origin = useMemo(() => {
-    const first = marks[0]?.at ?? active?.openedAt;
+    const first = marks[0]?.at ?? active?.openedAt ?? demo.injectedAt;
     return first ? new Date(first).getTime() : Date.now();
-  }, [marks, active]);
+  }, [marks, active, demo.injectedAt]);
 
   const windowMs = 5 * 60 * 1000;
   const now = Date.now();
@@ -115,7 +120,7 @@ export function Timeline() {
 
       <div className="flex flex-wrap gap-2 px-1">
         {marks.length === 0 && (
-          <span className="text-[11px] text-slate-500">Waiting for live incident milestones…</span>
+          <span className="text-[11px] text-slate-500">Waiting for inject / incident milestones…</span>
         )}
         {marks.map((m) => (
           <div

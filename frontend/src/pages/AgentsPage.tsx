@@ -8,6 +8,7 @@ import { AgentCard } from '@/components/agents/AgentCard';
 import { CopilotPanel } from '@/components/agents/CopilotPanel';
 import { FlowDiagram } from '@/components/agents/FlowDiagram';
 import { TraceTimeline } from '@/components/agents/TraceTimeline';
+import { AgentsSelfTest } from '@/components/agents/AgentsSelfTest';
 
 type Tab = 'overview' | 'trace' | 'copilot';
 const TABS: Tab[] = ['overview', 'trace', 'copilot'];
@@ -74,9 +75,12 @@ export function AgentsPage() {
   return (
     <div className="h-full overflow-y-auto p-4">
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold tracking-wide">{t('agents.title')}</h1>
-          <p className="text-xs text-slate-400">{t('agents.subtitle', { n: data?.agents.length ?? 16 })}</p>
+        <div className="space-y-2">
+          <div>
+            <h1 className="text-lg font-semibold tracking-wide">{t('agents.title')}</h1>
+            <p className="text-xs text-slate-400">{t('agents.subtitle', { n: data?.agents.length ?? 16 })}</p>
+          </div>
+          <AgentsSelfTest incidentId={activeIncident?.id} />
         </div>
         {h && (
           <div className="flex flex-wrap gap-2 text-[11px]">

@@ -1,11 +1,11 @@
 import type { Candidate, ScoreKey } from '@/lib/types';
 
 const COLORS: Record<ScoreKey, string> = {
-  metric_anomaly: '#ef4444',
-  dependency_overlap: '#f59e0b',
-  temporal_proximity: '#38bdf8',
-  blast_radius: '#a78bfa',
-  historical_support: '#22c55e',
+  metric_anomaly: 'var(--crit)',
+  dependency_overlap: 'var(--warn)',
+  temporal_proximity: 'var(--brand)',
+  blast_radius: 'var(--chart-2)',
+  historical_support: 'var(--ok)',
 };
 
 const WEIGHTS: Record<ScoreKey, number> = {

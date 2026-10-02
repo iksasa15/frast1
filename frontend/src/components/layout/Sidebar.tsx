@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import { RootIQMark } from '@/components/brand/Logo';
 
 const items: { to: string; labelKey: string; icon: typeof Network; end?: boolean }[] = [
   { to: '/', labelKey: 'nav.topology', icon: Network, end: true },
@@ -26,9 +27,12 @@ const items: { to: string; labelKey: string; icon: typeof Network; end?: boolean
 export function Sidebar() {
   const { t } = useTranslation();
   return (
-    <nav className="presenter-hide flex h-full flex-col items-center gap-1 py-3">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-info/15 text-sm font-bold text-info">
-        RQ
+    <nav
+      className="presenter-hide flex h-full flex-col items-center gap-0.5 py-4"
+      style={{ width: 'var(--rail-w)' }}
+    >
+      <div className="mb-6 flex size-10 items-center justify-center border border-[var(--border)] bg-[var(--bg-raised)]">
+        <RootIQMark size={28} />
       </div>
       {items.map(({ to, labelKey, icon: Icon, end }) => (
         <NavLink
@@ -38,16 +42,29 @@ export function Sidebar() {
           title={t(labelKey)}
           className={({ isActive }) =>
             clsx(
-              'flex h-11 w-11 items-center justify-center rounded-lg transition-colors',
+              'relative flex size-11 items-center justify-center transition-colors',
               isActive
-                ? 'bg-info/20 text-info'
-                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200',
+                ? 'bg-[var(--bg-selected)] text-[var(--brand-text)]'
+                : 'text-[var(--text-3)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-1)]',
             )
           }
         >
-          <Icon size={20} />
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <span
+                  aria-hidden
+                  className="absolute inset-y-0 start-0 w-[3px] bg-[var(--brand)]"
+                />
+              )}
+              <Icon size={18} strokeWidth={1.6} />
+            </>
+          )}
         </NavLink>
       ))}
+      <div className="mt-auto pb-2 font-mono text-[9px] tracking-widest text-[var(--text-3)]">
+        RQ
+      </div>
     </nav>
   );
 }

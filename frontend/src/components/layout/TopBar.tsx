@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOps } from '@/store/useOps';
+import { api } from '@/lib/api';
+import { applyLang, type Lang } from '@/lib/theme';
 import clsx from 'clsx';
 
 export function TopBar() {
   const { t, i18n } = useTranslation();
   const wsStatus = useOps((s) => s.wsStatus);
   const lastUpdate = useOps((s) => s.lastUpdate);
-  const discovery = useOps((s) => s.topology?.discovery);
+  const demo = useOps((s) => s.demo);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -16,48 +18,54 @@ export function TopBar() {
   }, []);
 
   const ageSec = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : null;
-  const observedAge = discovery?.observedAt
-    ? Math.max(0, Math.round((Date.now() - new Date(discovery.observedAt).getTime()) / 1000))
-    : null;
-  const discoveryState =
-    discovery?.state === 'live' && observedAge != null && observedAge > discovery.staleAfterSeconds
-      ? 'degraded'
-      : discovery?.state;
   const dot =
     wsStatus === 'open' ? 'bg-ok' : wsStatus === 'connecting' ? 'bg-warn' : 'bg-crit';
 
   const toggleLang = () => {
-    void i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar');
+    const next: Lang = i18n.language === 'ar' ? 'en' : 'ar';
+    void i18n.changeLanguage(next);
+    applyLang(next);
+  };
+
+  const toggleMode = () => {
+    void api.setMode(demo.mode === 'sim' ? 'live' : 'sim').catch(console.error);
   };
 
   return (
-    <header className="flex items-center justify-between border-b border-noc-line bg-noc-panel px-4">
-      <div className="flex items-center gap-3">
-        <span className="text-lg font-semibold tracking-wide text-info">{t('appName')}</span>
-        <span className="text-xs text-slate-400">{t('topbar.operations')}</span>
-        <span
-          title={discovery?.errors.join('\n') || 'Live topology discovery status'}
+    <header
+      className="flex items-center justify-between border-b border-noc-line bg-noc-panel px-5"
+      style={{ height: 'var(--topbar-h)' }}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[15px] font-semibold text-[var(--text-1)]">{t('appName')}</span>
+          <span className="rq-kicker !normal-case !tracking-normal">{t('topbar.operations')}</span>
+        </div>
+        <span className="rq-divider-v h-4" />
+        <button
+          type="button"
+          onClick={toggleMode}
+          title="Hot-switch mode"
           className={clsx(
-            'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-            discoveryState === 'live' ? 'animate-pulse bg-ok/20 text-ok' :
-              discoveryState === 'degraded' ? 'bg-warn/20 text-warn' : 'bg-slate-700 text-slate-300',
+            'mode-badge',
+            demo.mode === 'live' ? 'mode-badge--live' : 'mode-badge--sim',
           )}
         >
-          {discoveryState === 'live' ? t('topbar.live') : discoveryState ?? 'waiting'}
-        </span>
+          {demo.mode === 'live' ? t('topbar.live') : t('topbar.sim')}
+        </button>
       </div>
-      <div className="flex items-center gap-3 text-xs text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <span className={clsx('inline-block size-2 rounded-full', dot)} />
-          <bdi>{wsStatus}</bdi>
+      <div className="flex items-center gap-4 text-xs text-[var(--text-2)]">
+        <span className="flex items-center gap-2">
+          <span className={clsx('inline-block size-1.5', dot)} />
+          <bdi className="rq-mono text-[11px]">{wsStatus}</bdi>
         </span>
-        <span>
+        <span className="rq-mono text-[11px] text-[var(--text-3)]">
           {ageSec === null ? '—' : t('topbar.lastUpdate', { sec: ageSec })}
         </span>
         <button
           type="button"
           onClick={toggleLang}
-          className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-slate-300 hover:bg-white/5"
+          className="border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--text-2)] hover:bg-[var(--bg-hover)]"
         >
           {i18n.language === 'ar' ? 'EN' : 'ع'}
         </button>

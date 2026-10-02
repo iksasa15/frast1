@@ -84,9 +84,9 @@ export function LinkInspector({ link, sourceLabel, targetLabel, onClose }: Props
         <Row label="Latency" value={`${link.latencyMs.toFixed(1)} ms`} />
         <Row label="Packet loss" value={`${link.packetLoss.toFixed(2)}%`} />
 
-        <Spark title="Utilization %" dataKey="util" data={chartData} refY={85} color="#38bdf8" />
-        <Spark title="Latency ms" dataKey="lat" data={chartData} color="#eab308" />
-        <Spark title="Loss %" dataKey="loss" data={chartData} color="#ef4444" />
+        <Spark title="Utilization %" dataKey="util" data={chartData} refY={85} color="var(--chart-1)" />
+        <Spark title="Latency ms" dataKey="lat" data={chartData} color="var(--warn)" />
+        <Spark title="Loss %" dataKey="loss" data={chartData} color="var(--crit)" />
       </div>
     </aside>
   );
@@ -112,7 +112,7 @@ function Spark({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <YAxis hide domain={['auto', 'auto']} />
-            {refY !== undefined && <ReferenceLine y={refY} stroke="#ef4444" strokeDasharray="3 3" />}
+            {refY !== undefined && <ReferenceLine y={refY} stroke="var(--crit)" strokeDasharray="3 3" />}
             <Line type="monotone" dataKey={dataKey} stroke={color} dot={false} strokeWidth={1.5} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
