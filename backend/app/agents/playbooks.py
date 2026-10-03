@@ -7,6 +7,22 @@ change looks like; what the lab agent really executes is a fixed endpoint per sc
 from __future__ import annotations
 
 PLAYBOOKS: dict[str, dict] = {
+    "link-down": {
+        "id": "PB-LINK-RESTORE",
+        "actionType": "restore_lab_uplink",
+        "scenario": "uplink-down",
+        "risk": "low",
+        "title": "Restore the isolated lab uplink",
+        "description": "Re-enable the pre-approved EVE-NG lab interface after verifying the incident.",
+        "alternatives": ["Keep the fault for further diagnosis", "Restore through the lab console"],
+        "blastRadius": "Only the named EVE-NG lab uplink; no production target is accepted by the lab agent.",
+        "preconditions": ["Observed if_oper_status is down", "Isolated EVE-NG lab only", "A named human engineer approves"],
+        "steps": [{"n": 1, "kind": "read", "title": "Verify the affected lab interface is administratively down"}, {"n": 2, "kind": "change", "title": "Restore the pre-approved lab uplink", "command": "interface Ethernet0/0 ; no shutdown"}, {"n": 3, "kind": "verify", "title": "Confirm interface operational status is up within 60 s"}],
+        "rollback": [{"title": "Reapply the demo fault only if the recording must be repeated", "command": "interface Ethernet0/0 ; shutdown"}],
+        "verification": [{"entity": "{root}", "metric": "if_oper_status", "op": ">", "value": 0.5}],
+        "expectedEffect": "The link returns to healthy and RootIQ records verified recovery.",
+        "labImplementation": "The isolated lab agent runs only its fixed /remediate/uplink-down endpoint.",
+    },
     "link": {
         "id": "PB-LINK-QOS",
         "actionType": "apply_qos_policy",

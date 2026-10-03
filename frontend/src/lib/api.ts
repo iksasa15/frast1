@@ -10,6 +10,9 @@ async function j<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  demoStatus: () => j<{ enabled: boolean; labId: string | null }>('/api/demo/status'),
+  triggerUplinkDown: () => j('/api/demo/uplink-down/trigger', { method: 'POST' }),
+  restoreUplinkDown: () => j('/api/demo/uplink-down/restore', { method: 'POST' }),
   topology: () => j<Topology>('/api/topology'),
   saveLayout: (positions: Record<string, { x: number; y: number }>) =>
     j('/api/topology/layout', { method: 'PUT', body: JSON.stringify({ positions }) }),

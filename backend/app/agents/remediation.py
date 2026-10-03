@@ -42,6 +42,8 @@ class RemediationAgent(Agent):
         """Pure function: incident -> action fields (no id / approval state)."""
         root = (inc.root_cause or {}).get("entityId") or next(iter(sorted(inc.members)), "unknown")
         kind = kind_for_entity(root)
+        if kind == "link" and any(a.entity_id == root and a.metric == "if_oper_status" and a.value <= 0.5 for a in inc.anomalies):
+            kind = "link-down"
         pb = copy.deepcopy(PLAYBOOKS[kind])
         label = (inc.root_cause or {}).get("label") or root
 

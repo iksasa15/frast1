@@ -10,6 +10,7 @@ import { api } from '@/lib/api';
 import type { Focus } from '@/components/topology/DeviceNode';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck } from 'lucide-react';
+import { LabControls } from '@/components/demo/LabControls';
 
 export function OperationsPage() {
   const { t } = useTranslation();
@@ -73,6 +74,7 @@ export function OperationsPage() {
         onSelect={select}
         onLayoutSaved={(positions) => void api.saveLayout(positions)}
       />
+      <LabControls />
 
       <AlertStorm incident={active} />
       <ServicesPanel services={topology.services} dnsSuppressed={dnsSuppressed} />

@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 
 from app.agents.runtime import AgentRuntime
-from app.api import actions, agents as agents_api, events, health, incidents, topology, vendors, ws
+from app.api import actions, agents as agents_api, demo, events, health, incidents, topology, vendors, ws
 from app.core.config import settings
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
@@ -219,6 +219,7 @@ app.include_router(topology.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")
+app.include_router(demo.router, prefix="/api")
 app.include_router(agents_api.router, prefix="/api")
 app.include_router(vendors.router, prefix="/api")
 app.include_router(ws.router)

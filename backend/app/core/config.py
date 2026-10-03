@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     custom_llm_api_key: str = ""  # optional for the custom provider
     # Multi-agent layer
     rootiq_execution_enabled: bool = True  # False -> live-lab remediation becomes a dry run
+    # Demo fault injection is deliberately off by default. It is a lab-only control,
+    # separate from remediation approval, and must be enabled on both services.
+    demo_enabled: bool = False
+    demo_lab_id: str = ""
     agent_timeout_s: float = 8.0
     guardrail_max_executions: int = 5  # per 5 minutes
     verify_grace_s: float = 30.0  # after the 15 s recovery clock, wait up to this long for the playbook criteria
