@@ -1,0 +1,1693 @@
+{
+  "version": 1,
+  "problems": [
+    {
+      "id": "link-congestion",
+      "category": "performance",
+      "severity": "high",
+      "title": "Link congestion / bandwidth saturation",
+      "title_ar": "ازدحام الرابط / تشبّع السعة",
+      "summary": "Utilization stays near line rate; queues overflow, latency and packet loss rise for everything sharing the link.",
+      "summary_ar": "يقترب استخدام الرابط من سعته فتمتلئ الطوابير ويرتفع التأخير وفقد الحزم لكل ما يمر عبره.",
+      "keywords": [
+        "congestion",
+        "saturat",
+        "bandwidth",
+        "utilization",
+        "queue drops",
+        "slow",
+        "ازدحام",
+        "تشبع",
+        "بطء",
+        "سعة"
+      ],
+      "signals": {
+        "metrics": [
+          "link_utilization",
+          "link_latency_ms",
+          "link_packet_loss",
+          "if_out_discards_rate"
+        ],
+        "events": [
+          "qos_drops"
+        ]
+      },
+      "causes": [
+        "Bulk backup/replication or test traffic on a shaped uplink",
+        "No QoS classification, so critical flows share the queue with bulk",
+        "Uplink too small for the offered load",
+        "A loop or storm inflating traffic"
+      ],
+      "checks": [
+        {
+          "capability": "show_interface_detail",
+          "why": "Confirm utilization, output drops and rate on the suspected port"
+        },
+        {
+          "capability": "show_qos",
+          "why": "Read queue / policer counters per class"
+        },
+        {
+          "capability": "show_interface_errors",
+          "why": "Rule out physical errors that look like loss"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Look for STP or flap events at the same time"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "apply-qos",
+          "title": "Police or queue bulk traffic (QoS policy on the congested egress)",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Remove the policy / restore the previous one",
+          "change_capabilities": []
+        },
+        {
+          "id": "reroute",
+          "title": "Move traffic to an alternate path or load-balance",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the original routing metrics",
+          "change_capabilities": []
+        },
+        {
+          "id": "add-capacity",
+          "title": "Add capacity (LAG or faster uplink) in a planned change",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Remove the added members",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "link_utilization",
+          "op": "<",
+          "value": 70
+        },
+        {
+          "metric": "link_latency_ms",
+          "op": "<",
+          "value": 30
+        },
+        {
+          "metric": "link_packet_loss",
+          "op": "<",
+          "value": 1
+        }
+      ],
+      "rootiq_kind": "link",
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "crc-errors",
+      "category": "physical",
+      "severity": "high",
+      "title": "CRC / input errors on a port",
+      "title_ar": "أخطاء CRC / أخطاء إدخال على المنفذ",
+      "summary": "Frames arrive corrupted (FCS/CRC errors), causing retransmissions and hidden packet loss even though the link is 'up'.",
+      "summary_ar": "تصل الإطارات تالفة (CRC/FCS) فتحدث إعادة إرسال وفقد خفي رغم أن الرابط يبدو UP.",
+      "keywords": [
+        "crc",
+        "fcs",
+        "input errors",
+        "corrupt",
+        "runts",
+        "giants",
+        "أخطاء",
+        "تالف"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss"
+        ],
+        "events": [
+          "crc_errors"
+        ]
+      },
+      "causes": [
+        "Bad or damaged cable / connector",
+        "Dirty or bent fiber, faulty SFP/transceiver",
+        "Duplex/speed mismatch",
+        "Electromagnetic interference"
+      ],
+      "checks": [
+        {
+          "capability": "show_interface_errors",
+          "why": "Read CRC/FCS, runts, giants counters"
+        },
+        {
+          "capability": "show_optics",
+          "why": "Check optical power (DOM) if fiber"
+        },
+        {
+          "capability": "show_interface_status",
+          "why": "Verify negotiated speed/duplex"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Correlate with flaps"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "clear-and-watch",
+          "title": "Clear counters and watch whether errors grow again",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Nothing to roll back",
+          "change_capabilities": [
+            "clear_counters"
+          ]
+        },
+        {
+          "id": "replace-media",
+          "title": "Replace the cable or SFP, clean the fiber",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Reinstall the original if no improvement",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "link_packet_loss",
+          "op": "<",
+          "value": 1
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {
+        "cisco": "Watch 'show interfaces <if> counters errors': FCS-Err, Align-Err, Runts, Giants."
+      },
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "duplex-mismatch",
+      "category": "configuration",
+      "severity": "medium",
+      "title": "Speed / duplex mismatch",
+      "title_ar": "عدم تطابق السرعة / الازدواج (Duplex)",
+      "summary": "One side is half duplex (or a different speed) so late collisions and CRC errors appear and throughput collapses.",
+      "summary_ar": "أحد الطرفين نصف ازدواج أو بسرعة مختلفة فتظهر تصادمات متأخرة وأخطاء CRC وينهار الأداء.",
+      "keywords": [
+        "duplex",
+        "half duplex",
+        "late collision",
+        "autoneg",
+        "auto-negotiation",
+        "ازدواج"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss",
+          "link_latency_ms"
+        ],
+        "events": [
+          "duplex_mismatch"
+        ]
+      },
+      "causes": [
+        "One end hard-coded and the other on auto",
+        "Autonegotiation failure on an old NIC or cable",
+        "Misconfigured speed on one side"
+      ],
+      "checks": [
+        {
+          "capability": "show_interface_status",
+          "why": "Compare speed/duplex on both ends"
+        },
+        {
+          "capability": "show_interface_errors",
+          "why": "Look for late collisions and CRC"
+        },
+        {
+          "capability": "show_neighbors",
+          "why": "Confirm who the peer is"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "align-negotiation",
+          "title": "Set both ends to auto (preferred) or both to the same fixed speed/duplex",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Restore the previous interface settings",
+          "change_capabilities": [
+            "bounce_interface"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "metric": "link_packet_loss",
+          "op": "<",
+          "value": 1
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {
+        "cisco": "%CDP-4-DUPLEX_MISMATCH in the log names the port and the peer."
+      },
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "interface-flapping",
+      "category": "physical",
+      "severity": "high",
+      "title": "Interface flapping (link up/down loops)",
+      "title_ar": "تذبذب المنفذ (Flapping)",
+      "summary": "The port keeps going up and down; traffic, STP and routing reconverge each time.",
+      "summary_ar": "يتكرر سقوط المنفذ وعودته فتعيد الشبكة التقارب (STP/التوجيه) في كل مرة.",
+      "keywords": [
+        "flap",
+        "link down",
+        "link up",
+        "unstable link",
+        "up/down",
+        "تذبذب",
+        "سقوط الرابط"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss",
+          "link_latency_ms",
+          "syslog_link_down"
+        ],
+        "events": [
+          "interface_state"
+        ]
+      },
+      "causes": [
+        "Faulty SFP / cable / port",
+        "Autonegotiation issues",
+        "Power or PoE problems on the peer",
+        "Peer reload or crash"
+      ],
+      "checks": [
+        {
+          "capability": "show_logging",
+          "why": "Count and time the up/down events"
+        },
+        {
+          "capability": "show_interface_detail",
+          "why": "Check last flap time and carrier transitions"
+        },
+        {
+          "capability": "show_optics",
+          "why": "Optical power out of range?"
+        },
+        {
+          "capability": "show_neighbors",
+          "why": "Does the peer still see us?"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "replace-media",
+          "title": "Replace cable/SFP or move to another port",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Move back",
+          "change_capabilities": []
+        },
+        {
+          "id": "hold-down",
+          "title": "Add link-debounce / dampening so short flaps do not reconverge the network",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Remove the setting",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "link_packet_loss",
+          "op": "<",
+          "value": 1
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "err-disabled-port",
+      "category": "configuration",
+      "severity": "medium",
+      "title": "Port shut down by a protection feature (err-disabled)",
+      "title_ar": "منفذ متوقف بواسطة ميزة حماية (Err-disabled)",
+      "summary": "A protection feature (BPDU guard, port security, UDLD, loop protection) disabled the port; the device behind it loses connectivity.",
+      "summary_ar": "أوقفت ميزة حماية (BPDU guard أو أمان المنفذ أو UDLD…) المنفذ فيفقد الجهاز خلفه الاتصال.",
+      "keywords": [
+        "err-disable",
+        "errdisable",
+        "bpdu guard",
+        "port security",
+        "shutdown by",
+        "منفذ متوقف"
+      ],
+      "signals": {
+        "metrics": [
+          "syslog_link_down"
+        ],
+        "events": [
+          "port_errdisabled"
+        ]
+      },
+      "causes": [
+        "BPDU received on an edge port (rogue switch, loop)",
+        "Port-security MAC violation",
+        "UDLD unidirectional link",
+        "Excessive flaps"
+      ],
+      "checks": [
+        {
+          "capability": "show_errdisable",
+          "why": "List err-disabled ports and their cause"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Find the triggering message"
+        },
+        {
+          "capability": "show_interface_detail",
+          "why": "Confirm state"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "fix-cause-then-recover",
+          "title": "Remove the cause first (loop, rogue device), then bounce the port",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Shut the port again if the cause returns",
+          "change_capabilities": [
+            "bounce_interface"
+          ]
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {
+        "cisco": "errdisable recovery cause <cause> and errdisable recovery interval <seconds> re-enable ports automatically; fix the cause first.",
+        "juniper": "set ethernet-switching-options bpdu-block disable-timeout <seconds> re-enables BPDU-blocked interfaces automatically."
+      },
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "stp-instability",
+      "category": "layer2",
+      "severity": "high",
+      "title": "Spanning-tree instability (root changes, topology changes)",
+      "title_ar": "عدم استقرار Spanning-Tree",
+      "summary": "The STP root or topology keeps changing, flushing MAC tables and causing bursts of flooding and packet loss.",
+      "summary_ar": "يتغير جذر STP أو الطوبولوجيا باستمرار فتُمسح جداول MAC وتحدث فيضانات وفقد حزم.",
+      "keywords": [
+        "spanning",
+        "stp",
+        "root change",
+        "topology change",
+        "tcn",
+        "rstp",
+        "mstp",
+        "root bridge"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss",
+          "link_latency_ms"
+        ],
+        "events": [
+          "stp_root_change",
+          "stp_port_state"
+        ]
+      },
+      "causes": [
+        "A new or rogue switch with a better priority",
+        "No explicit root priority",
+        "Flapping links triggering topology changes",
+        "Mismatched STP modes"
+      ],
+      "checks": [
+        {
+          "capability": "show_stp",
+          "why": "Who is root? Any recent topology changes and from which port?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Find root-change and port-state messages"
+        },
+        {
+          "capability": "show_mac_table",
+          "why": "Check for MAC moves"
+        },
+        {
+          "capability": "show_interface_status",
+          "why": "Look for flapping ports"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "pin-root",
+          "title": "Set an explicit root/secondary priority and enable root/BPDU protection on edge ports",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous priorities",
+          "change_capabilities": []
+        },
+        {
+          "id": "remove-rogue",
+          "title": "Find and disconnect the unexpected switch",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Reconnect if it was legitimate",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {
+        "cisco": "%SPANTREE-5-ROOTCHANGE names the VLAN and the new root port."
+      },
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "layer2-loop-broadcast-storm",
+      "category": "layer2",
+      "severity": "critical",
+      "title": "Layer-2 loop / broadcast storm",
+      "title_ar": "حلقة في الطبقة الثانية / عاصفة بث",
+      "summary": "Broadcast/multicast traffic circulates endlessly: many links show high utilization, CPU spikes, MAC tables flap and the network becomes unusable.",
+      "summary_ar": "يدور البث بلا نهاية: ارتفاع الاستخدام على عدة روابط ومعالج الأجهزة وتذبذب جداول MAC وتصبح الشبكة غير قابلة للاستخدام.",
+      "keywords": [
+        "storm",
+        "broadcast storm",
+        "loop",
+        "layer 2 loop",
+        "flood",
+        "mac flapping",
+        "عاصفة",
+        "حلقة"
+      ],
+      "signals": {
+        "metrics": [
+          "link_utilization",
+          "cpu_percent",
+          "link_packet_loss"
+        ],
+        "events": [
+          "mac_flapping"
+        ]
+      },
+      "causes": [
+        "Redundant link without STP or with STP disabled",
+        "Unmanaged switch plugged into two ports",
+        "Misconfigured LAG on one side",
+        "VM/host bridging loop"
+      ],
+      "checks": [
+        {
+          "capability": "show_interface_detail",
+          "why": "Find ports with runaway broadcast/multicast counters"
+        },
+        {
+          "capability": "show_stp",
+          "why": "Is the topology what you expect?"
+        },
+        {
+          "capability": "show_mac_table",
+          "why": "Look for the same MAC on several ports"
+        },
+        {
+          "capability": "show_logging",
+          "why": "MAC-flap messages point to the loop"
+        },
+        {
+          "capability": "show_cpu",
+          "why": "Control-plane impact"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "isolate-loop",
+          "title": "Shut or unplug the looping port(s) found in the counters",
+          "risk": "high",
+          "needs_approval": true,
+          "rollback": "Re-enable the port after removing the loop",
+          "change_capabilities": [
+            "bounce_interface"
+          ]
+        },
+        {
+          "id": "storm-control",
+          "title": "Enable storm-control and STP protection on edge ports",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Remove the storm-control policy",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "link_utilization",
+          "op": "<",
+          "value": 70
+        },
+        {
+          "metric": "cpu_percent",
+          "op": "<",
+          "value": 80
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "mac-flapping",
+      "category": "layer2",
+      "severity": "high",
+      "title": "MAC address flapping between ports",
+      "title_ar": "تذبذب عنوان MAC بين المنافذ",
+      "summary": "The same MAC address is learned on alternating ports, usually a loop, a duplicate MAC, or an unbalanced LAG.",
+      "summary_ar": "يُتعلَّم نفس عنوان MAC على منافذ متبدلة، وغالبًا السبب حلقة أو تكرار MAC أو LAG غير متوازن.",
+      "keywords": [
+        "mac flap",
+        "macflap",
+        "moving between ports",
+        "duplicate mac",
+        "تذبذب mac"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "mac_flapping"
+        ]
+      },
+      "causes": [
+        "Layer-2 loop",
+        "Duplicate MAC (VM cloning, misconfigured device)",
+        "LAG configured on one side only",
+        "Legitimate VM migration bursts"
+      ],
+      "checks": [
+        {
+          "capability": "show_mac_table",
+          "why": "Where is the MAC learned now?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Which ports and VLAN are in the flap message?"
+        },
+        {
+          "capability": "show_stp",
+          "why": "Rule out a loop"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "find-source",
+          "title": "Trace the MAC to the physical device and remove the duplicate/loop",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Reconnect once corrected",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "vlan-trunk-mismatch",
+      "category": "configuration",
+      "severity": "medium",
+      "title": "VLAN / trunk mismatch (native VLAN, allowed VLANs)",
+      "title_ar": "عدم تطابق VLAN / Trunk",
+      "summary": "Traffic for some VLANs does not cross a trunk, or untagged traffic lands in the wrong VLAN.",
+      "summary_ar": "لا تعبر بعض الـVLANs عبر الـtrunk أو يذهب الـuntagged إلى VLAN خاطئ.",
+      "keywords": [
+        "native vlan",
+        "trunk",
+        "allowed vlan",
+        "vlan mismatch",
+        "vlan missing",
+        "تعارض vlan"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "native_vlan_mismatch"
+        ]
+      },
+      "causes": [
+        "Native VLAN differs between the two ends",
+        "VLAN not in the allowed list or not created on a switch",
+        "Trunk vs access mode mismatch"
+      ],
+      "checks": [
+        {
+          "capability": "show_trunk",
+          "why": "Native/allowed VLANs and trunk state on both ends"
+        },
+        {
+          "capability": "show_vlan",
+          "why": "Is the VLAN defined and active?"
+        },
+        {
+          "capability": "show_neighbors",
+          "why": "Confirm the peer port"
+        },
+        {
+          "capability": "show_logging",
+          "why": "CDP/LLDP native VLAN mismatch messages"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "align-vlans",
+          "title": "Make native and allowed VLANs identical on both ends",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous trunk configuration",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "mtu-mismatch",
+      "category": "configuration",
+      "severity": "medium",
+      "title": "MTU mismatch",
+      "title_ar": "عدم تطابق MTU",
+      "summary": "Small packets work but large ones are dropped; OSPF sticks in ExStart/Exchange; jumbo frames fail across part of the path.",
+      "summary_ar": "تعمل الحزم الصغيرة وتسقط الكبيرة؛ يعلق OSPF في ExStart؛ وتفشل الإطارات الكبيرة في جزء من المسار.",
+      "keywords": [
+        "mtu",
+        "jumbo",
+        "fragment",
+        "exstart",
+        "large packets",
+        "pmtud"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss"
+        ],
+        "events": []
+      },
+      "causes": [
+        "Different interface MTU on the two ends",
+        "Tunnel/VPN overhead without adjusting MSS",
+        "A device in the path not supporting jumbo"
+      ],
+      "checks": [
+        {
+          "capability": "show_interface_detail",
+          "why": "Compare MTU on every hop"
+        },
+        {
+          "capability": "show_ospf",
+          "why": "Neighbors stuck in ExStart/Exchange?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Fragmentation / MTU messages"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "align-mtu",
+          "title": "Set the same MTU on all hops (or lower MSS on tunnels)",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous MTU",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "lacp-bundle-failure",
+      "category": "layer2",
+      "severity": "medium",
+      "title": "LAG / LACP bundle not forming or degraded",
+      "title_ar": "فشل تجميع الروابط LAG/LACP",
+      "summary": "A port-channel is down or has fewer members than expected, reducing capacity or causing loops.",
+      "summary_ar": "الـport-channel معطّل أو ينقص أعضاؤه فتنخفض السعة أو تحدث حلقات.",
+      "keywords": [
+        "lacp",
+        "port-channel",
+        "etherchannel",
+        "lag",
+        "bundle",
+        "eth-trunk",
+        "تجميع"
+      ],
+      "signals": {
+        "metrics": [
+          "link_utilization",
+          "syslog_link_down"
+        ],
+        "events": []
+      },
+      "causes": [
+        "Members with different speed/duplex/VLAN settings",
+        "Both ends passive (no LACP negotiation)",
+        "A member link is down or err-disabled",
+        "Mismatched hashing or mode (static vs LACP)"
+      ],
+      "checks": [
+        {
+          "capability": "show_lag",
+          "why": "Member states and the reason a port is not bundled"
+        },
+        {
+          "capability": "show_interface_status",
+          "why": "Are all members up at the same speed?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "LACP/bundle messages"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "align-members",
+          "title": "Make all members identical and set LACP active on at least one side",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous member configuration",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "ospf-neighbor-down",
+      "category": "routing",
+      "severity": "high",
+      "title": "OSPF neighbor down / not reaching FULL",
+      "title_ar": "جار OSPF متوقف / لا يصل إلى FULL",
+      "summary": "An OSPF adjacency drops or stays in Init/ExStart, so routes disappear or reconverge.",
+      "summary_ar": "تسقط علاقة OSPF أو تبقى في Init/ExStart فتختفي المسارات أو يعاد التقارب.",
+      "keywords": [
+        "ospf",
+        "adjacency",
+        "neighbor down",
+        "exstart",
+        "dead timer",
+        "جار ospf"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "ospf_neighbor_change"
+        ]
+      },
+      "causes": [
+        "Hello/dead timer, area, network type or authentication mismatch",
+        "MTU mismatch",
+        "Interface flapping or packet loss on the link",
+        "ACL or firewall blocking OSPF (IP protocol 89)"
+      ],
+      "checks": [
+        {
+          "capability": "show_ospf",
+          "why": "Neighbor state and the last reason"
+        },
+        {
+          "capability": "show_interface_detail",
+          "why": "Timers, MTU, and errors on the interface"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Adjacency change message and reason"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "align-ospf",
+          "title": "Align timers/area/authentication/MTU on both ends",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous OSPF interface settings",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "bgp-session-down",
+      "category": "routing",
+      "severity": "high",
+      "title": "BGP session down / flapping",
+      "title_ar": "جلسة BGP متوقفة / متذبذبة",
+      "summary": "A BGP peer is Idle/Active or resets, withdrawing prefixes.",
+      "summary_ar": "يكون جار BGP في حالة Idle/Active أو يعاد ضبطه فتُسحب البادئات.",
+      "keywords": [
+        "bgp",
+        "session down",
+        "idle",
+        "active state",
+        "hold timer",
+        "prefix",
+        "جلسة bgp"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "bgp_neighbor_change"
+        ]
+      },
+      "causes": [
+        "No reachability to the peer address",
+        "ASN, authentication or timers mismatch",
+        "Hold-timer expiry because of loss or CPU load",
+        "Max-prefix limit reached"
+      ],
+      "checks": [
+        {
+          "capability": "show_bgp",
+          "why": "Session state and last error"
+        },
+        {
+          "capability": "show_interface_status",
+          "why": "Is the transport link up?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Notification messages"
+        },
+        {
+          "capability": "show_cpu",
+          "why": "Is the control plane overloaded?"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "fix-peering",
+          "title": "Correct ASN/auth/timers or restore reachability",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous neighbor configuration",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "high-cpu",
+      "category": "device-health",
+      "severity": "high",
+      "title": "High CPU / control-plane overload",
+      "title_ar": "ارتفاع المعالج / حمل على مستوى التحكم",
+      "summary": "The device CPU stays high: management is slow, protocols time out, and packets punted to the CPU are dropped.",
+      "summary_ar": "يبقى المعالج مرتفعًا: تبطؤ الإدارة وتنتهي مهلة البروتوكولات وتُسقط الحزم الموجهة إلى المعالج.",
+      "keywords": [
+        "cpu",
+        "high cpu",
+        "control plane",
+        "punt",
+        "processor",
+        "معالج",
+        "cpu مرتفع"
+      ],
+      "signals": {
+        "metrics": [
+          "cpu_percent"
+        ],
+        "events": []
+      },
+      "causes": [
+        "Layer-2 loop or broadcast storm",
+        "ARP/ND flood or scanning",
+        "Routing churn",
+        "Aggressive SNMP polling or management traffic",
+        "Software bug (check vendor advisories)"
+      ],
+      "checks": [
+        {
+          "capability": "show_cpu",
+          "why": "Which process is consuming CPU?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Loop/flap/reload messages"
+        },
+        {
+          "capability": "show_arp",
+          "why": "Is the ARP table exploding?"
+        },
+        {
+          "capability": "show_stp",
+          "why": "Topology changes?"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "remove-source",
+          "title": "Remove the cause (loop, scan, polling) and apply control-plane policing",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Remove the policing policy",
+          "change_capabilities": []
+        },
+        {
+          "id": "upgrade",
+          "title": "If a bug is confirmed, plan an upgrade in a maintenance window",
+          "risk": "high",
+          "needs_approval": true,
+          "rollback": "Roll back to the previous image",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "cpu_percent",
+          "op": "<",
+          "value": 80
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "server"
+      ]
+    },
+    {
+      "id": "high-memory",
+      "category": "device-health",
+      "severity": "high",
+      "title": "High memory / possible memory leak",
+      "title_ar": "ارتفاع الذاكرة / تسرّب محتمل",
+      "summary": "Memory use climbs steadily or stays high, risking process crashes or reloads.",
+      "summary_ar": "ترتفع الذاكرة تدريجيًا أو تبقى عالية فتزداد مخاطر انهيار العمليات أو إعادة التشغيل.",
+      "keywords": [
+        "memory",
+        "leak",
+        "out of memory",
+        "oom",
+        "ذاكرة",
+        "تسرب"
+      ],
+      "signals": {
+        "metrics": [
+          "mem_percent"
+        ],
+        "events": []
+      },
+      "causes": [
+        "Memory leak in a process (bug)",
+        "Very large MAC/ARP/route tables",
+        "Excessive logging or debug enabled"
+      ],
+      "checks": [
+        {
+          "capability": "show_memory",
+          "why": "Top memory consumers and free memory trend"
+        },
+        {
+          "capability": "show_cpu",
+          "why": "Related CPU pressure"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Process restarts or OOM messages"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "restart-or-upgrade",
+          "title": "Restart the leaking process or upgrade in a maintenance window",
+          "risk": "high",
+          "needs_approval": true,
+          "rollback": "Roll back the image / restore the process",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "mem_percent",
+          "op": "<",
+          "value": 85
+        }
+      ],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "server"
+      ]
+    },
+    {
+      "id": "power-fan-thermal",
+      "category": "hardware",
+      "severity": "high",
+      "title": "Power supply, fan or temperature alarm",
+      "title_ar": "إنذار طاقة أو مروحة أو حرارة",
+      "summary": "A PSU, fan or temperature sensor is out of range; risk of shutdown or degraded redundancy.",
+      "summary_ar": "مصدر طاقة أو مروحة أو حرارة خارج المدى فتزداد مخاطر الإيقاف أو فقد التكرار.",
+      "keywords": [
+        "power supply",
+        "psu",
+        "fan",
+        "temperature",
+        "overheat",
+        "thermal",
+        "حرارة",
+        "مروحة",
+        "طاقة"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "hardware_alarm"
+        ]
+      },
+      "causes": [
+        "Failed PSU or fan tray",
+        "Blocked airflow or high room temperature",
+        "Unplugged or overloaded power feed"
+      ],
+      "checks": [
+        {
+          "capability": "show_environment",
+          "why": "PSU/fan/temperature status"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Hardware alarm history"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "replace-hw",
+          "title": "Replace the failed PSU/fan and restore airflow (hot-swap where supported)",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Reinstall the original module",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "poe-budget-exceeded",
+      "category": "hardware",
+      "severity": "medium",
+      "title": "PoE budget exceeded / PoE device down",
+      "title_ar": "تجاوز ميزانية PoE / جهاز PoE متوقف",
+      "summary": "Powered devices (phones, APs, cameras) lose power because the switch power budget is exhausted or a port faulted.",
+      "summary_ar": "تفقد أجهزة PoE (هواتف، نقاط وصول، كاميرات) الطاقة لأن ميزانية الطاقة نفدت أو تعطل المنفذ.",
+      "keywords": [
+        "poe",
+        "power over ethernet",
+        "power budget",
+        "powered device",
+        "ميزانية الطاقة"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": [
+          "poe_fault"
+        ]
+      },
+      "causes": [
+        "Total PoE budget exceeded",
+        "Cable too long or damaged",
+        "Faulty powered device",
+        "Failed switch PSU (reduced budget)"
+      ],
+      "checks": [
+        {
+          "capability": "show_poe",
+          "why": "Budget used/available and per-port power"
+        },
+        {
+          "capability": "show_environment",
+          "why": "PSU status"
+        },
+        {
+          "capability": "show_logging",
+          "why": "PoE denied/fault messages"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "prioritize-poe",
+          "title": "Set PoE priorities, remove low-value devices or add a PSU",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Restore the previous priorities",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "optics-low-light",
+      "category": "physical",
+      "severity": "high",
+      "title": "Optical power out of range (fiber / transceiver)",
+      "title_ar": "قدرة ضوئية خارج المدى (ألياف / SFP)",
+      "summary": "Rx/Tx power (DOM) is too low or too high; errors and flaps follow.",
+      "summary_ar": "قدرة الاستقبال/الإرسال (DOM) منخفضة جدًا أو مرتفعة فتظهر أخطاء وتذبذب.",
+      "keywords": [
+        "dom",
+        "rx power",
+        "tx power",
+        "optical",
+        "fiber",
+        "transceiver",
+        "sfp",
+        "light",
+        "ضوء",
+        "ألياف"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss",
+          "syslog_link_down"
+        ],
+        "events": [
+          "crc_errors",
+          "interface_state"
+        ]
+      },
+      "causes": [
+        "Dirty connectors",
+        "Bent or damaged fiber",
+        "Wrong or failing transceiver type/distance",
+        "Excessive attenuation"
+      ],
+      "checks": [
+        {
+          "capability": "show_optics",
+          "why": "Compare Rx/Tx power to the transceiver thresholds"
+        },
+        {
+          "capability": "show_interface_errors",
+          "why": "CRC growing?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Flap history"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "clean-replace",
+          "title": "Clean connectors, replace patch cord or transceiver",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Reinstall the original",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "dhcp-failure",
+      "category": "service",
+      "severity": "high",
+      "title": "DHCP failure (clients get no address)",
+      "title_ar": "فشل DHCP (لا تحصل الأجهزة على عنوان)",
+      "summary": "New or renewing clients do not get an IP address; users report 'no network'.",
+      "summary_ar": "لا تحصل الأجهزة الجديدة أو المجدِّدة على عنوان IP فيشتكي المستخدمون من انقطاع الشبكة.",
+      "keywords": [
+        "dhcp",
+        "no ip address",
+        "169.254",
+        "apipa",
+        "lease",
+        "relay",
+        "snooping"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": []
+      },
+      "causes": [
+        "DHCP server down or scope exhausted",
+        "Relay/helper address missing on the gateway",
+        "DHCP snooping blocking the server port (untrusted)",
+        "VLAN not extended to the server"
+      ],
+      "checks": [
+        {
+          "capability": "show_vlan",
+          "why": "Is the client VLAN present end to end?"
+        },
+        {
+          "capability": "show_trunk",
+          "why": "Does the trunk carry it?"
+        },
+        {
+          "capability": "show_arp",
+          "why": "Is the gateway reachable?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Snooping/relay drops"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "fix-relay-or-trust",
+          "title": "Fix the relay address / trusted port / scope",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restore the previous DHCP configuration",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "dns-failure",
+      "category": "service",
+      "severity": "high",
+      "title": "DNS service failure",
+      "title_ar": "فشل خدمة DNS",
+      "summary": "Name resolution fails or is slow; applications that depend on DNS fail even though the network path is fine.",
+      "summary_ar": "تفشل ترجمة الأسماء أو تبطؤ فتتعطل التطبيقات المعتمدة عليها رغم سلامة مسار الشبكة.",
+      "keywords": [
+        "dns",
+        "name resolution",
+        "nslookup",
+        "servfail",
+        "resolver",
+        "named",
+        "dns failure",
+        "فشل dns"
+      ],
+      "signals": {
+        "metrics": [
+          "dns_success_rate",
+          "dns_latency_ms",
+          "http_ok"
+        ],
+        "events": []
+      },
+      "causes": [
+        "The DNS daemon stopped or crashed",
+        "Zone/config error after a change",
+        "Server resource exhaustion",
+        "Firewall blocking UDP/TCP 53"
+      ],
+      "checks": [
+        {
+          "capability": "show_service_dns",
+          "why": "Service state, a local query, and recent daemon logs"
+        },
+        {
+          "capability": "show_cpu",
+          "why": "Is the host overloaded?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Kernel/service errors"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "restart-dns",
+          "title": "Restart the DNS service after checking its configuration",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Stop the service if it flaps",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "dns_success_rate",
+          "op": ">",
+          "value": 95
+        },
+        {
+          "metric": "dns_latency_ms",
+          "op": "<",
+          "value": 100
+        }
+      ],
+      "rootiq_kind": "svc-dns",
+      "vendor_hints": {},
+      "applies_to": [
+        "svc-dns"
+      ]
+    },
+    {
+      "id": "server-resource-pressure",
+      "category": "service",
+      "severity": "high",
+      "title": "Application server CPU/memory pressure",
+      "title_ar": "ضغط موارد على خادم التطبيق",
+      "summary": "CPU or memory on a server is saturated; application latency rises and health checks degrade.",
+      "summary_ar": "يمتلئ المعالج أو الذاكرة على الخادم فيرتفع زمن التطبيق وتتدهور فحوصات الصحة.",
+      "keywords": [
+        "cpu",
+        "load",
+        "memory",
+        "stress",
+        "runaway process",
+        "web latency",
+        "http latency",
+        "خادم",
+        "ضغط"
+      ],
+      "signals": {
+        "metrics": [
+          "cpu_percent",
+          "mem_percent",
+          "http_latency_ms"
+        ],
+        "events": []
+      },
+      "causes": [
+        "A runaway or stress process",
+        "Traffic surge",
+        "Memory leak",
+        "Noisy neighbor on a shared host"
+      ],
+      "checks": [
+        {
+          "capability": "show_cpu",
+          "why": "Top CPU consumers"
+        },
+        {
+          "capability": "show_memory",
+          "why": "Memory and swap"
+        },
+        {
+          "capability": "show_logging",
+          "why": "OOM killer / service errors"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "stop-process",
+          "title": "Stop the runaway process (after confirming it is not business critical)",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Restart the process if it was legitimate",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [
+        {
+          "metric": "cpu_percent",
+          "op": "<",
+          "value": 80
+        },
+        {
+          "metric": "http_latency_ms",
+          "op": "<",
+          "value": 300
+        }
+      ],
+      "rootiq_kind": "server",
+      "vendor_hints": {},
+      "applies_to": [
+        "server"
+      ]
+    },
+    {
+      "id": "snmp-discovery-failure",
+      "category": "monitoring",
+      "severity": "medium",
+      "title": "SNMP polling fails (device pings but SNMP times out)",
+      "title_ar": "فشل استطلاع SNMP (الجهاز يستجيب للـping)",
+      "summary": "The device answers ICMP but SNMP requests time out, so RootIQ raises poll_timeout and loses interface counters.",
+      "summary_ar": "يستجيب الجهاز لـICMP لكن طلبات SNMP تنتهي مهلتها فتظهر poll_timeout ويفقد RootIQ عدّادات المنافذ.",
+      "keywords": [
+        "snmp",
+        "poll timeout",
+        "snmpwalk",
+        "community",
+        "snmpv3",
+        "no response",
+        "استطلاع",
+        "snmp timeout"
+      ],
+      "signals": {
+        "metrics": [
+          "poll_timeout"
+        ],
+        "events": []
+      },
+      "causes": [
+        "Wrong community string or SNMPv3 credentials",
+        "SNMP ACL/view does not include the collector address",
+        "UDP/161 blocked by a firewall",
+        "SNMP agent disabled or wrong source interface/VRF",
+        "Device CPU too busy to answer"
+      ],
+      "checks": [
+        {
+          "capability": "show_snmp",
+          "why": "Agent counters: bad community names, ACL drops"
+        },
+        {
+          "capability": "show_cpu",
+          "why": "Is the CPU starving the agent?"
+        },
+        {
+          "capability": "show_logging",
+          "why": "SNMP authentication failures"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "fix-snmp-access",
+          "title": "Correct the credentials/ACL/VRF so the collector is allowed (read-only access only)",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Remove the added ACL entry",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {
+        "cisco": "'show snmp' counters (bad community names) and 'show ip access-lists' for an SNMP ACL show why polls are refused."
+      }
+    },
+    {
+      "id": "time-drift-ntp",
+      "category": "monitoring",
+      "severity": "low",
+      "title": "Clock drift / NTP not synchronized",
+      "title_ar": "انحراف الساعة / NTP غير متزامن",
+      "summary": "Device clocks disagree: logs cannot be correlated, certificates and authentication may fail.",
+      "summary_ar": "ساعات الأجهزة غير متزامنة: يتعذر ربط السجلات وقد تفشل الشهادات والمصادقة.",
+      "keywords": [
+        "ntp",
+        "clock",
+        "time drift",
+        "unsynchronized",
+        "timestamp",
+        "الساعة",
+        "الوقت"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": []
+      },
+      "causes": [
+        "NTP server unreachable",
+        "Wrong timezone/VRF",
+        "Stratum too high or authentication mismatch"
+      ],
+      "checks": [
+        {
+          "capability": "show_ntp",
+          "why": "Sync state, stratum and offset"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Timestamps jumping?"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "fix-ntp",
+          "title": "Point the device at reachable NTP servers",
+          "risk": "low",
+          "needs_approval": true,
+          "rollback": "Restore the previous NTP configuration",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    },
+    {
+      "id": "unidirectional-link",
+      "category": "physical",
+      "severity": "high",
+      "title": "Unidirectional link (one fiber strand failing)",
+      "title_ar": "رابط أحادي الاتجاه",
+      "summary": "One direction of a link works and the other does not; STP may create a loop because BPDUs are lost one way.",
+      "summary_ar": "يعمل اتجاه واحد من الرابط فقط وقد ينتج عنه حلقة STP لأن رسائل BPDU تضيع في اتجاه.",
+      "keywords": [
+        "udld",
+        "unidirectional",
+        "one way",
+        "single strand",
+        "أحادي"
+      ],
+      "signals": {
+        "metrics": [
+          "link_packet_loss",
+          "syslog_link_down"
+        ],
+        "events": [
+          "interface_state"
+        ]
+      },
+      "causes": [
+        "Failed transmit/receive fiber strand or SFP",
+        "Cross-connected or miswired fiber"
+      ],
+      "checks": [
+        {
+          "capability": "show_neighbors",
+          "why": "Does only one side see the other?"
+        },
+        {
+          "capability": "show_optics",
+          "why": "Rx power missing on one end"
+        },
+        {
+          "capability": "show_interface_detail",
+          "why": "Counters moving in one direction only"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "repair-fiber",
+          "title": "Repair/replace the failing strand or transceiver and enable UDLD/loop protection",
+          "risk": "medium",
+          "needs_approval": true,
+          "rollback": "Reinstall the original",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {},
+      "applies_to": [
+        "link"
+      ]
+    },
+    {
+      "id": "software-bug-eol",
+      "category": "lifecycle",
+      "severity": "medium",
+      "title": "Suspected software bug or end-of-life software",
+      "title_ar": "خلل برمجي محتمل أو نظام منتهي الدعم",
+      "summary": "Behavior matches a known defect, or the running release/hardware is past end of support and gets no fixes.",
+      "summary_ar": "السلوك يطابق عيبًا معروفًا أو أن الإصدار/العتاد تجاوز نهاية الدعم فلا تصدر له إصلاحات.",
+      "keywords": [
+        "bug",
+        "known issue",
+        "end of life",
+        "eol",
+        "end of support",
+        "cve",
+        "advisory",
+        "upgrade",
+        "firmware",
+        "ثغرة",
+        "إصدار"
+      ],
+      "signals": {
+        "metrics": [],
+        "events": []
+      },
+      "causes": [
+        "Running a release with a known defect",
+        "Hardware or release past EoL/EoS",
+        "Mixed firmware versions in a stack or pair"
+      ],
+      "checks": [
+        {
+          "capability": "show_version",
+          "why": "Exact release, image and uptime"
+        },
+        {
+          "capability": "show_logging",
+          "why": "Crash, traceback or reload reasons"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "plan-upgrade",
+          "title": "Check the vendor advisories for your exact release and plan a tested upgrade",
+          "risk": "high",
+          "needs_approval": true,
+          "rollback": "Boot the previous image",
+          "change_capabilities": []
+        }
+      ],
+      "verify": [],
+      "rootiq_kind": null,
+      "vendor_hints": {}
+    }
+  ]
+}

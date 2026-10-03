@@ -1,0 +1,66 @@
+{
+  "id": "netgear",
+  "name": "NETGEAR",
+  "aliases": [
+    "netgear",
+    "prosafe",
+    "نتجير"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 4526,
+      "org": "Netgear"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "prosafe",
+      "name": "NETGEAR managed switch firmware (ProSAFE / M-series)",
+      "cli": null,
+      "netmiko": "netgear_prosafe",
+      "aliases": [
+        "prosafe",
+        "netgear"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "M4250 / M4300 / M4350 / M4500",
+      "role": "managed AV/campus (M-series)",
+      "os": "prosafe"
+    },
+    {
+      "name": "GS / GSS smart switches",
+      "role": "SMB",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

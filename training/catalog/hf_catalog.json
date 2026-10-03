@@ -1,0 +1,422 @@
+{
+  "verified_on": "2026-09-29",
+  "source": "huggingface.co public API (metadata only)",
+  "datasets": {
+    "Elfsong/Cisco_CCNA": {
+      "use": "eval_only",
+      "title": "Networking",
+      "note": "343 CCNA exam questions (volume1 187, volume2 156). Used ONLY to check that fine-tuning did not make the model forget general networking. Licence not stated.",
+      "license": "not stated",
+      "downloads": 80,
+      "gated": false,
+      "lastModified": "2024-08-15",
+      "configs": {
+        "default": {
+          "columns": [
+            "ChapterID",
+            "ChapterTitle",
+            "Domain",
+            "QID",
+            "FullQuestion",
+            "Question",
+            "Choices",
+            "Answer"
+          ],
+          "rows": {
+            "volume1": 187,
+            "volume2": 156
+          }
+        }
+      }
+    },
+    "zilalzihar/mikrotik-routeros-qa-dataset": {
+      "use": "train_optional",
+      "title": "MikroTik RouterOS Q&A",
+      "note": "instruction/input/output/source. Apache-2.0. Good fit for the MikroTik command gap (RootIQ's own KB has 22 RouterOS commands). Check the `source` column and spot-check answers before mixing.",
+      "license": "apache-2.0",
+      "downloads": 13,
+      "gated": false,
+      "lastModified": "2026-05-18",
+      "configs": {
+        "default": {
+          "columns": [
+            "instruction",
+            "input",
+            "output",
+            "source"
+          ],
+          "rows": {
+            "train": 1590,
+            "validation": 82
+          }
+        }
+      }
+    },
+    "witfoo/syslog-to-artifact": {
+      "use": "train_optional",
+      "title": "Syslog -> structured artifact",
+      "note": "155k rows of raw syslog to WitFoo artifact JSON (Apache-2.0). Different output schema from RootIQ's normalized event, so use it as a small (<=5%) auxiliary mix to teach log structure, not as the syslog task itself.",
+      "license": "apache-2.0",
+      "downloads": 145,
+      "gated": false,
+      "lastModified": "2024-09-14",
+      "configs": {
+        "default": {
+          "columns": [
+            "input_text",
+            "output_text",
+            "instruction"
+          ],
+          "rows": {
+            "train": 155304
+          }
+        }
+      }
+    },
+    "NetConfEval/NetConfEval": {
+      "use": "future",
+      "title": "Network configuration benchmarks",
+      "note": "MIT. Config generation / policy translation benchmarks, not vendor troubleshooting. Relevant for a future `config` agent.",
+      "license": "mit",
+      "downloads": 1469,
+      "gated": false,
+      "lastModified": "2024-05-14",
+      "configs": {
+        "Configuration Generation": {
+          "columns": [
+            "scenario_name",
+            "prompt",
+            "result"
+          ],
+          "rows": {
+            "train": 5
+          }
+        },
+        "Formal Specification Translation": {
+          "columns": [
+            "iteration",
+            "chunk",
+            "batch_size",
+            "n_policy_types",
+            "max_n_requirements",
+            "description",
+            "human_language",
+            "expected"
+          ],
+          "rows": {
+            "train": 1665
+          }
+        },
+        "Routing Code Generation": {
+          "columns": [
+            "prompts",
+            "policy",
+            "prompt",
+            "tests"
+          ],
+          "rows": {
+            "train": 8
+          }
+        },
+        "Translation Conflict Detection": {
+          "columns": [
+            "iteration",
+            "chunk",
+            "batch_size",
+            "n_policy_types",
+            "max_n_requirements",
+            "conflict_exist",
+            "description",
+            "human_language",
+            "expected"
+          ],
+          "rows": {
+            "train": 1680
+          }
+        }
+      }
+    },
+    "rachid-abdou/NetConfEval": {
+      "use": "future",
+      "title": "NetConfEval, augmented",
+      "note": "CC-BY-4.0 (attribution required). Same purpose as NetConfEval.",
+      "license": "cc-by-4.0",
+      "downloads": 30,
+      "gated": false,
+      "lastModified": "2026-06-21",
+      "configs": {}
+    },
+    "shaunak1234/snmp-diagnostic-agent-traces": {
+      "use": "future",
+      "title": "SNMP diagnostic agent traces",
+      "note": "Apache-2.0. 2,136 tool-calling trajectories (train 1,459 / val 197 / test 480). A different format (messages + tools): useful later to teach tool-use for a diagnostic agent.",
+      "license": "apache-2.0",
+      "downloads": 34,
+      "gated": false,
+      "lastModified": "2026-09-27",
+      "configs": {
+        "default": {
+          "columns": [
+            "id",
+            "scenario_id",
+            "group_id",
+            "split",
+            "root_cause",
+            "difficulty",
+            "template_id",
+            "user_hypothesis",
+            "num_tool_calls",
+            "tool_sequence",
+            "messages",
+            "tools"
+          ],
+          "rows": {
+            "train": 1459,
+            "validation": 197,
+            "test": 480
+          }
+        }
+      }
+    },
+    "AliMaatouk/TelecomTS": {
+      "use": "future",
+      "title": "Telecom KPI time series",
+      "note": "MIT. 5G telecom KPIs with Q&A. Not switch-related; only relevant for time-series anomaly explanations.",
+      "license": "mit",
+      "downloads": 1000,
+      "gated": false,
+      "lastModified": "2026-05-27",
+      "configs": {
+        "default": {
+          "columns": [
+            "start_time",
+            "end_time",
+            "sampling_rate",
+            "KPIs",
+            "description",
+            "anomalies",
+            "statistics",
+            "labels",
+            "QnA"
+          ],
+          "rows": {
+            "train": 32000
+          }
+        }
+      }
+    },
+    "ndavidson/cisco_inam_chatml": {
+      "use": "excluded",
+      "title": "Cisco Q&A (33k)",
+      "note": "Built from Cisco product documentation and no licence is stated. Fine for private experiments, do not ship a model trained on it.",
+      "license": "not stated",
+      "downloads": 41,
+      "gated": false,
+      "lastModified": "2024-03-21",
+      "configs": {
+        "default": {
+          "columns": [
+            "Question",
+            "Answer",
+            "Text",
+            "prompt_and_answer"
+          ],
+          "rows": {
+            "train": 33170
+          }
+        }
+      }
+    },
+    "vivek-dodia/mikrotik-docs": {
+      "use": "reference_only",
+      "title": "MikroTik documentation sections",
+      "note": "Tagged MIT, but the content is the vendor's own documentation: use for retrieval/reading, not as training text.",
+      "license": "mit",
+      "downloads": 42,
+      "gated": false,
+      "lastModified": "2025-02-05",
+      "configs": {
+        "default": {
+          "columns": [
+            "doc_title",
+            "doc_section",
+            "source_url",
+            "section_count",
+            "section_1_title",
+            "section_1_content",
+            "... (277 columns)"
+          ],
+          "rows": {
+            "train": 285
+          }
+        }
+      }
+    },
+    "jack0503/junos_cli_qa": {
+      "use": "excluded",
+      "title": "Junos CLI Q&A (29.8k)",
+      "note": "No licence stated; derived from Juniper documentation. Excluded until the licence is clarified.",
+      "license": "not stated",
+      "downloads": 46,
+      "gated": false,
+      "lastModified": "2026-03-25",
+      "configs": {
+        "default": {
+          "columns": [
+            "qa_type",
+            "instruction",
+            "input",
+            "output",
+            "command",
+            "uid",
+            "llm_expanded"
+          ],
+          "rows": {
+            "train": 29839
+          }
+        }
+      }
+    },
+    "jack0503/junos_cli_command": {
+      "use": "excluded",
+      "title": "Junos CLI command reference (11.5k)",
+      "note": "No licence stated; derived from Juniper documentation. Excluded until the licence is clarified.",
+      "license": "not stated",
+      "downloads": 3,
+      "gated": false,
+      "lastModified": "2026-05-27",
+      "configs": {
+        "default": {
+          "columns": [
+            "command",
+            "syntax",
+            "hierarchy_level",
+            "description",
+            "options",
+            "required_privilege_level",
+            "release_information",
+            "related_documentation"
+          ],
+          "rows": {
+            "train": 11530
+          }
+        }
+      }
+    },
+    "Coldyuja/junos-user-manual-markdown-raw": {
+      "use": "excluded",
+      "title": "Junos manuals (markdown)",
+      "note": "Raw vendor manual text, no licence stated.",
+      "license": "not stated",
+      "downloads": 9,
+      "gated": false,
+      "lastModified": "2026-03-27",
+      "configs": {
+        "by_book": {
+          "columns": [
+            "title",
+            "text"
+          ],
+          "rows": {
+            "train": 48
+          }
+        },
+        "by_chapter": {
+          "columns": [
+            "id",
+            "title",
+            "text"
+          ],
+          "rows": {
+            "train": 1684
+          }
+        }
+      }
+    },
+    "bolu61/loghub_2": {
+      "use": "excluded",
+      "title": "LogHub 2 (unofficial mirror)",
+      "note": "Unofficial upload, single `text` column, no licence. Use the official LogHub release from logpai if generic log data is ever needed.",
+      "license": "not stated",
+      "downloads": 326,
+      "gated": false,
+      "lastModified": "2025-05-28",
+      "configs": {
+        "default": {
+          "columns": [
+            "text"
+          ],
+          "rows": {
+            "train": 38288761,
+            "test": 74273
+          }
+        }
+      }
+    }
+  },
+  "models": {
+    "Qwen/Qwen3-4B-Instruct-2507": {
+      "use": "train",
+      "title": "Default base model",
+      "note": "Apache-2.0. Fits a Colab T4 in 4-bit. Multilingual, follows the JSON output formats well.",
+      "license": "apache-2.0",
+      "downloads": 3935829,
+      "gated": false,
+      "lastModified": "2025-09-17"
+    },
+    "humain-ai/ALLaM-7B-Instruct-preview": {
+      "use": "train_optional",
+      "title": "Arabic/Saudi base model",
+      "note": "Apache-2.0. Better Arabic; needs an L4/A100. Same fine-tuning code (BASE_KEY = 'allam').",
+      "license": "apache-2.0",
+      "downloads": 9993,
+      "gated": false,
+      "lastModified": "2025-07-14"
+    },
+    "intfloat/multilingual-e5-small": {
+      "use": "future",
+      "title": "Embedding model (small)",
+      "note": "MIT. Candidate to replace TF-IDF in the Knowledge agent; needs the prefixes 'query: ' / 'passage: '.",
+      "license": "mit",
+      "downloads": 11941920,
+      "gated": false,
+      "lastModified": "2026-04-02"
+    },
+    "intfloat/multilingual-e5-base": {
+      "use": "future",
+      "title": "Embedding model (base)",
+      "note": "MIT.",
+      "license": "mit",
+      "downloads": 7310823,
+      "gated": false,
+      "lastModified": "2026-04-02"
+    },
+    "intfloat/multilingual-e5-large": {
+      "use": "future",
+      "title": "Embedding model (large)",
+      "note": "MIT.",
+      "license": "mit",
+      "downloads": 7448119,
+      "gated": false,
+      "lastModified": "2026-04-02"
+    },
+    "BAAI/bge-m3": {
+      "use": "future",
+      "title": "Embedding model (multilingual, long input)",
+      "note": "MIT. Strongest of the shortlist for Arabic + English retrieval; largest.",
+      "license": "mit",
+      "downloads": 36143759,
+      "gated": false,
+      "lastModified": "2024-07-03"
+    },
+    "BAAI/bge-reranker-v2-m3": {
+      "use": "future",
+      "title": "Re-ranker",
+      "note": "Apache-2.0. Re-order the top-k retrieved passages before the Copilot uses them.",
+      "license": "apache-2.0",
+      "downloads": 17068125,
+      "gated": false,
+      "lastModified": "2024-06-24"
+    }
+  }
+}

@@ -2,15 +2,13 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: rootiq
-      POSTGRES_PASSWORD: rootiq
-      POSTGRES_DB: rootiq
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rootiq"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       retries: 10
   backend:
@@ -19,10 +17,9 @@ services:
       dockerfile: backend/Dockerfile
     env_file: .env
     environment:
-      TOPOLOGY_PATH: /app/configs/topology.json
+      TOPOLOGY_STATE_PATH: /app/data/topology-observed.json
       LAYOUT_PATH: /app/configs/layout.json
-      DATABASE_URL: postgresql+psycopg://rootiq:rootiq@db:5432/rootiq
-      ROOTIQ_MODE: sim
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     ports:
       - "8000:8000"
     volumes:

@@ -1,0 +1,59 @@
+{
+  "id": "calix",
+  "name": "Calix",
+  "aliases": [
+    "calix",
+    "axos"
+  ],
+  "categories": [
+    "access"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 6321,
+      "org": "Calix Networks"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "axos",
+      "name": "Calix AXOS / E-Series",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "axos",
+        "calix"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "E-Series / AXOS systems",
+      "role": "broadband access",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

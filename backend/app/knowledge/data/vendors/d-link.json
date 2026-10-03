@@ -1,0 +1,68 @@
+{
+  "id": "d-link",
+  "name": "D-Link",
+  "aliases": [
+    "d-link",
+    "dlink",
+    "dgs-",
+    "dxs-",
+    "دي لينك"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 171,
+      "org": "D-Link Systems, Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "dlink-ds",
+      "name": "D-Link DGS/DXS firmware",
+      "cli": null,
+      "netmiko": "dlink_ds",
+      "aliases": [
+        "dgs",
+        "dxs",
+        "d-link"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "DGS-1210 (smart managed)",
+      "role": "SMB",
+      "os": "dlink-ds"
+    },
+    {
+      "name": "DGS-1520 / DGS-3130 / DXS-3400",
+      "role": "aggregation / core",
+      "os": "dlink-ds"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

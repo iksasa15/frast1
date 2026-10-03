@@ -1,0 +1,60 @@
+{
+  "id": "teltonika",
+  "name": "Teltonika Networks",
+  "aliases": [
+    "teltonika",
+    "rutos"
+  ],
+  "categories": [
+    "routing",
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 48690,
+      "org": "Teltonika"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "rutos",
+      "name": "RutOS / TSWOS",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "rutos",
+        "tswos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "RUT routers / TSW switches",
+      "role": "industrial routing/switching",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

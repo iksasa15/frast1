@@ -1,0 +1,77 @@
+{
+  "id": "allied-telesis",
+  "name": "Allied Telesis",
+  "aliases": [
+    "allied telesis",
+    "awplus",
+    "alliedware"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 207,
+      "org": "Allied Telesis, Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "awplus",
+      "name": "AlliedWare Plus",
+      "cli": null,
+      "netmiko": "allied_telesis_awplus",
+      "aliases": [
+        "awplus",
+        "alliedware plus",
+        "aw+"
+      ],
+      "sysdescr_regex": [
+        "Allied Telesis.*?AW\\+ v(?P<version>\\d+\\.\\d+\\.\\d+-\\d+\\.\\d+)"
+      ],
+      "version_regex": "AW\\+ v(?P<version>\\d+\\.\\d+\\.\\d+-\\d+\\.\\d+)",
+      "version_scheme": "MAJOR.MINOR.PATCH-BRANCH.REV, e.g. 5.5.2-2.1.",
+      "examples": {
+        "sysdescr": [
+          "Allied Telesis router/switch, AW+ v5.5.2-2.1"
+        ],
+        "version": [
+          "5.5.2-2.1"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "x230 / x310 / x510 / x550",
+      "role": "access / aggregation",
+      "os": "awplus"
+    },
+    {
+      "name": "x930 / x950",
+      "role": "aggregation / core",
+      "os": "awplus"
+    },
+    {
+      "name": "SwitchBlade x908 / SBx8100",
+      "role": "core",
+      "os": "awplus"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

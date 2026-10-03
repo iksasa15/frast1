@@ -1,0 +1,226 @@
+{
+  "id": "dell",
+  "name": "Dell Technologies (Dell EMC Networking / PowerSwitch)",
+  "aliases": [
+    "dell",
+    "dell emc",
+    "powerswitch",
+    "force10",
+    "os10",
+    "smartfabric",
+    "powerconnect",
+    "ديل"
+  ],
+  "categories": [
+    "switching",
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 674,
+      "org": "Dell Inc."
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "os10",
+      "name": "Dell OS10 (SmartFabric OS10)",
+      "cli": "ios",
+      "netmiko": "dell_os10",
+      "aliases": [
+        "os10",
+        "smartfabric os10"
+      ],
+      "sysdescr_regex": [
+        "OS10.*?Version:?\\s*(?P<version>\\d+\\.\\d+\\.\\d+\\.\\d+)"
+      ],
+      "version_regex": "OS Version:\\s*(?P<version>\\d+\\.\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "A.B.C.D, e.g. 10.5.3.4 (Linux-based NOS on S/Z/N-series PowerSwitch).",
+      "examples": {
+        "sysdescr": [
+          "Dell SmartFabric OS10 Enterprise, Version: 10.5.3.4"
+        ],
+        "version": [
+          "10.5.3.4"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "write memory",
+          "copy running-configuration startup-configuration"
+        ],
+        "snapshot": [],
+        "safe_change": [],
+        "rollback": [],
+        "notes": "OS10 spells the configuration names out in full: running-configuration / startup-configuration."
+      }
+    },
+    {
+      "id": "dnos6",
+      "name": "Dell Networking OS6 (N-Series)",
+      "cli": "ios",
+      "netmiko": "dell_os6",
+      "aliases": [
+        "os6",
+        "dnos6",
+        "powerconnect"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "6.x (N1100/N1500/N2000/N3000 lines).",
+      "examples": {
+        "sysdescr": [],
+        "version": [
+          "6.6.3.10"
+        ]
+      }
+    },
+    {
+      "id": "os9",
+      "name": "Dell Networking OS9 (FTOS / Force10)",
+      "cli": "ios",
+      "netmiko": "dell_os9",
+      "aliases": [
+        "os9",
+        "ftos",
+        "force10"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "9.x, e.g. 9.14(2.4).",
+      "examples": {
+        "sysdescr": [],
+        "version": [
+          "9.14(2.4)"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "PowerSwitch S3100 / S4100 / S5200",
+      "role": "access / leaf",
+      "os": "os10"
+    },
+    {
+      "name": "PowerSwitch Z9100 / Z9200 / Z9264",
+      "role": "spine / core",
+      "os": "os10"
+    },
+    {
+      "name": "PowerSwitch N1100 / N1500 / N2200 / N3200",
+      "role": "campus access / aggregation",
+      "os": "dnos6"
+    },
+    {
+      "name": "S-Series (S4048, S6000) / Z9000 (Force10 heritage)",
+      "role": "data center (legacy)",
+      "os": "os9"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interface status"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interface <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interface <if>"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlan"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree brief"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show mac address-table"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbors"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show environment"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show logging"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ip ospf neighbor"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "show ip bgp summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show port-channel summary"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "shutdown",
+          "no shutdown"
+        ]
+      }
+    }
+  },
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://www.dell.com/support/home/en-us",
+      "status": "403 to bots (page exists)"
+    }
+  },
+  "notes": "Three OS families coexist (OS10, OS6, OS9). Command lists here are OS10-oriented and partly unverified; confirm on your release.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "os10"
+  ]
+}

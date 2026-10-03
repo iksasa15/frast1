@@ -1,0 +1,61 @@
+{
+  "id": "paloalto",
+  "name": "Palo Alto Networks (firewalls)",
+  "aliases": [
+    "palo alto",
+    "paloalto",
+    "pan-os",
+    "بالو التو"
+  ],
+  "categories": [
+    "security"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 25461,
+      "org": "PALO ALTO NETWORKS"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "pan-os",
+      "name": "PAN-OS",
+      "cli": null,
+      "netmiko": "paloalto_panos",
+      "aliases": [
+        "pan-os",
+        "panos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "PA-400 / PA-800 / PA-3200 / PA-5200 / PA-7000",
+      "role": "next-generation firewall",
+      "os": "pan-os"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

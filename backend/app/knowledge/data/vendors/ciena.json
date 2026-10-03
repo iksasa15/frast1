@@ -1,0 +1,59 @@
+{
+  "id": "ciena",
+  "name": "Ciena",
+  "aliases": [
+    "ciena",
+    "saos"
+  ],
+  "categories": [
+    "switching",
+    "optical"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 1271,
+      "org": "Ciena Corporation"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "saos",
+      "name": "SAOS",
+      "cli": null,
+      "netmiko": "ciena_saos",
+      "aliases": [
+        "saos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "3900 / 5100 / 5160 / 5170 (carrier ethernet)",
+      "role": "carrier access / aggregation",
+      "os": "saos"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

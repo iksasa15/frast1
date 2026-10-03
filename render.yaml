@@ -8,5 +8,11 @@ services:
     plan: free
     healthCheckPath: /api/health
     envVars:
-      - key: ROOTIQ_MODE
-        value: sim
+      - key: INGEST_TOKEN
+        sync: false
+      - key: LAB_AGENT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TOPOLOGY_STATE_PATH
+        value: /app/data/topology-observed.json

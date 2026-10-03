@@ -1,0 +1,154 @@
+{
+  "id": "linux",
+  "name": "Linux servers (Ubuntu / Debian / RHEL family)",
+  "aliases": [
+    "linux",
+    "ubuntu",
+    "debian",
+    "centos",
+    "rhel",
+    "red hat",
+    "rocky",
+    "almalinux",
+    "suse",
+    "لينكس"
+  ],
+  "categories": [
+    "server"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 8072,
+      "org": "net-snmp (Net-SNMP agent, used by most Linux hosts)"
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "linux",
+      "name": "Linux (net-snmp sysDescr)",
+      "cli": "linux",
+      "netmiko": "linux",
+      "aliases": [
+        "linux",
+        "ubuntu",
+        "debian"
+      ],
+      "sysdescr_regex": [
+        "^Linux (?P<hostname>\\S+) (?P<kernel>\\d+\\.\\d+\\.\\d+\\S*)"
+      ],
+      "version_regex": "(?P<version>\\d+\\.\\d+\\.\\d+\\S*)",
+      "version_scheme": "Kernel version, e.g. 6.8.0-45-generic (distribution version is in /etc/os-release).",
+      "examples": {
+        "sysdescr": [
+          "Linux app01 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC Fri Aug 30 12:02:04 UTC 2024 x86_64"
+        ],
+        "version": [
+          "6.8.0-45-generic"
+        ]
+      }
+    }
+  ],
+  "series": [],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "uname -a",
+          "cat /etc/os-release"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "ip -br link",
+          "ip -br addr"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "ip -s link show <if>",
+          "ethtool <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "ethtool -S <if>",
+          "ip -s link show <if>"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "ethtool -m <if>"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "top -bn1 | head -20"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "free -m"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "journalctl -k -n 200"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "ip neigh show"
+        ]
+      },
+      "show_service_dns": {
+        "read": [
+          "systemctl status named",
+          "journalctl -u named -n 100",
+          "dig @127.0.0.1 <name>"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "timedatectl status"
+        ]
+      },
+      "show_snmp": {
+        "read": [
+          "systemctl status snmpd"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "sudo ip link set <if> down",
+          "sudo ip link set <if> up"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "nic-link",
+      "regex": "(?P<interface>\\b[a-z][\\w.\\-]*\\d+):? (?:NIC )?Link is (?P<state>Up|Down)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "kernel: e1000e: eth0 NIC Link is Down"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "distribution-specific"
+    }
+  },
+  "notes": "Included because RootIQ's own lab servers (APP-01, COLLECTOR-01) and many appliances run Linux.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "linux"
+  ]
+}

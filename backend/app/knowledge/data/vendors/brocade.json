@@ -1,0 +1,112 @@
+{
+  "id": "brocade",
+  "name": "Brocade (legacy; now Extreme / Ruckus / Broadcom)",
+  "aliases": [
+    "brocade",
+    "icx",
+    "vdx",
+    "fastiron",
+    "بروكيد"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "san"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 1588,
+      "org": "Brocade Communications Systems, Inc."
+    },
+    {
+      "pen": 1991,
+      "org": "Brocade Communication Systems, Inc. (formerly 'Foundry Networks, Inc.')"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "fastiron",
+      "name": "FastIron (ICX)",
+      "cli": null,
+      "netmiko": "brocade_fastiron",
+      "aliases": [
+        "fastiron",
+        "icx"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    },
+    {
+      "id": "nos",
+      "name": "Network OS (VDX)",
+      "cli": null,
+      "netmiko": "brocade_nos",
+      "aliases": [
+        "nos",
+        "vdx"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    },
+    {
+      "id": "netiron",
+      "name": "NetIron (MLX)",
+      "cli": null,
+      "netmiko": "brocade_netiron",
+      "aliases": [
+        "netiron",
+        "mlx"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "ICX 7150 / 7250 / 7450 / 7650 / 7850",
+      "role": "campus access / aggregation (now Ruckus)",
+      "os": "fastiron"
+    },
+    {
+      "name": "VDX 6740 / 6940 / 8770",
+      "role": "data center (legacy)",
+      "os": "nos"
+    },
+    {
+      "name": "MLX",
+      "role": "service-provider routing (legacy)",
+      "os": "netiron"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "The SLX line moved to Extreme; ICX switches are sold under Ruckus.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

@@ -1,0 +1,243 @@
+{
+  "id": "huawei",
+  "name": "Huawei",
+  "aliases": [
+    "huawei",
+    "vrp",
+    "cloudengine",
+    "ce6800",
+    "s5700",
+    "s6700",
+    "هواوي"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "wireless",
+    "security"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 2011,
+      "org": "HUAWEI Technology Co.,Ltd"
+    }
+  ],
+  "coverage": "full",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "vrp",
+      "name": "Huawei VRP",
+      "cli": "vrp",
+      "netmiko": "huawei",
+      "aliases": [
+        "vrp",
+        "vrpv8",
+        "versatile routing platform"
+      ],
+      "sysdescr_regex": [
+        "VRP \\(R\\) software, Version (?P<vrp>\\d+\\.\\d+) \\((?P<model>[A-Za-z0-9\\-]+) (?P<release>V\\d+R\\d+C\\d+(?:SPC\\d+|SPH\\d+)?)\\)"
+      ],
+      "version_regex": "VRP \\(R\\) software, Version (?P<version>\\d+\\.\\d+)",
+      "version_scheme": "VRP platform version (5.170 or 8.191) plus a release like V200R011C10SPC600 (V=version, R=release, C=customer feature, SPC/SPH = service pack / hot patch).",
+      "examples": {
+        "sysdescr": [
+          "Huawei Versatile Routing Platform Software VRP (R) software, Version 5.170 (S5720 V200R011C10SPC600) Copyright (C) 2000-2019 HUAWEI TECH CO., LTD Huawei S5720-28X-LI-AC"
+        ],
+        "version": [
+          "5.170",
+          "8.191"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "S-series (VRP5): changes apply immediately and are lost at reload unless saved with `save`. CE/NE (VRP8) stage changes until `commit`.",
+        "summary_ar": "سلسلة S (VRP5): التغييرات تسري فورًا وتضيع عند إعادة التشغيل ما لم تُحفظ بـ`save`. أما CE/NE (VRP8) فتُجمَّع التغييرات حتى `commit`.",
+        "enter": [
+          "system-view"
+        ],
+        "save": [
+          "save"
+        ],
+        "snapshot": [],
+        "safe_change": [],
+        "rollback": [],
+        "notes": "Verify which VRP generation the device runs before relying on `commit`."
+      },
+      "cli_style": "`display` instead of `show`, `undo` instead of `no`; views: user-view `<host>` and system-view `[host]`; `display this` shows the configuration of the current view; interfaces `GigabitEthernet0/0/1`, `10GE1/0/1`.",
+      "cli_style_ar": "`display` بدل `show` و`undo` بدل `no`؛ العروض: user-view `<host>` وsystem-view `[host]`؛ `display this` يعرض إعداد العرض الحالي؛ الواجهات `GigabitEthernet0/0/1` و`10GE1/0/1`."
+    }
+  ],
+  "series": [
+    {
+      "name": "S1700 / S2700",
+      "role": "access (entry)",
+      "os": "vrp"
+    },
+    {
+      "name": "S5700 / S5720 / S5730 / S5735",
+      "role": "access / aggregation",
+      "os": "vrp"
+    },
+    {
+      "name": "S6700 / S6720 / S6730",
+      "role": "aggregation 10/25G",
+      "os": "vrp"
+    },
+    {
+      "name": "S7700 / S9700 / S12700",
+      "role": "campus core",
+      "os": "vrp"
+    },
+    {
+      "name": "CloudEngine CE5800 / CE6800 / CE7800",
+      "role": "data-center leaf",
+      "os": "vrp"
+    },
+    {
+      "name": "CloudEngine CE8800 / CE12800 / CE16800",
+      "role": "data-center spine / core",
+      "os": "vrp"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "display version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "display interface brief"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "display interface <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "display interface <if>"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "display transceiver interface <if> verbose"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "display vlan"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "display stp brief"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "display mac-address"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "display lldp neighbor brief"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "display cpu-usage"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "display memory-usage"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "display device",
+          "display power",
+          "display fan",
+          "display temperature all"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "display logbuffer"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "display arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "display ospf peer"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "display bgp peer"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "display eth-trunk"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "display ntp-service status"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "reset counters interface <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "shutdown",
+          "undo shutdown"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "link-state",
+      "regex": "IFNET/\\d/LINK_STATE.*?interface (?P<interface>\\S+) has entered the (?P<state>UP|DOWN) state",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "%%01IFNET/4/LINK_STATE(l)[10]:The line protocol on the interface GigabitEthernet0/0/1 has entered the DOWN state."
+    },
+    {
+      "id": "if-state",
+      "regex": "IFPDT/\\d/IF_STATE.*?Interface (?P<interface>\\S+) has turned into (?P<state>UP|DOWN) state",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "%%01IFPDT/4/IF_STATE(l)[11]:Interface GigabitEthernet0/0/1 has turned into DOWN state."
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://www.huawei.com/en/psirt",
+      "status": "200"
+    }
+  },
+  "notes": "VRP uses 'display' instead of 'show' and 'undo' instead of 'no'. Commands and log formats vary between VRP 5 (S-series) and VRP 8 (CloudEngine); verify on your release.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "vrp"
+  ]
+}

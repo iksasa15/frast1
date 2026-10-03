@@ -1,0 +1,81 @@
+{
+  "id": "lenovo",
+  "name": "Lenovo (RackSwitch / ThinkSystem NE)",
+  "aliases": [
+    "lenovo",
+    "rackswitch",
+    "thinksystem ne",
+    "لينوفو"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 19046,
+      "org": "Lenovo Enterprise Business Group"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "cnos",
+      "name": "Lenovo CNOS",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "cnos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    },
+    {
+      "id": "enos",
+      "name": "Lenovo ENOS (ex-IBM/BNT)",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "enos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "RackSwitch G8052 / G8264",
+      "role": "data center (legacy)",
+      "os": "enos"
+    },
+    {
+      "name": "ThinkSystem NE series",
+      "role": "data center",
+      "os": "cnos"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

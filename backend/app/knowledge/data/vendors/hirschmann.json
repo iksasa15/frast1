@@ -1,0 +1,61 @@
+{
+  "id": "hirschmann",
+  "name": "Hirschmann (Belden)",
+  "aliases": [
+    "hirschmann",
+    "belden",
+    "hios"
+  ],
+  "categories": [
+    "switching",
+    "industrial"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 248,
+      "org": "Richard Hirschmann GmbH & Co."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "hios",
+      "name": "HiOS / Classic",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "hios",
+        "hirschmann"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "MACH / GREYHOUND / OCTOPUS / RSP / RS20-RS30 / BOBCAT",
+      "role": "industrial Ethernet",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

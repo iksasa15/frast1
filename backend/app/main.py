@@ -5,7 +5,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from app.api import actions, demo, events, health, incidents, topology, ws
+from app.agents.runtime import AgentRuntime
+from app.api import actions, agents as agents_api, demo, events, health, incidents, topology, vendors, ws
 from app.collectors.simulator import Simulator
 from app.core.config import settings
 from app.intelligence.correlate import Correlator
@@ -80,7 +81,7 @@ def build_snapshot(app: FastAPI) -> dict:
         "topology": snap,
         "incidents": app.state.incidents.list_incidents(),
         "alerts": list(app.state.pipeline.alerts),
-        "demo": app.state.demo,
+        "demo": getattr(app.state, "demo", {"mode": "sim", "scenario": None, "state": "idle"}),
     }
 
 
@@ -111,14 +112,18 @@ async def lifespan(app: FastAPI):
         "injectedAt": None,
     }
 
+    agents = AgentRuntime(
+        graph=graph, history=history, topology=topo, correlator=correlator, detector=detector, audit=audit
+    )
+
     holder: dict = {}
     incidents_svc = IncidentService(
         correlator,
         graph,
-        demo_ref=lambda: demo_state,
         history=history,
         persist=make_persist(holder),
         topology=topo,
+        agents=agents,
     )
 
     path = _persist_path()
@@ -128,7 +133,6 @@ async def lifespan(app: FastAPI):
                 blob["id"],
                 blob["title"],
                 blob["openedAt"],
-                (blob.get("timings") or {}).get("injectedAt"),
             )
             st.status = blob.get("status", "resolved")
             st.severity = blob.get("severity", "high")
@@ -145,23 +149,37 @@ async def lifespan(app: FastAPI):
             st.explanation = blob.get("explanation")
             st.action = blob.get("action")
             st.needs_investigation = blob.get("needsInvestigation", True)
+            st.acknowledged_by = blob.get("acknowledgedBy")
+            st.acknowledged_at = blob.get("acknowledgedAt")
+            st.verification = blob.get("verification")
+            st.knowledge = blob.get("knowledge")
+            st.vendor_context = blob.get("vendorContext")
             if st.status != "resolved":
                 incidents_svc.open[st.id] = st
             else:
                 incidents_svc.history_list.append(st)
+        # Persisted ids must not be reused after a restart (traces, postmortems and the knowledge
+        # index are all keyed by incident id).
+        incidents_svc.resume_sequence(
+            list(incidents_svc.open) + [h.id for h in incidents_svc.history_list]
+        )
 
     action_svc = ActionService(
         incidents_svc,
-        demo_ref=lambda: demo_state,
         detector=detector,
         history=history,
-        simulator_ref=lambda: getattr(app.state, "simulator", None),
         audit=audit,
+        agents=agents,
+        demo_ref=lambda: demo_state,
+        simulator_ref=lambda: getattr(app.state, "simulator", None),
     )
     incidents_svc.actions = action_svc
+    agents.bind(state=state, demo_ref=lambda: demo_state, simulator_ref=lambda: getattr(app.state, "simulator", None))
 
     pipeline = Pipeline(topo, state, detector, incidents_svc)
     pipeline.recorder = Recorder()
+    pipeline.agents = agents
+    agents.bind(pipeline=pipeline)
 
     app.state.topology = topo
     app.state.state = state
@@ -169,20 +187,33 @@ async def lifespan(app: FastAPI):
     app.state.incidents = incidents_svc
     app.state.actions = action_svc
     app.state.audit = audit
+    app.state.agents = agents
     app.state.history = history
     app.state.pipeline = pipeline
     app.state.demo = demo_state
+
+    def refresh_graph():
+        fresh = TopologyGraph(topo.raw)
+        correlator.g = fresh
+        incidents_svc.graph = fresh
+        agents.graph = fresh
+
+    app.state.refresh_graph = refresh_graph
     app.state.snapshot = lambda: build_snapshot(app)
     app.state.tasks = [
         asyncio.create_task(state.flush_loop()),
         asyncio.create_task(recovery_loop(app)),
+        # build the RAG index in the background so the first incident is not slowed down
+        asyncio.create_task(asyncio.to_thread(agents.knowledge.reindex)),
     ]
 
-    if settings.rootiq_mode == "sim":
+    # Simulator runs only in sim mode — never start it beside a live lab session.
+    if settings.rootiq_mode == "sim" and not settings.sim_paused:
         sim = Simulator(pipeline)
-        sim.paused = settings.sim_paused
         app.state.simulator = sim
         app.state.tasks.append(asyncio.create_task(sim.run()))
+    else:
+        app.state.simulator = None
 
     yield
 
@@ -197,8 +228,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -206,7 +237,9 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api")
 app.include_router(topology.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
-app.include_router(demo.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")
+app.include_router(demo.router, prefix="/api")
+app.include_router(agents_api.router, prefix="/api")
+app.include_router(vendors.router, prefix="/api")
 app.include_router(ws.router)

@@ -1,0 +1,84 @@
+{
+  "id": "h3c",
+  "name": "H3C / HPE FlexNetwork (Comware)",
+  "aliases": [
+    "h3c",
+    "comware",
+    "hpe flexnetwork",
+    "hp a-series",
+    "اتش ثري سي"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 25506,
+      "org": "H3C"
+    },
+    {
+      "pen": 43,
+      "org": "3Com (legacy, HPE FlexNetwork heritage)"
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "comware",
+      "name": "Comware",
+      "cli": "comware",
+      "netmiko": "h3c_comware",
+      "aliases": [
+        "comware",
+        "h3c comware"
+      ],
+      "sysdescr_regex": [
+        "H3C Comware Platform Software, Software Version (?P<version>\\d+\\.\\d+\\.\\d+),?\\s+Release (?P<release>\\S+)\\s+(?P<model>H3C \\S+)"
+      ],
+      "version_regex": "Software Version (?P<version>\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "Comware 7: 7.1.0xx with a Release code, e.g. 7.1.070 Release 6635P05.",
+      "examples": {
+        "sysdescr": [
+          "H3C Comware Platform Software, Software Version 7.1.070, Release 6635P05 H3C S5130S-28S-EI Copyright (c) 2004-2022 New H3C Technologies Co., Ltd."
+        ],
+        "version": [
+          "7.1.070"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "S5120 / S5130 / S5500 / S5560",
+      "role": "access / aggregation",
+      "os": "comware"
+    },
+    {
+      "name": "S6520 / S6800",
+      "role": "aggregation / DC",
+      "os": "comware"
+    },
+    {
+      "name": "S7500 / S9800",
+      "role": "core",
+      "os": "comware"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "Comware CLI resembles Huawei VRP ('display' commands) but differs in details; command lists not curated yet.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

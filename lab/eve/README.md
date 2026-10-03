@@ -14,4 +14,4 @@ Images (on EVE host under `/opt/unetlab/addons/qemu/`):
 - `viosl2-adventerprisek9-m.SSA.high_iron`
 - `linux-ubuntu-24.04-server`
 
-Host needs ≥ 16GB RAM. Small-team path can defer this and stay on `ROOTIQ_MODE=sim`.
+Host needs ≥ 16GB RAM. RootIQ reports a waiting state until this live lab is reachable.

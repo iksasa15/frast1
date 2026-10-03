@@ -1,19 +1,29 @@
+"""Simulated telemetry for the lab topology.
+
+Demo spine metrics (BASELINE_CORE + SCENARIOS) stay frozen so RCA demos keep working.
+Healthy campus fabric metrics are derived from configs/topology.json so new devices
+look alive without stealing the three demo scenarios.
+"""
+from __future__ import annotations
+
 import asyncio
+import json
 import random
 from datetime import datetime, timezone
+from pathlib import Path
 
+from app.core.config import settings
 from app.schemas.event import Event
+from app.services.hub import hub
 
-BASELINE = [
+# Demo spine — IDs must exist in configs/topology.json (edge uplink keeps id link-r1-sw1).
+BASELINE_CORE = [
     ("link-r1-sw1", "link", "link_utilization", "percent", 14, 3),
     ("link-r1-sw1", "link", "link_latency_ms", "ms", 2.5, 0.6),
     ("link-r1-sw1", "link", "link_packet_loss", "percent", 0, 0),
     ("link-r1-sw1", "link", "if_out_discards_rate", "pps", 0, 0),
-    ("link-r1-sw2", "link", "link_utilization", "percent", 6, 2),
-    ("link-r1-sw2", "link", "link_latency_ms", "ms", 1.2, 0.3),
     ("link-sw1-app01", "link", "link_utilization", "percent", 9, 2),
     ("link-sw1-app01", "link", "link_latency_ms", "ms", 0.8, 0.2),
-    ("link-sw2-collector01", "link", "link_utilization", "percent", 5, 1),
     ("app01", "server", "cpu_percent", "percent", 18, 4),
     ("app01", "server", "mem_percent", "percent", 41, 1),
     ("svc-web", "service", "http_latency_ms", "ms", 42, 8),
@@ -46,6 +56,57 @@ SCENARIOS = {
 }
 
 
+def _stable(seed: str, lo: int, hi: int) -> int:
+    h = sum(ord(c) for c in seed) % (hi - lo + 1)
+    return lo + h
+
+
+def _campus_baseline(topo_path: str | Path | None = None) -> list[tuple]:
+    """Healthy metrics for every topology entity not already covered by BASELINE_CORE."""
+    path = Path(topo_path or settings.topology_path)
+    if not path.exists():
+        return []
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    covered = {e for e, _, _, _, _, _ in BASELINE_CORE}
+    out: list[tuple] = []
+
+    for link in raw.get("links", []):
+        lid = link["id"]
+        if lid in covered:
+            continue
+        util = _stable(lid, 4, 18)
+        out.append((lid, "link", "link_utilization", "percent", util, 2))
+        out.append((lid, "link", "link_latency_ms", "ms", round(0.4 + util * 0.05, 2), 0.2))
+
+    for node in raw.get("nodes", []):
+        nid, ntype = node["id"], node["type"]
+        if nid in covered:
+            continue
+        if ntype in ("server", "collector"):
+            out.append((nid, "server", "cpu_percent", "percent", _stable(nid + ":cpu", 8, 28), 3))
+            out.append((nid, "server", "mem_percent", "percent", _stable(nid + ":mem", 30, 55), 2))
+
+    for svc in raw.get("services", []):
+        sid = svc["id"]
+        if sid in covered:
+            continue
+        port = int(svc.get("port") or 0)
+        if port in (53, 389):
+            out.append((sid, "service", "dns_success_rate", "percent", 100, 0))
+            out.append((sid, "service", "dns_latency_ms", "ms", _stable(sid, 2, 8), 1))
+        elif port in (25, 445):
+            out.append((sid, "service", "http_ok", "bool", 1, 0))
+            out.append((sid, "service", "http_latency_ms", "ms", _stable(sid, 20, 60), 5))
+        else:
+            out.append((sid, "service", "http_ok", "bool", 1, 0))
+            out.append((sid, "service", "http_latency_ms", "ms", _stable(sid, 30, 90), 6))
+
+    return out
+
+
+BASELINE = BASELINE_CORE + _campus_baseline()
+
+
 class Simulator:
     def __init__(self, pipeline):
         self.pipeline = pipeline
@@ -60,7 +121,30 @@ class Simulator:
         self.active, self.elapsed, self.recovering = scenario, 0.0, False
 
     def remediate(self):
+        """Engineer approved a fix: snap every metric to its healthy baseline immediately."""
         self.recovering = True
+        self.current = {(e, m): float(b) for e, _, m, _, b, _ in BASELINE}
+
+    async def push_baseline(self):
+        """Emit clean baseline samples for demo metrics so the topology UI turns green now."""
+        now = datetime.now(timezone.utc)
+        # Campus fabric was never faulted — only push the demo spine metrics.
+        for e, st, m, unit, base, _noise in BASELINE_CORE:
+            self.current[(e, m)] = float(base)
+            await self.pipeline.ingest(
+                Event(
+                    source_id=e,
+                    source_type=st,
+                    metric=m,
+                    value=round(float(base), 2),
+                    unit=unit,
+                    timestamp=now,
+                    metadata={"collector": "simulator", "recovery": True},
+                )
+            )
+        dirty, self.pipeline.state.dirty = self.pipeline.state.dirty, set()
+        for entity in dirty:
+            await hub.broadcast(self.pipeline.state.kind(entity), self.pipeline.state.payload(entity))
 
     def reset(self):
         self.active, self.recovering = None, False
@@ -68,7 +152,8 @@ class Simulator:
 
     def _target(self, e, m, base):
         if not self.active or self.recovering:
-            return base, 8.0
+            # Stay near baseline after remediation (map already snapped green).
+            return base, 1.0
         for off, te, tm, tgt, ramp in SCENARIOS[self.active]:
             if te == e and tm == m and self.elapsed >= off:
                 return tgt, ramp

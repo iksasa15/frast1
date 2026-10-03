@@ -1,0 +1,576 @@
+{
+  "id": "cisco",
+  "name": "Cisco Systems",
+  "aliases": [
+    "cisco",
+    "catalyst",
+    "nexus",
+    "meraki",
+    "vios",
+    "iosv",
+    "سيسكو"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "security",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 9,
+      "org": "ciscoSystems"
+    }
+  ],
+  "coverage": "full",
+  "confidence": "high",
+  "os_families": [
+    {
+      "id": "ios-xe",
+      "name": "Cisco IOS XE",
+      "cli": "ios",
+      "netmiko": "cisco_xe",
+      "aliases": [
+        "ios xe",
+        "ios-xe",
+        "iosxe",
+        "catalyst 9"
+      ],
+      "sysdescr_regex": [
+        "Cisco IOS Software \\[(?P<codename>[^\\]]+)\\],.*?\\((?P<image>[A-Z0-9_\\-]*IOSXE[A-Z0-9_\\-]*)\\),\\s*Version (?P<version>\\d+\\.\\d+\\.\\d+[a-z]?)",
+        "Cisco IOS XE Software,? Version (?P<version>\\d+\\.\\d+(?:\\.\\d+)?[a-z]?)"
+      ],
+      "version_regex": "Version (?P<version>\\d+\\.\\d+(?:\\.\\d+)?[a-z]?)",
+      "version_scheme": "MAJOR.MINOR.MAINT[letter], e.g. 17.9.4a (show version zero-pads: 17.09.04a). 16.x and 17.x trains; each release carries a codename in sysDescr.",
+      "examples": {
+        "sysdescr": [
+          "Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_IOSXE), Version 17.9.4a, RELEASE SOFTWARE (fc3)"
+        ],
+        "version": [
+          "17.9.4a",
+          "17.09.04a",
+          "16.12.4"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "copy running-config startup-config",
+          "write memory"
+        ],
+        "snapshot": [
+          "copy running-config flash:<backup>"
+        ],
+        "safe_change": [
+          "reload in 5",
+          "reload cancel"
+        ],
+        "rollback": [
+          "configure replace flash:<backup> force"
+        ],
+        "notes": "`reload in 5` before a risky change reloads the switch back to the saved startup configuration unless you cancel it; do not save until the change is verified."
+      },
+      "cli_style": "Modal CLI (user EXEC, privileged EXEC, global config, interface config). Unique prefixes are accepted (`sh int gi0/1`). In configuration mode put `do` in front of a show command. Filters: `| include`, `| section`, `| begin`.",
+      "cli_style_ar": "واجهة أوامر متعددة الأوضاع (User ثم Privileged ثم Global config ثم Interface). تُقبل الاختصارات الفريدة (`sh int gi0/1`). داخل وضع الإعداد ضع `do` قبل أمر show. الفلترة: `| include` و`| section` و`| begin`."
+    },
+    {
+      "id": "ios",
+      "name": "Cisco IOS (classic)",
+      "cli": "ios",
+      "netmiko": "cisco_ios",
+      "aliases": [
+        "ios",
+        "vios",
+        "viosl2",
+        "iosv",
+        "catalyst 2960",
+        "catalyst 3750",
+        "catalyst 3560"
+      ],
+      "sysdescr_regex": [
+        "Cisco IOS Software, (?P<family>[^,(]+?) Software \\((?P<image>[^)]+)\\), Version (?P<version>\\d+\\.\\d+\\(\\d+[a-z]?\\)[A-Za-z]*\\d*[a-z]?)"
+      ],
+      "version_regex": "Version (?P<version>\\d+\\.\\d+\\(\\d+[a-z]?\\)[A-Za-z]*\\d*[a-z]?)",
+      "version_scheme": "MAJOR.MINOR(BUILD)TRAIN+REV, e.g. 15.0(2)SE11 (train SE = Catalyst 2960/3560/3750; M = mainline; T = technology).",
+      "examples": {
+        "sysdescr": [
+          "Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE11, RELEASE SOFTWARE (fc3)"
+        ],
+        "version": [
+          "15.0(2)SE11",
+          "15.2(4)E10"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "copy running-config startup-config",
+          "write memory"
+        ],
+        "snapshot": [
+          "copy running-config flash:<backup>"
+        ],
+        "safe_change": [
+          "reload in 5",
+          "reload cancel"
+        ],
+        "rollback": [
+          "configure replace flash:<backup> force"
+        ],
+        "notes": "Classic IOS (the EVE-NG vIOS / vIOS-L2 lab images): `configure replace` needs the archive feature on some releases; the simplest rollback is not saving and reloading."
+      },
+      "cli_style": "Modal CLI, same style as IOS XE: user EXEC, privileged EXEC, global config, interface config; unique prefixes accepted; `do show ...` inside configuration mode.",
+      "cli_style_ar": "واجهة متعددة الأوضاع بنفس أسلوب IOS XE؛ تُقبل الاختصارات الفريدة، و`do show ...` داخل وضع الإعداد."
+    },
+    {
+      "id": "nx-os",
+      "name": "Cisco NX-OS",
+      "cli": "ios",
+      "netmiko": "cisco_nxos",
+      "aliases": [
+        "nx-os",
+        "nxos",
+        "nexus"
+      ],
+      "sysdescr_regex": [
+        "Cisco NX-OS\\(tm\\) (?P<platform>\\S+?),? Software.*?Version (?P<version>\\d+\\.\\d+\\(\\d+[a-z]*\\))",
+        "Cisco Nexus Operating System \\(NX-OS\\) Software.*?Version (?P<version>\\d+\\.\\d+\\(\\d+[a-z]*\\))"
+      ],
+      "version_regex": "(?:system|NXOS): +version (?P<version>\\d+\\.\\d+\\(\\d+[a-z]*\\))",
+      "version_scheme": "MAJOR.MINOR(MAINT)[letter], e.g. 10.3(3) or 9.3(10)F; 'F' suffix marks a feature/long-lived release variants.",
+      "examples": {
+        "sysdescr": [
+          "Cisco NX-OS(tm) n9000, Software (n9000-dk9), Version 9.3(10), RELEASE SOFTWARE Copyright (c) 2002-2022, Cisco Systems, Inc."
+        ],
+        "version": [
+          "10.3(3)",
+          "9.3(10)"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "copy running-config startup-config"
+        ],
+        "snapshot": [
+          "checkpoint <name>"
+        ],
+        "safe_change": [],
+        "rollback": [
+          "rollback running-config checkpoint <name>"
+        ],
+        "notes": "NX-OS checkpoints give a real rollback point; many protocols must be enabled first with `feature <name>`."
+      },
+      "cli_style": "IOS-like modal CLI, but most protocols must be enabled first with `feature <name>`; interfaces are named `Ethernet1/1`; `show running-config | section <x>`.",
+      "cli_style_ar": "شبيهة بـIOS لكن يجب تفعيل معظم البروتوكولات أولًا بـ`feature <name>`؛ الواجهات باسم `Ethernet1/1`؛ و`show running-config | section <x>`."
+    },
+    {
+      "id": "ios-xr",
+      "name": "Cisco IOS XR",
+      "cli": "ios",
+      "netmiko": "cisco_xr",
+      "aliases": [
+        "ios xr",
+        "ios-xr",
+        "iosxr",
+        "ncs"
+      ],
+      "sysdescr_regex": [
+        "Cisco IOS XR Software \\((?P<platform>[^)]+)\\),\\s*Version (?P<version>\\d+\\.\\d+\\.\\d+[A-Za-z]?)"
+      ],
+      "version_regex": "Version\\s*[:=]?\\s*(?P<version>\\d+\\.\\d+\\.\\d+[A-Za-z]?)",
+      "version_scheme": "MAJOR.MINOR.MAINT, e.g. 7.5.2 (service provider routers: ASR 9000, NCS, 8000).",
+      "examples": {
+        "sysdescr": [
+          "Cisco IOS XR Software (Cisco NCS-5500), Version 7.5.2"
+        ],
+        "version": [
+          "7.5.2"
+        ]
+      },
+      "config_model": {
+        "style": "candidate-commit",
+        "summary": "Changes are staged in a target configuration and become active (and persistent) only on commit.",
+        "summary_ar": "التغييرات تُجمَّع في إعداد مرشّح ولا تصير فعّالة ودائمة إلا عند `commit`.",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "commit"
+        ],
+        "snapshot": [],
+        "safe_change": [
+          "commit confirmed 5"
+        ],
+        "rollback": [
+          "rollback configuration last 1"
+        ],
+        "notes": "`show configuration` lists the uncommitted changes."
+      },
+      "cli_style": "Two-stage CLI: edit the target configuration, then `commit`; `show configuration` lists uncommitted changes; interfaces are named like `GigabitEthernet0/0/0/0`.",
+      "cli_style_ar": "أوامر على مرحلتين: عدّل الإعداد المرشّح ثم `commit`؛ `show configuration` يعرض التغييرات غير المُلتزَم بها؛ أسماء الواجهات مثل `GigabitEthernet0/0/0/0`."
+    }
+  ],
+  "series": [
+    {
+      "name": "Catalyst 9200 / 9300 / 9300X",
+      "role": "access, stackable",
+      "os": "ios-xe"
+    },
+    {
+      "name": "Catalyst 9400 / 9500 / 9600",
+      "role": "distribution / core / modular",
+      "os": "ios-xe"
+    },
+    {
+      "name": "Catalyst 3850 / 3650",
+      "role": "access (legacy, IOS XE)",
+      "os": "ios-xe"
+    },
+    {
+      "name": "Catalyst 4500-X / 4500E",
+      "role": "distribution (legacy)",
+      "os": "ios-xe"
+    },
+    {
+      "name": "Catalyst 2960-X / 2960-XR / 2960-Plus",
+      "role": "access (legacy IOS)",
+      "os": "ios"
+    },
+    {
+      "name": "Catalyst 3750 / 3560",
+      "role": "access (legacy IOS)",
+      "os": "ios"
+    },
+    {
+      "name": "Catalyst 6500 / 6800",
+      "role": "core (legacy)",
+      "os": "ios"
+    },
+    {
+      "name": "Catalyst 1000 / 1200 / 1300",
+      "role": "small-branch access",
+      "os": "ios"
+    },
+    {
+      "name": "Nexus 3000 / 9000",
+      "role": "data-center leaf/spine",
+      "os": "nx-os"
+    },
+    {
+      "name": "Nexus 5000 / 6000 / 7000",
+      "role": "data-center (legacy)",
+      "os": "nx-os"
+    },
+    {
+      "name": "Cisco Business 110 / 220 / 250 / 350",
+      "role": "small business",
+      "os": null
+    },
+    {
+      "name": "Meraki MS",
+      "role": "cloud-managed (Meraki dashboard, not CLI)",
+      "os": null
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interfaces status"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interfaces <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interfaces <if> counters errors"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show interfaces <if> transceiver detail"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlan brief"
+        ]
+      },
+      "show_trunk": {
+        "read": [
+          "show interfaces trunk"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree",
+          "show spanning-tree detail"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show mac address-table"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbors",
+          "show cdp neighbors"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show processes cpu sorted"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show processes memory sorted"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show environment all"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show logging"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show ip arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ip ospf neighbor"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "show ip bgp summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show etherchannel summary"
+        ]
+      },
+      "show_poe": {
+        "read": [
+          "show power inline"
+        ]
+      },
+      "show_qos": {
+        "read": [
+          "show policy-map interface <if>"
+        ]
+      },
+      "show_errdisable": {
+        "read": [
+          "show interfaces status err-disabled"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "show ntp status"
+        ]
+      },
+      "show_snmp": {
+        "read": [
+          "show snmp"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "clear counters <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "shutdown",
+          "no shutdown"
+        ]
+      }
+    },
+    "nx-os": {
+      "show_interface_status": {
+        "read": [
+          "show interface status"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interface <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interface <if> counters errors"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show interface <if> transceiver details"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show processes cpu sort"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show system resources"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show environment"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show port-channel summary"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "show ntp peer-status"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "link-updown",
+      "regex": "%LINK-\\d-UPDOWN:\\s*Interface\\s+(?P<interface>\\S+),\\s+changed state to\\s+(?P<state>up|down)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "%LINK-3-UPDOWN: Interface GigabitEthernet1/0/1, changed state to down"
+    },
+    {
+      "id": "lineproto-updown",
+      "regex": "%LINEPROTO-\\d-UPDOWN:\\s*Line protocol on Interface\\s+(?P<interface>\\S+),\\s+changed state to\\s+(?P<state>up|down)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet1/0/1, changed state to down"
+    },
+    {
+      "id": "nxos-if-down",
+      "regex": "%ETHPORT-\\d-IF_DOWN_[A-Z_]+:\\s*Interface\\s+(?P<interface>\\S+)\\s+is down",
+      "event": "interface_state",
+      "state": "down",
+      "severity": "warning",
+      "example": "%ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface Ethernet1/1 is down (Link failure)"
+    },
+    {
+      "id": "nxos-if-up",
+      "regex": "%ETHPORT-\\d-IF_UP:\\s*Interface\\s+(?P<interface>\\S+)\\s+is up",
+      "event": "interface_state",
+      "state": "up",
+      "severity": "info",
+      "example": "%ETHPORT-5-IF_UP: Interface Ethernet1/1 is up in Layer3"
+    },
+    {
+      "id": "err-disable",
+      "regex": "%PM-4-ERR_DISABLE:\\s*(?P<cause>[\\w\\-]+) error detected on (?P<interface>\\S+),\\s+putting \\S+ in err-disable state",
+      "event": "port_errdisabled",
+      "severity": "critical",
+      "example": "%PM-4-ERR_DISABLE: bpduguard error detected on Gi1/0/5, putting Gi1/0/5 in err-disable state"
+    },
+    {
+      "id": "mac-flap",
+      "regex": "%SW_MATM-4-MACFLAP_NOTIF:\\s*Host (?P<mac>[0-9a-f.]+) in vlan (?P<vlan>\\d+) is flapping between port (?P<interface>\\S+) and port (?P<interface2>\\S+)",
+      "event": "mac_flapping",
+      "severity": "critical",
+      "example": "%SW_MATM-4-MACFLAP_NOTIF: Host 0011.2233.4455 in vlan 10 is flapping between port Gi1/0/1 and port Gi1/0/2"
+    },
+    {
+      "id": "stp-rootchange",
+      "regex": "%SPANTREE-\\d-ROOTCHANGE:\\s*Root Changed for (?:vlan|inst)\\S* (?P<vlan>\\d+)",
+      "event": "stp_root_change",
+      "severity": "warning",
+      "example": "%SPANTREE-5-ROOTCHANGE: Root Changed for vlan 1: New Root Port is GigabitEthernet1/0/1. New Root Mac Address is 0011.2233.4455"
+    },
+    {
+      "id": "ospf-adjchg",
+      "regex": "%OSPF-5-ADJCHG:\\s*Process (?P<process>\\d+), Nbr (?P<neighbor>[\\d.]+) on (?P<interface>\\S+) from (?P<from_state>\\w+) to (?P<to_state>\\w+)",
+      "event": "ospf_neighbor_change",
+      "severity": "warning",
+      "example": "%OSPF-5-ADJCHG: Process 1, Nbr 10.0.0.2 on GigabitEthernet0/1 from FULL to DOWN, Neighbor Down: Dead timer expired"
+    },
+    {
+      "id": "bgp-adjchange",
+      "regex": "%BGP-5-ADJCHANGE:\\s*neighbor (?P<neighbor>[\\d.a-fA-F:]+) (?P<state>Up|Down)",
+      "event": "bgp_neighbor_change",
+      "severity": "warning",
+      "example": "%BGP-5-ADJCHANGE: neighbor 10.1.1.1 Down BGP Notification sent"
+    },
+    {
+      "id": "duplex-mismatch",
+      "regex": "%CDP-4-DUPLEX_MISMATCH:\\s*duplex mismatch discovered on (?P<interface>\\S+)",
+      "event": "duplex_mismatch",
+      "severity": "warning",
+      "example": "%CDP-4-DUPLEX_MISMATCH: duplex mismatch discovered on GigabitEthernet0/1 (not half duplex), with SW2 GigabitEthernet0/2 (half duplex)."
+    },
+    {
+      "id": "native-vlan-mismatch",
+      "regex": "%CDP-4-NATIVE_VLAN_MISMATCH:\\s*Native VLAN mismatch discovered on (?P<interface>\\S+)",
+      "event": "native_vlan_mismatch",
+      "severity": "warning",
+      "example": "%CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on GigabitEthernet0/1 (1), with SW2 GigabitEthernet0/2 (10)."
+    },
+    {
+      "id": "config-i",
+      "regex": "%SYS-5-CONFIG_I:\\s*Configured from\\s+(?P<source>\\S+)\\s+by\\s+(?P<user>\\S+)",
+      "event": "config_change",
+      "severity": "info",
+      "example": "%SYS-5-CONFIG_I: Configured from console by admin on vty0 (10.0.0.5)"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": "https://www.cisco.com/c/en/us/products/eos-eol-listing.html",
+      "status": "403 to bots (page exists)"
+    },
+    "security": {
+      "url": "https://sec.cloudapps.cisco.com/security/center/publicationListing.x",
+      "status": "200"
+    }
+  },
+  "notes": "Catalyst/Nexus are the largest installed base in enterprise LAN and DC. IOS XE and NX-OS commands differ in a few places (see os overrides).",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "ios-xe",
+    "ios",
+    "nx-os"
+  ]
+}

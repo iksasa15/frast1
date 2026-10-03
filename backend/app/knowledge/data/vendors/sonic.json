@@ -1,0 +1,54 @@
+{
+  "id": "sonic",
+  "name": "SONiC (open-source network OS)",
+  "aliases": [
+    "sonic",
+    "sonic-nos"
+  ],
+  "categories": [
+    "switching",
+    "data-center"
+  ],
+  "enterprise_oids": [],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "sonic",
+      "name": "SONiC",
+      "cli": "linux",
+      "netmiko": "dell_sonic",
+      "aliases": [
+        "sonic"
+      ],
+      "sysdescr_regex": [
+        "SONiC Software Version:\\s*SONiC\\.(?P<version>\\S+)"
+      ],
+      "version_regex": "SONiC Software Version:\\s*SONiC\\.(?P<version>\\S+)",
+      "version_scheme": "SONiC.<YYYYMM>.<build>, e.g. SONiC.202305.1 (Linux-based, used by Edgecore, Dell, Celestica and hyperscalers).",
+      "examples": {
+        "sysdescr": [
+          "SONiC Software Version: SONiC.202305.1"
+        ],
+        "version": [
+          "202305.1"
+        ]
+      }
+    }
+  ],
+  "series": [],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "community project"
+    }
+  },
+  "notes": "Profile only. Netmiko's closest driver is 'dell_sonic' (Dell Enterprise SONiC).",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

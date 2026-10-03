@@ -1,0 +1,59 @@
+{
+  "id": "adtran",
+  "name": "ADTRAN",
+  "aliases": [
+    "adtran",
+    "netvanta"
+  ],
+  "categories": [
+    "switching",
+    "access"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 664,
+      "org": "Adtran"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "adtran-os",
+      "name": "ADTRAN OS",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "adtran"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "NetVanta switches",
+      "role": "SMB / branch",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

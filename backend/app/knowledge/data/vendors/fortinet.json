@@ -1,0 +1,305 @@
+{
+  "id": "fortinet",
+  "name": "Fortinet",
+  "aliases": [
+    "fortinet",
+    "fortiswitch",
+    "fortigate",
+    "fortios",
+    "فورتينت",
+    "fortigate-vm",
+    "fortiwifi",
+    "فورتي جيت"
+  ],
+  "categories": [
+    "switching",
+    "security",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 12356,
+      "org": "Fortinet, Inc."
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "fortiswitchos",
+      "name": "FortiSwitchOS",
+      "cli": "fortios",
+      "netmiko": "fortinet",
+      "aliases": [
+        "fortiswitchos",
+        "fortiswitch"
+      ],
+      "sysdescr_regex": [
+        "FortiSwitch-(?P<model>[0-9A-Za-z\\-]+)"
+      ],
+      "version_regex": "Version:\\s*FortiSwitch-\\S+\\s+v(?P<version>\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "MAJOR.MINOR.PATCH, e.g. 7.2.5 (managed standalone or by FortiGate FortiLink).",
+      "examples": {
+        "sysdescr": [
+          "FortiSwitch-124E-POE"
+        ],
+        "version": [
+          "7.2.5"
+        ]
+      },
+      "config_model": {
+        "style": "auto-save",
+        "summary": "Each `end` / `next` applies the change immediately and persists it: there is no separate save step, so take a backup before a risky change.",
+        "summary_ar": "كل `end` / `next` يطبّق التغيير فورًا ويحفظه: لا توجد خطوة حفظ منفصلة، لذلك خذ نسخة احتياطية قبل أي تغيير محفوف بالمخاطر.",
+        "enter": [
+          "config <path>"
+        ],
+        "save": [],
+        "snapshot": [
+          "execute backup config tftp <file> <server>"
+        ],
+        "safe_change": [],
+        "rollback": [
+          "execute restore config tftp <file> <server>"
+        ],
+        "notes": "A FortiSwitch managed through FortiLink is configured from the FortiGate; the switch CLI then shows the result but the FortiGate owns the configuration."
+      },
+      "cli_style": "Same FortiOS-style CLI (`config` / `edit` / `set` / `next` / `end`) with switch-specific trees: `diagnose switch ...`, `get switch ...`, `config switch physical-port`. Ports are `port1`..`portN`.",
+      "cli_style_ar": "نفس أسلوب FortiOS (`config` / `edit` / `set` / `next` / `end`) مع أشجار خاصة بالسوتش: `diagnose switch ...` و`get switch ...` و`config switch physical-port`. المنافذ `port1` إلى `portN`."
+    },
+    {
+      "id": "fortios",
+      "name": "FortiOS (FortiGate firewalls)",
+      "cli": "fortios",
+      "netmiko": "fortinet",
+      "aliases": [
+        "fortios",
+        "fortigate"
+      ],
+      "sysdescr_regex": [
+        "FortiGate-(?P<model>[0-9A-Za-z\\-]+)"
+      ],
+      "version_regex": "Version:\\s*FortiGate-\\S+\\s+v(?P<version>\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "MAJOR.MINOR.PATCH, e.g. 7.4.3.",
+      "examples": {
+        "sysdescr": [
+          "FortiGate-VM64"
+        ],
+        "version": [
+          "7.4.3"
+        ]
+      },
+      "config_model": {
+        "style": "auto-save",
+        "summary": "Each `end` / `next` applies the change immediately and persists it: there is no separate save step, so take a backup before a risky change.",
+        "summary_ar": "كل `end` / `next` يطبّق التغيير فورًا ويحفظه: لا توجد خطوة حفظ منفصلة، لذلك خذ نسخة احتياطية قبل أي تغيير محفوف بالمخاطر.",
+        "enter": [
+          "config <path>"
+        ],
+        "save": [],
+        "snapshot": [
+          "execute backup config tftp <file> <server>"
+        ],
+        "safe_change": [],
+        "rollback": [
+          "execute restore config tftp <file> <server>"
+        ],
+        "notes": "Restoring a configuration reboots the device. Inside a VDOM-enabled FortiGate, enter the VDOM first (`config vdom`, `edit root`)."
+      },
+      "cli_style": "Not a Cisco-like CLI: `config <table>` / `edit <name>` / `set <key> <value>` / `next` / `end`. Read with `get`, `show` and `diagnose`; act with `execute`. Interfaces are `port1`, `wan1`. Multi-VDOM units need `config vdom` / `edit <vdom>` first.",
+      "cli_style_ar": "ليست شبيهة بـCisco: `config <table>` ثم `edit <name>` ثم `set <key> <value>` ثم `next` ثم `end`. للقراءة `get` و`show` و`diagnose`، وللإجراءات `execute`. الواجهات `port1` و`wan1`. وحدات VDOM المتعددة تحتاج `config vdom` ثم `edit <vdom>` أولًا."
+    }
+  ],
+  "series": [
+    {
+      "name": "FortiSwitch 100 / 200 / 400 / 500 series",
+      "role": "access / aggregation (PoE variants)",
+      "os": "fortiswitchos"
+    },
+    {
+      "name": "FortiSwitch 1000 / 2000 / 3000 series",
+      "role": "data-center / core",
+      "os": "fortiswitchos"
+    },
+    {
+      "name": "FortiGate",
+      "role": "firewall (FortiOS)",
+      "os": "fortios"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "get system status"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "diagnose switch physical-ports summary"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "diagnose switch mac-address list"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "get switch lldp neighbors-summary"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "get system performance status"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "diagnose switch trunk summary"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "execute log display"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "diagnose switch physical-ports stats <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "diagnose switch physical-ports stats <if>"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "diagnose stp instance list"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "get system performance status"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "config switch physical-port",
+          "edit <if>",
+          "set status down",
+          "next",
+          "end",
+          "config switch physical-port",
+          "edit <if>",
+          "set status up",
+          "next",
+          "end"
+        ]
+      }
+    },
+    "fortios": {
+      "show_version": {
+        "read": [
+          "get system status"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "get system interface physical"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "diagnose netlink interface list <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "diagnose hardware deviceinfo nic <if>"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "get system performance status",
+          "diagnose sys top-summary"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "get system performance status",
+          "diagnose hardware sysinfo memory"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "get system arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "get router info ospf neighbor"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "get router info bgp summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "diagnose netlink aggregate list"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "execute log display"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "diagnose sys ntp status"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "config system interface",
+          "edit <if>",
+          "set status down",
+          "next",
+          "end",
+          "config system interface",
+          "edit <if>",
+          "set status up",
+          "next",
+          "end"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "fortios-if-status",
+      "regex": "^(?=.*type=\"event\")(?=.*interface=\"(?P<interface>[^\"]+)\")(?=.*status=\"(?P<state>up|down)\")",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "date=2026-09-29 time=10:02:11 devname=\"FGT-LAB\" logid=\"0100020007\" type=\"event\" subtype=\"system\" level=\"warning\" logdesc=\"Interface status changed\" action=\"interface-stat-change\" status=\"DOWN\" interface=\"port2\" msg=\"Interface port2 is down\""
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://www.fortiguard.com/psirt",
+      "status": "200"
+    }
+  },
+  "notes": "Two products share one CLI style: FortiOS (FortiGate firewalls / routers) and FortiSwitchOS. Commands were written from general knowledge and are the least verified in this knowledge base: capture `get system status` and interface output from your own FortiGate-VM to raise the confidence.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "fortiswitchos"
+  ]
+}

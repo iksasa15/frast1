@@ -1,0 +1,65 @@
+{
+  "id": "alcatel-lucent-enterprise",
+  "name": "Alcatel-Lucent Enterprise",
+  "aliases": [
+    "alcatel-lucent enterprise",
+    "omniswitch",
+    "ale"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 6486,
+      "org": "Alcatel-Lucent Enterprise"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "aos",
+      "name": "Alcatel-Lucent OS (AOS)",
+      "cli": null,
+      "netmiko": "alcatel_aos",
+      "aliases": [
+        "omniswitch",
+        "aos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "OmniSwitch 6350 / 6450 / 6465",
+      "role": "access",
+      "os": "aos"
+    },
+    {
+      "name": "OmniSwitch 6560 / 6860 / 6900 / 9900",
+      "role": "aggregation / core",
+      "os": "aos"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

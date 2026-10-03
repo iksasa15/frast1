@@ -1,0 +1,216 @@
+{
+  "id": "nvidia",
+  "name": "NVIDIA Networking (Mellanox / Cumulus)",
+  "aliases": [
+    "nvidia",
+    "mellanox",
+    "cumulus",
+    "spectrum",
+    "onyx",
+    "connectx",
+    "انفيديا"
+  ],
+  "categories": [
+    "switching",
+    "infiniband"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 5703,
+      "org": "NVIDIA Corporation"
+    },
+    {
+      "pen": 33049,
+      "org": "Mellanox Technologies LTD"
+    },
+    {
+      "pen": 40310,
+      "org": "Cumulus Networks, inc"
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "cumulus",
+      "name": "Cumulus Linux",
+      "cli": "linux",
+      "netmiko": "cumulus_linux",
+      "aliases": [
+        "cumulus",
+        "cumulus linux",
+        "nvue"
+      ],
+      "sysdescr_regex": [
+        "Cumulus Linux (?:version )?(?P<version>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "version_regex": "(?:release|version)\\s+(?P<version>\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "MAJOR.MINOR.PATCH, e.g. 5.4.0 (Debian-based; NVUE 'nv' CLI plus regular Linux tools and FRR).",
+      "examples": {
+        "sysdescr": [
+          "Cumulus Linux version 5.4.0 running on NVIDIA SN2010"
+        ],
+        "version": [
+          "5.4.0"
+        ]
+      },
+      "config_model": {
+        "style": "candidate-commit",
+        "summary": "NVUE stages changes as a pending revision: `nv config apply` makes them active and `nv config save` makes them persistent across reboots.",
+        "summary_ar": "NVUE يجمّع التغييرات في نسخة معلّقة: `nv config apply` يفعّلها و`nv config save` يجعلها دائمة بعد إعادة التشغيل.",
+        "enter": [],
+        "save": [
+          "nv config apply",
+          "nv config save"
+        ],
+        "snapshot": [],
+        "safe_change": [
+          "nv config apply --confirm 5m"
+        ],
+        "rollback": [
+          "nv config history"
+        ],
+        "notes": "`nv config diff` shows the pending changes. Applies to Cumulus Linux 5.x with NVUE (the older ifupdown2/NCLU flow differs)."
+      }
+    },
+    {
+      "id": "onyx",
+      "name": "Mellanox Onyx / NVIDIA MLNX-OS",
+      "cli": "ios",
+      "netmiko": "mellanox_mlnxos",
+      "aliases": [
+        "onyx",
+        "mlnx-os",
+        "mlnxos"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "3.x, e.g. 3.10.4000.",
+      "examples": {
+        "sysdescr": [],
+        "version": [
+          "3.10.4000"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "Spectrum SN2000 / SN3000",
+      "role": "DC leaf/spine 10-100/200G",
+      "os": "cumulus"
+    },
+    {
+      "name": "Spectrum-3 / -4 SN4000 / SN5000",
+      "role": "AI / DC fabrics 400/800G",
+      "os": "cumulus"
+    },
+    {
+      "name": "Quantum QM8700 / QM9700 (InfiniBand)",
+      "role": "HPC / AI fabric",
+      "os": null
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "nv show system"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "nv show interface"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "ip -s link show <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "ethtool -S <if>",
+          "ip -s link show <if>"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "ethtool -m <if>"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "bridge vlan show"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "bridge fdb show"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "lldpctl"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "top -bn1 | head -20"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "free -m"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "journalctl -n 200"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "ip neigh show"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "vtysh -c 'show ip ospf neighbor'"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "vtysh -c 'show bgp summary'"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "cat /proc/net/bonding/bond0"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "sudo ip link set <if> down",
+          "sudo ip link set <if> up"
+        ]
+      }
+    }
+  },
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://docs.nvidia.com/networking-ethernet-software/cumulus-linux/",
+      "status": "200 (docs)"
+    }
+  },
+  "notes": "Cumulus is Linux: standard Linux/FRR commands work. Command list partly unverified for NVUE syntax.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "cumulus"
+  ]
+}

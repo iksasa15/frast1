@@ -22,6 +22,18 @@
 | 4:25 | «وجربناه **[9]** مرات على 3 أنواع أعطال — شبكة، DNS، وموارد سيرفر — والسبب الأول كان صحيح **[9/9]**، وتقليل الضجيج **[~96]%**.» | Analytics page |
 | 4:45 | «RootIQ: Find the cause before it becomes an outage.» | Back to green map |
 
+## Optional add-on — vendor awareness (90 seconds, after 4:25 or as the answer to «بس Cisco؟»)
+
+| Time | Presenter | Action |
+|---|---|---|
+| +0:00 | «RootIQ مو مربوط بـCisco. كل جهاز يُعرَّف بمصنّعه ونظامه وإصداره، وكل مصنّع له لغته.» | Open the incident plan → **Vendor diagnostics** (R1 and SW1: Cisco IOS, read-only commands with the real port) |
+| +0:25 | «والفرق الحقيقي بين المصنّعين في طريقة حفظ الإعداد: عند Cisco تحفظ، وعند Juniper تعمل commit، وعند Fortinet يُحفظ تلقائيًا.» | Expand **Applying a change** (running → startup, safer change, roll back) |
+| +0:45 | «واسألوا المساعد بالعربي — الجواب من قاعدة المعرفة حرفيًا وبدون تخمين.» | Agents → Copilot: «كيف أحفظ الإعداد على Juniper وCisco وFortinet؟» |
+| +1:10 | «حتى لو الجهاز ما نعرفه، نقول لكم ما عندنا أوامر له بدل ما نخترع. ولا شي من هذا يُنفَّذ بدون موافقة مهندس.» | Ask about a profile-only vendor (e.g. TP-Link) → «no curated command» |
+
+Backup if the UI is slow: `curl -X POST localhost:8000/api/copilot/ask -H 'content-type: application/json' -d '{"question":"How do I save the config on Junos vs Cisco vs Fortigate?"}'`.
+Mixed-vendor lab to show on a slide: `configs/topology.multivendor.example.json`.
+
 ## Golden rules
 
 - Do not read the screen · never say «إن شاء الله يشتغل»

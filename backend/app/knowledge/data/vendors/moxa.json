@@ -1,0 +1,66 @@
+{
+  "id": "moxa",
+  "name": "Moxa",
+  "aliases": [
+    "moxa",
+    "eds-",
+    "mds-"
+  ],
+  "categories": [
+    "switching",
+    "industrial"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 8691,
+      "org": "Moxa Technologies Co., Ltd."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "moxa-os",
+      "name": "Moxa switch firmware",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "moxa",
+        "eds-"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "EDS-2000 / EDS-3000 / EDS-4000 / EDS-G500",
+      "role": "industrial Ethernet",
+      "os": null
+    },
+    {
+      "name": "MDS-G4000",
+      "role": "industrial modular",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

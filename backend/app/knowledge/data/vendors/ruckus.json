@@ -1,0 +1,62 @@
+{
+  "id": "ruckus",
+  "name": "Ruckus (CommScope)",
+  "aliases": [
+    "ruckus",
+    "icx",
+    "روكس"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 25053,
+      "org": "Ruckus Wireless, Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "ruckus-fastiron",
+      "name": "Ruckus ICX (FastIron)",
+      "cli": null,
+      "netmiko": "ruckus_fastiron",
+      "aliases": [
+        "fastiron",
+        "icx",
+        "ruckus icx"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "ICX 7150 / 7250 / 7450 / 7650 / 7850",
+      "role": "campus switching",
+      "os": "ruckus-fastiron"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

@@ -2,6 +2,7 @@ data/recordings/*
 !data/recordings/.gitkeep
 data/incidents.json
 data/history.json
+data/postmortems/
 data/models/*
 !data/models/.gitkeep
 .env
@@ -18,3 +19,8 @@ test-results/
 
 *.db
 
+
+# training data
+training/data/external/*
+!training/data/external/README.md
+training/**/__pycache__/

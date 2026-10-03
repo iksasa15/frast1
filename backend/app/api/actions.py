@@ -17,6 +17,8 @@ class RejectBody(BaseModel):
 async def approve(action_id: str, body: DecideBody, request: Request):
     try:
         return await request.app.state.actions.approve(action_id, body.decidedBy)
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
     except KeyError:
         raise HTTPException(status_code=404, detail="action or incident not found") from None
 
@@ -27,6 +29,8 @@ async def reject(action_id: str, body: RejectBody, request: Request):
         return await request.app.state.actions.reject(action_id, body.decidedBy, body.reason)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
     except KeyError:
         raise HTTPException(status_code=404, detail="action or incident not found") from None
 

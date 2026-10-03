@@ -1,0 +1,60 @@
+{
+  "id": "checkpoint",
+  "name": "Check Point (firewalls)",
+  "aliases": [
+    "check point",
+    "checkpoint",
+    "gaia",
+    "تشيك بوينت"
+  ],
+  "categories": [
+    "security"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 2620,
+      "org": "Check Point Software Technologies Ltd"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "gaia",
+      "name": "Gaia",
+      "cli": null,
+      "netmiko": "checkpoint_gaia",
+      "aliases": [
+        "gaia"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "Quantum / Maestro",
+      "role": "firewall / hyperscale",
+      "os": "gaia"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

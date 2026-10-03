@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { TopologyCanvas } from '@/components/topology/TopologyCanvas';
 import { DeviceInspector } from '@/components/topology/DeviceInspector';
 import { LinkInspector } from '@/components/topology/LinkInspector';
-import { DemoControls } from '@/components/demo/DemoControls';
 import { AlertStorm } from '@/components/demo/AlertStorm';
-import { MttdStopwatch } from '@/components/demo/MttdStopwatch';
+import { DemoControls } from '@/components/demo/DemoControls';
+import { LabControls } from '@/components/demo/LabControls';
 import { ServicesPanel } from '@/components/demo/ServicesPanel';
 import { IncidentPanel } from '@/components/incidents/IncidentPanel';
 import { useOps } from '@/store/useOps';
@@ -27,7 +27,6 @@ export function OperationsPage() {
       .filter((i) => i.status !== 'resolved')
       .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
     if (open[0]) return open[0];
-    // Keep last resolved visible after recovery (presenter + e2e)
     if (demo.state === 'recovered') {
       return (
         list
@@ -80,17 +79,13 @@ export function OperationsPage() {
         onSelect={select}
         onLayoutSaved={(positions) => void api.saveLayout(positions)}
       />
+      {demo.mode === 'sim' ? <DemoControls /> : <LabControls />}
 
       <AlertStorm incident={active} />
-      <MttdStopwatch
-        injectedAt={demo.injectedAt ?? active?.timings.injectedAt}
-        analyzedAt={active?.timings.analyzedAt}
-      />
       <ServicesPanel services={topology.services} dnsSuppressed={dnsSuppressed} />
-      <DemoControls />
 
       {!active && demo.state !== 'recovered' && (
-        <div className="pointer-events-none absolute start-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-ok/30 bg-ok/10 px-4 py-2 text-sm text-ok">
+        <div className="pointer-events-none absolute start-1/2 top-16 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-ok/30 bg-ok/10 px-4 py-2 text-sm text-ok">
           <ShieldCheck className="size-4" />
           {t('incident.empty')}
         </div>

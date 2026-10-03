@@ -1,0 +1,250 @@
+{
+  "id": "extreme",
+  "name": "Extreme Networks",
+  "aliases": [
+    "extreme",
+    "exos",
+    "extremexos",
+    "voss",
+    "vsp",
+    "fabric engine",
+    "switch engine",
+    "brocade slx",
+    "اكستريم"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 1916,
+      "org": "Extreme Networks"
+    },
+    {
+      "pen": 6889,
+      "org": "Avaya Communication (VSP/ERS heritage)"
+    },
+    {
+      "pen": 5624,
+      "org": "Enterasys Networks (heritage)"
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "exos",
+      "name": "ExtremeXOS (Switch Engine)",
+      "cli": "exos",
+      "netmiko": "extreme_exos",
+      "aliases": [
+        "exos",
+        "extremexos",
+        "switch engine"
+      ],
+      "sysdescr_regex": [
+        "ExtremeXOS \\((?P<model>[^)]+)\\) version (?P<version>\\d+\\.\\d+\\.\\d+\\.\\d+)"
+      ],
+      "version_regex": "version (?P<version>\\d+\\.\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "MAJOR.MINOR.PATCH.BUILD, e.g. 22.7.1.4 (newer branding: Switch Engine 31.x).",
+      "examples": {
+        "sysdescr": [
+          "ExtremeXOS (X460-48p) version 22.7.1.4 22.7.1.4 by release-manager on Thu Mar 1 2018"
+        ],
+        "version": [
+          "22.7.1.4",
+          "31.7.1.4"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes apply immediately to the running configuration and are lost at reload unless saved with `save configuration`.",
+        "summary_ar": "التغييرات تسري فورًا وتضيع عند إعادة التشغيل ما لم تُحفظ بـ`save configuration`.",
+        "enter": [],
+        "save": [
+          "save configuration"
+        ],
+        "snapshot": [],
+        "safe_change": [],
+        "rollback": [],
+        "notes": "EXOS has no configuration mode: configuration commands are typed in the normal CLI."
+      }
+    },
+    {
+      "id": "voss",
+      "name": "VOSS / Fabric Engine (VSP)",
+      "cli": "voss",
+      "netmiko": "extreme_vsp",
+      "aliases": [
+        "voss",
+        "vsp",
+        "fabric engine"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "MAJOR.MINOR.PATCH.BUILD (e.g. 8.4.1.0); Fabric Engine 9.x.",
+      "examples": {
+        "sysdescr": [],
+        "version": [
+          "8.4.1.0"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "X435 / X440-G2 / X450-G2",
+      "role": "access",
+      "os": "exos"
+    },
+    {
+      "name": "X460-G2 / X465 / X590",
+      "role": "aggregation / stackable",
+      "os": "exos"
+    },
+    {
+      "name": "X620 / X670-G2 / X690 / X695 / X870",
+      "role": "DC / core 10-100G",
+      "os": "exos"
+    },
+    {
+      "name": "5320 / 5420 / 5520 / 5720",
+      "role": "campus (Switch Engine or Fabric Engine)",
+      "os": "exos"
+    },
+    {
+      "name": "VSP 4900 / 7400 / 8000",
+      "role": "fabric core / DC (VOSS)",
+      "os": "voss"
+    },
+    {
+      "name": "SLX 9140 / 9240 / 9540 (ex-Brocade)",
+      "role": "DC (SLX-OS)",
+      "os": null
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show ports"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show ports <if> information detail"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show ports <if> rxerrors",
+          "show ports <if> txerrors"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show ports <if> transceiver information detail"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlan"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show stpd"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show fdb"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbors"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show cpu-monitoring"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show memory"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show power",
+          "show fans",
+          "show temperature"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show log"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show iparp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ospf neighbor"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show sharing"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "clear counters ports <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "disable ports <if>",
+          "enable ports <if>"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "port-link",
+      "regex": "Port (?P<interface>\\S+) link (?P<state>UP|DOWN)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "Port 1:5 link UP at speed 1 Gbps and full-duplex"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": "https://www.extremenetworks.com/support/",
+      "status": "200"
+    },
+    "security": {
+      "url": "https://www.extremenetworks.com/support/",
+      "status": "200"
+    }
+  },
+  "notes": "Ports are addressed slot:port on stacks (e.g. 1:5). Extreme absorbed Brocade's data-center switching (VDX/SLX) and Enterasys/Avaya (VSP).",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "exos"
+  ]
+}

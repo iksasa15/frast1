@@ -1,0 +1,387 @@
+{
+  "id": "hpe-aruba",
+  "name": "HPE Aruba Networking (Aruba + HP ProCurve)",
+  "aliases": [
+    "aruba",
+    "hpe aruba",
+    "hp procurve",
+    "procurve",
+    "hpe networking",
+    "aos-cx",
+    "aoscx",
+    "instant on",
+    "اروبا",
+    "أروبا",
+    "arubaos-cx",
+    "aruba cx"
+  ],
+  "categories": [
+    "switching",
+    "wireless",
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 14823,
+      "org": "Aruba, a Hewlett Packard Enterprise company"
+    },
+    {
+      "pen": 11,
+      "org": "Hewlett-Packard (legacy ProCurve)"
+    }
+  ],
+  "coverage": "full",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "aos-cx",
+      "name": "ArubaOS-CX",
+      "cli": "aoscx",
+      "netmiko": "aruba_aoscx",
+      "aliases": [
+        "aos-cx",
+        "aoscx",
+        "arubaos-cx"
+      ],
+      "sysdescr_regex": [
+        "Aruba (?P<sku>[A-Z]{1,2}\\d{3,5}[A-Z]?) (?P<model>.+?)\\s+Swch\\s+(?P<version>[A-Z]{2}\\.\\d{2}\\.\\d{2}\\.\\d{3,4})"
+      ],
+      "version_regex": "(?P<version>[A-Z]{2}\\.\\d{2}\\.\\d{2}\\.\\d{3,4})",
+      "version_scheme": "PP.MM.BBBB with a 2-letter platform prefix, e.g. FL.10.09.1020 (10.09 = release, 1020 = build).",
+      "examples": {
+        "sysdescr": [
+          "Aruba JL659A 6300M 48SR5 CL6 PoE 4SFP56 Swch FL.10.09.1020"
+        ],
+        "version": [
+          "FL.10.09.1020"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "write memory",
+          "copy running-config startup-config"
+        ],
+        "snapshot": [
+          "checkpoint <name>"
+        ],
+        "safe_change": [],
+        "rollback": [
+          "checkpoint rollback <name>"
+        ],
+        "notes": "Checkpoints are the rollback mechanism; verify the exact checkpoint syntax on your AOS-CX release."
+      },
+      "cli_style": "Cisco-like CLI. Interfaces are member/slot/port (`1/1/1`). `show running-config`, checkpoints for rollback, REST API and NAE built in. Enable a port with `no shutdown`.",
+      "cli_style_ar": "واجهة شبيهة بـCisco. أسماء الواجهات member/slot/port (`1/1/1`). `show running-config` ونقاط استرجاع (checkpoints) وREST API وNAE مدمج. فعّل المنفذ بـ`no shutdown`."
+    },
+    {
+      "id": "arubaos-switch",
+      "name": "ArubaOS-Switch (ProVision / ProCurve)",
+      "cli": "provision",
+      "netmiko": "aruba_osswitch",
+      "aliases": [
+        "arubaos-switch",
+        "provision",
+        "procurve",
+        "hp procurve"
+      ],
+      "sysdescr_regex": [
+        "(?:ProCurve|Aruba|HP)\\s+(?P<sku>[JL][A-Z]?\\d{3,5}[A-Z]?)\\s+(?P<model>[^,]+?)\\s+Switch,\\s+revision\\s+(?P<version>[A-Z]{1,2}\\.\\d+\\.\\d+\\.\\d+)"
+      ],
+      "version_regex": "revision\\s+(?P<version>[A-Z]{1,2}\\.\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "PP.MM.mm.bbbb with a 1-2 letter platform prefix, e.g. YA.16.10.0003 (YA = 2530, WC = 2930F/M, KB = 5400R).",
+      "examples": {
+        "sysdescr": [
+          "ProCurve J9773A 2530-24G-PoEP Switch, revision YA.16.04.0008, ROM YA.15.10 (/sw/code/build/xxx)"
+        ],
+        "version": [
+          "YA.16.10.0003",
+          "WC.16.11.0004"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure"
+        ],
+        "save": [
+          "write memory"
+        ],
+        "snapshot": [],
+        "safe_change": [],
+        "rollback": [],
+        "notes": "No automatic rollback: to undo an unsaved change, reload without saving."
+      },
+      "cli_style": "HP ProCurve heritage: `show interfaces brief`, ports named like `A1` or `1`, `disable` / `enable` instead of shutdown / no shutdown, `write memory` to persist; a menu interface also exists.",
+      "cli_style_ar": "إرث HP ProCurve: `show interfaces brief` والمنافذ باسم مثل `A1` أو `1`، و`disable` / `enable` بدل shutdown / no shutdown، و`write memory` للحفظ؛ وتوجد أيضًا واجهة قوائم."
+    }
+  ],
+  "series": [
+    {
+      "name": "CX 6000 / 6100 / 6200 / 6300 / 6400",
+      "role": "campus access / aggregation",
+      "os": "aos-cx"
+    },
+    {
+      "name": "CX 8100 / 8320 / 8325 / 8360 / 8400",
+      "role": "campus core / DC",
+      "os": "aos-cx"
+    },
+    {
+      "name": "CX 9300 / 10000",
+      "role": "DC / distributed services",
+      "os": "aos-cx"
+    },
+    {
+      "name": "2530 / 2540 / 2620 / 2920",
+      "role": "access (legacy ProVision)",
+      "os": "arubaos-switch"
+    },
+    {
+      "name": "2930F / 2930M / 3810M",
+      "role": "access / stackable (ProVision)",
+      "os": "arubaos-switch"
+    },
+    {
+      "name": "5400R zl2 / 5400zl",
+      "role": "modular core (ProVision)",
+      "os": "arubaos-switch"
+    },
+    {
+      "name": "Instant On 1830 / 1930 / 1960",
+      "role": "small business (cloud/app managed)",
+      "os": null
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interface brief"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interface <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interface <if>"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show interface <if> dom"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlan"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show mac-address-table"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbor-info"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show system resource-utilization"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show system resource-utilization"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show environment fan",
+          "show environment power-supply",
+          "show environment temperature"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show logging"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ip ospf neighbors"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "show bgp all summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show lacp interfaces"
+        ]
+      },
+      "show_poe": {
+        "read": [
+          "show power-over-ethernet brief"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "show ntp status"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "shutdown",
+          "no shutdown"
+        ]
+      }
+    },
+    "arubaos-switch": {
+      "show_version": {
+        "read": [
+          "show version",
+          "show system"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interfaces brief"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interfaces <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interfaces <if>"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlans"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show mac-address"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp info remote-device"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show cpu"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show system power-supply",
+          "show system fans",
+          "show system temperature"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show logging"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ip ospf neighbor"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show trunks",
+          "show lacp"
+        ]
+      },
+      "show_poe": {
+        "read": [
+          "show power-over-ethernet"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "disable",
+          "enable"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "port-online",
+      "regex": "\\bports?:?\\s+port\\s+(?P<interface>[A-Za-z]?\\d+(?:/\\d+)*)\\s+is now\\s+(?P<state>on-line|off-line)",
+      "state_map": {
+        "on-line": "up",
+        "off-line": "down"
+      },
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "I 09/29/26 10:02:11 00077 ports: port 1 is now off-line"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": "https://support.hpe.com/",
+      "status": "200"
+    },
+    "security": {
+      "url": "https://www.arubanetworks.com/support-services/security-bulletins/",
+      "status": "403 to bots (page exists)"
+    }
+  },
+  "notes": "Two CLI generations: ArubaOS-CX (modern, REST API, NAE) and ArubaOS-Switch (legacy HP ProVision). Commands differ; identify the OS first. Syslog patterns are not curated yet.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "aos-cx"
+  ]
+}

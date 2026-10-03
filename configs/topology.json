@@ -1,42 +1,434 @@
 {
+  "_comment": "Sim data-center campus. Demo spine: collector01→r1→link-r1-sw1→sw-core→dist→sw1→app01 (svc-dns/svc-web).",
   "version": 1,
-  "site": "RootIQ Lab",
+  "site": "RootIQ Campus — Buildings 1–3",
   "vantage": "collector01",
   "nodes": [
     {
+      "id": "collector01",
+      "type": "collector",
+      "label": "COLLECTOR-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "edge",
+      "managementIp": "10.10.80.10",
+      "position": {
+        "x": 640,
+        "y": 20
+      },
+      "interfaces": [
+        {
+          "name": "ens3",
+          "side": "left",
+          "speedMbps": 1000
+        },
+        {
+          "name": "ens4",
+          "side": "right",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "fw1",
+      "type": "router",
+      "label": "FW-EDGE",
+      "vendor": "Fortinet FortiGate",
+      "zone": "edge",
+      "managementIp": "10.10.1.5",
+      "position": {
+        "x": 200,
+        "y": 20
+      },
+      "interfaces": [
+        {
+          "name": "port1",
+          "ifIndex": 1,
+          "side": "right",
+          "speedMbps": 1000,
+          "description": "TO-R1"
+        },
+        {
+          "name": "port2",
+          "ifIndex": 2,
+          "side": "left",
+          "speedMbps": 1000,
+          "description": "WAN"
+        }
+      ]
+    },
+    {
       "id": "r1",
       "type": "router",
-      "label": "R1",
-      "vendor": "Cisco vIOS",
+      "label": "R1-Edge",
+      "vendor": "Cisco ASR",
+      "os": "ios-xe",
+      "zone": "edge",
       "managementIp": "10.10.10.1",
-      "position": { "x": 420, "y": 40 },
+      "position": {
+        "x": 420,
+        "y": 20
+      },
       "interfaces": [
-        { "name": "Gi0/0", "ifIndex": 1, "side": "bottom", "speedMbps": 10, "description": "UPLINK-TO-SW1 (shaped 10M)" },
-        { "name": "Gi0/1", "ifIndex": 2, "side": "bottom", "speedMbps": 1000, "description": "LINK-TO-SW2" }
+        {
+          "name": "Gi0/0",
+          "ifIndex": 1,
+          "side": "bottom",
+          "speedMbps": 10,
+          "description": "UPLINK-TO-CORE (shaped 10M)"
+        },
+        {
+          "name": "Gi0/1",
+          "ifIndex": 2,
+          "side": "right",
+          "speedMbps": 1000,
+          "description": "TO-COLLECTOR"
+        },
+        {
+          "name": "Gi0/2",
+          "ifIndex": 3,
+          "side": "left",
+          "speedMbps": 1000,
+          "description": "TO-FW1"
+        }
+      ]
+    },
+    {
+      "id": "sw-core-a",
+      "type": "switch",
+      "label": "SW-CORE-A",
+      "vendor": "Cisco Nexus 9300",
+      "os": "nx-os",
+      "zone": "core",
+      "managementIp": "10.10.10.2",
+      "position": {
+        "x": 380,
+        "y": 190
+      },
+      "interfaces": [
+        {
+          "name": "Eth1/1",
+          "ifIndex": 1,
+          "side": "right",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Eth1/2",
+          "ifIndex": 2,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Eth1/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Eth1/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 10000
+        }
+      ]
+    },
+    {
+      "id": "sw-core",
+      "type": "switch",
+      "label": "SW-CORE-B",
+      "vendor": "Cisco Nexus 9300",
+      "os": "nx-os",
+      "zone": "core",
+      "managementIp": "10.10.10.3",
+      "position": {
+        "x": 620,
+        "y": 190
+      },
+      "interfaces": [
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/2",
+          "ifIndex": 2,
+          "side": "left",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/5",
+          "ifIndex": 5,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/6",
+          "ifIndex": 6,
+          "side": "bottom",
+          "speedMbps": 10000
+        }
+      ]
+    },
+    {
+      "id": "sw-dist-a",
+      "type": "switch",
+      "label": "SW-DIST-A",
+      "vendor": "Cisco Catalyst 9500",
+      "os": "ios-xe",
+      "zone": "building-a",
+      "managementIp": "10.10.20.2",
+      "position": {
+        "x": 180,
+        "y": 380
+      },
+      "interfaces": [
+        {
+          "name": "Te1/0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/2",
+          "ifIndex": 2,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 10000
+        }
+      ]
+    },
+    {
+      "id": "sw-dist-b",
+      "type": "switch",
+      "label": "SW-DIST-B",
+      "vendor": "Cisco Catalyst 9500",
+      "os": "ios-xe",
+      "zone": "building-b",
+      "managementIp": "10.10.20.3",
+      "position": {
+        "x": 860,
+        "y": 380
+      },
+      "interfaces": [
+        {
+          "name": "Te1/0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/2",
+          "ifIndex": 2,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Te1/0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 10000
+        }
       ]
     },
     {
       "id": "sw1",
       "type": "switch",
-      "label": "SW1",
-      "vendor": "Cisco vIOS-L2",
-      "managementIp": "10.10.20.11",
-      "position": { "x": 180, "y": 260 },
+      "label": "TOR-APP-A",
+      "vendor": "Cisco Catalyst 9300",
+      "os": "ios-xe",
+      "zone": "building-a",
+      "managementIp": "10.10.30.11",
+      "position": {
+        "x": 40,
+        "y": 540
+      },
       "interfaces": [
-        { "name": "Gi0/1", "ifIndex": 2, "side": "top", "speedMbps": 1000 },
-        { "name": "Gi0/3", "ifIndex": 4, "side": "bottom", "speedMbps": 1000 }
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/5",
+          "ifIndex": 5,
+          "side": "bottom",
+          "speedMbps": 1000
+        }
       ]
     },
     {
       "id": "sw2",
       "type": "switch",
-      "label": "SW2",
-      "vendor": "Cisco vIOS-L2",
+      "label": "TOR-APP-B",
+      "vendor": "Cisco Catalyst 9300",
+      "os": "ios-xe",
+      "zone": "building-a",
       "managementIp": "10.10.30.12",
-      "position": { "x": 660, "y": 260 },
+      "position": {
+        "x": 280,
+        "y": 540
+      },
       "interfaces": [
-        { "name": "Gi0/1", "ifIndex": 2, "side": "top", "speedMbps": 1000 },
-        { "name": "Gi0/3", "ifIndex": 4, "side": "bottom", "speedMbps": 1000 }
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "sw3",
+      "type": "switch",
+      "label": "TOR-DB",
+      "vendor": "Cisco Catalyst 9300",
+      "os": "ios-xe",
+      "zone": "building-b",
+      "managementIp": "10.10.30.13",
+      "position": {
+        "x": 720,
+        "y": 540
+      },
+      "interfaces": [
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "sw4",
+      "type": "switch",
+      "label": "TOR-STORAGE",
+      "vendor": "Cisco Catalyst 9300",
+      "os": "ios-xe",
+      "zone": "building-b",
+      "managementIp": "10.10.30.14",
+      "position": {
+        "x": 1000,
+        "y": 540
+      },
+      "interfaces": [
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "sw5",
+      "type": "switch",
+      "label": "TOR-COMPUTE",
+      "vendor": "Cisco Catalyst 9300",
+      "os": "ios-xe",
+      "zone": "datacenter",
+      "managementIp": "10.10.30.15",
+      "position": {
+        "x": 1580,
+        "y": 540
+      },
+      "interfaces": [
+        {
+          "name": "Gi0/1",
+          "ifIndex": 1,
+          "side": "top",
+          "speedMbps": 10000
+        },
+        {
+          "name": "Gi0/3",
+          "ifIndex": 3,
+          "side": "bottom",
+          "speedMbps": 1000
+        },
+        {
+          "name": "Gi0/4",
+          "ifIndex": 4,
+          "side": "bottom",
+          "speedMbps": 1000
+        }
       ]
     },
     {
@@ -44,32 +436,473 @@
       "type": "server",
       "label": "APP-01",
       "vendor": "Ubuntu 24.04",
-      "managementIp": "10.10.20.10",
-      "position": { "x": 180, "y": 480 },
+      "zone": "building-a",
+      "managementIp": "10.20.40.10",
+      "position": {
+        "x": 0,
+        "y": 720
+      },
       "interfaces": [
-        { "name": "eth0", "side": "top", "speedMbps": 1000 }
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
       ]
     },
     {
-      "id": "collector01",
-      "type": "collector",
-      "label": "COLLECTOR-01",
+      "id": "app02",
+      "type": "server",
+      "label": "APP-02",
       "vendor": "Ubuntu 24.04",
-      "managementIp": "10.10.30.10",
-      "position": { "x": 660, "y": 480 },
+      "zone": "building-a",
+      "managementIp": "10.20.40.11",
+      "position": {
+        "x": 140,
+        "y": 720
+      },
       "interfaces": [
-        { "name": "ens3", "side": "top", "speedMbps": 1000 }
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "web01",
+      "type": "server",
+      "label": "WEB-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "building-a",
+      "managementIp": "10.20.40.12",
+      "position": {
+        "x": 280,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "app03",
+      "type": "server",
+      "label": "APP-03",
+      "vendor": "Ubuntu 24.04",
+      "zone": "building-a",
+      "managementIp": "10.20.40.20",
+      "position": {
+        "x": 40,
+        "y": 860
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "cache01",
+      "type": "server",
+      "label": "CACHE-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "building-a",
+      "managementIp": "10.20.40.21",
+      "position": {
+        "x": 280,
+        "y": 860
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "db01",
+      "type": "server",
+      "label": "DB-01",
+      "vendor": "RHEL 9",
+      "zone": "building-b",
+      "managementIp": "10.20.50.10",
+      "position": {
+        "x": 680,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "db02",
+      "type": "server",
+      "label": "DB-02",
+      "vendor": "RHEL 9",
+      "zone": "building-b",
+      "managementIp": "10.20.50.11",
+      "position": {
+        "x": 820,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "nas01",
+      "type": "server",
+      "label": "NAS-01",
+      "vendor": "TrueNAS",
+      "zone": "building-b",
+      "managementIp": "10.20.60.10",
+      "position": {
+        "x": 960,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "backup01",
+      "type": "server",
+      "label": "BACKUP-01",
+      "vendor": "Veeam",
+      "zone": "building-b",
+      "managementIp": "10.20.60.11",
+      "position": {
+        "x": 1100,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "batch01",
+      "type": "server",
+      "label": "BATCH-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "datacenter",
+      "managementIp": "10.20.70.10",
+      "position": {
+        "x": 1500,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "ml01",
+      "type": "server",
+      "label": "ML-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "datacenter",
+      "managementIp": "10.20.70.11",
+      "position": {
+        "x": 1660,
+        "y": 720
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "top",
+          "speedMbps": 1000
+        }
+      ]
+    },
+    {
+      "id": "jump01",
+      "type": "server",
+      "label": "JUMP-01",
+      "vendor": "Ubuntu 24.04",
+      "zone": "edge",
+      "managementIp": "10.10.80.11",
+      "position": {
+        "x": 860,
+        "y": 20
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "side": "left",
+          "speedMbps": 1000
+        }
       ]
     }
   ],
   "links": [
-    { "id": "link-r1-sw1", "source": "r1", "sourcePort": "Gi0/0", "target": "sw1", "targetPort": "Gi0/1", "role": "uplink" },
-    { "id": "link-r1-sw2", "source": "r1", "sourcePort": "Gi0/1", "target": "sw2", "targetPort": "Gi0/1", "role": "uplink" },
-    { "id": "link-sw1-app01", "source": "sw1", "sourcePort": "Gi0/3", "target": "app01", "targetPort": "eth0", "role": "access" },
-    { "id": "link-sw2-collector01", "source": "sw2", "sourcePort": "Gi0/3", "target": "collector01", "targetPort": "ens3", "role": "access" }
+    {
+      "id": "link-r1-collector01",
+      "source": "r1",
+      "sourcePort": "Gi0/1",
+      "target": "collector01",
+      "targetPort": "ens3",
+      "role": "access"
+    },
+    {
+      "id": "link-collector-jump01",
+      "source": "collector01",
+      "sourcePort": "ens4",
+      "target": "jump01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-fw1-r1",
+      "source": "fw1",
+      "sourcePort": "port1",
+      "target": "r1",
+      "targetPort": "Gi0/2",
+      "role": "uplink"
+    },
+    {
+      "id": "link-r1-sw1",
+      "source": "r1",
+      "sourcePort": "Gi0/0",
+      "target": "sw-core",
+      "targetPort": "Gi0/1",
+      "role": "uplink",
+      "_comment": "Demo spine uplink id kept as link-r1-sw1 for RCA scenarios"
+    },
+    {
+      "id": "link-core-a-b",
+      "source": "sw-core-a",
+      "sourcePort": "Eth1/1",
+      "target": "sw-core",
+      "targetPort": "Gi0/2",
+      "role": "backup"
+    },
+    {
+      "id": "link-core-a-dist-a",
+      "source": "sw-core-a",
+      "sourcePort": "Eth1/2",
+      "target": "sw-dist-a",
+      "targetPort": "Te1/0/1",
+      "role": "uplink"
+    },
+    {
+      "id": "link-core-b-dist-a",
+      "source": "sw-core",
+      "sourcePort": "Gi0/3",
+      "target": "sw-dist-a",
+      "targetPort": "Te1/0/2",
+      "role": "uplink"
+    },
+    {
+      "id": "link-core-b-dist-b",
+      "source": "sw-core",
+      "sourcePort": "Gi0/4",
+      "target": "sw-dist-b",
+      "targetPort": "Te1/0/1",
+      "role": "uplink"
+    },
+    {
+      "id": "link-core-a-dist-b",
+      "source": "sw-core-a",
+      "sourcePort": "Eth1/3",
+      "target": "sw-dist-b",
+      "targetPort": "Te1/0/2",
+      "role": "backup"
+    },
+    {
+      "id": "link-dist-a-sw1",
+      "source": "sw-dist-a",
+      "sourcePort": "Te1/0/3",
+      "target": "sw1",
+      "targetPort": "Gi0/1",
+      "role": "access"
+    },
+    {
+      "id": "link-dist-a-sw2",
+      "source": "sw-dist-a",
+      "sourcePort": "Te1/0/4",
+      "target": "sw2",
+      "targetPort": "Gi0/1",
+      "role": "access"
+    },
+    {
+      "id": "link-dist-b-sw3",
+      "source": "sw-dist-b",
+      "sourcePort": "Te1/0/3",
+      "target": "sw3",
+      "targetPort": "Gi0/1",
+      "role": "access"
+    },
+    {
+      "id": "link-dist-b-sw4",
+      "source": "sw-dist-b",
+      "sourcePort": "Te1/0/4",
+      "target": "sw4",
+      "targetPort": "Gi0/1",
+      "role": "access"
+    },
+    {
+      "id": "link-core-b-sw5",
+      "source": "sw-core",
+      "sourcePort": "Gi0/5",
+      "target": "sw5",
+      "targetPort": "Gi0/1",
+      "role": "access"
+    },
+    {
+      "id": "link-sw1-app01",
+      "source": "sw1",
+      "sourcePort": "Gi0/3",
+      "target": "app01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw1-app02",
+      "source": "sw1",
+      "sourcePort": "Gi0/4",
+      "target": "app02",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw1-web01",
+      "source": "sw1",
+      "sourcePort": "Gi0/5",
+      "target": "web01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw2-app03",
+      "source": "sw2",
+      "sourcePort": "Gi0/3",
+      "target": "app03",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw2-cache01",
+      "source": "sw2",
+      "sourcePort": "Gi0/4",
+      "target": "cache01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw3-db01",
+      "source": "sw3",
+      "sourcePort": "Gi0/3",
+      "target": "db01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw3-db02",
+      "source": "sw3",
+      "sourcePort": "Gi0/4",
+      "target": "db02",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw4-nas01",
+      "source": "sw4",
+      "sourcePort": "Gi0/3",
+      "target": "nas01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw4-backup01",
+      "source": "sw4",
+      "sourcePort": "Gi0/4",
+      "target": "backup01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw5-batch01",
+      "source": "sw5",
+      "sourcePort": "Gi0/3",
+      "target": "batch01",
+      "targetPort": "eth0",
+      "role": "access"
+    },
+    {
+      "id": "link-sw5-ml01",
+      "source": "sw5",
+      "sourcePort": "Gi0/4",
+      "target": "ml01",
+      "targetPort": "eth0",
+      "role": "access"
+    }
   ],
   "services": [
-    { "id": "svc-dns", "label": "Internal DNS", "host": "app01", "port": 53, "dependsOn": [] },
-    { "id": "svc-web", "label": "Web Application", "host": "app01", "port": 80, "dependsOn": ["svc-dns"] }
+    {
+      "id": "svc-dns",
+      "label": "Internal DNS",
+      "host": "app01",
+      "port": 53,
+      "dependsOn": []
+    },
+    {
+      "id": "svc-web",
+      "label": "Web Application",
+      "host": "app01",
+      "port": 80,
+      "dependsOn": [
+        "svc-dns"
+      ]
+    },
+    {
+      "id": "svc-db",
+      "label": "Postgres Primary",
+      "host": "db01",
+      "port": 5432,
+      "dependsOn": []
+    },
+    {
+      "id": "svc-cache",
+      "label": "Redis Cache",
+      "host": "cache01",
+      "port": 6379,
+      "dependsOn": []
+    },
+    {
+      "id": "svc-api",
+      "label": "Public API",
+      "host": "web01",
+      "port": 443,
+      "dependsOn": [
+        "svc-dns",
+        "svc-db"
+      ]
+    }
   ]
 }

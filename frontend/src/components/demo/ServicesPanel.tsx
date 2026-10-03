@@ -8,7 +8,7 @@ interface Props {
 
 export function ServicesPanel({ services, dnsSuppressed }: Props) {
   return (
-    <div className="absolute bottom-3 right-[440px] z-20 w-56 rounded-xl border border-noc-line bg-noc-panel/95 p-3 shadow-xl">
+    <div className="pointer-events-auto absolute bottom-14 start-3 z-20 max-h-[40%] w-56 overflow-y-auto rounded-xl border border-noc-line bg-noc-panel/95 p-3 shadow-xl">
       <div className="mb-2 text-[10px] uppercase tracking-wider text-slate-500">Services</div>
       <ul className="space-y-2">
         {services.map((s) => {

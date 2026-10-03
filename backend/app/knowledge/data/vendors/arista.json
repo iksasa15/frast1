@@ -1,0 +1,268 @@
+{
+  "id": "arista",
+  "name": "Arista Networks",
+  "aliases": [
+    "arista",
+    "eos",
+    "dcs-",
+    "اريستا",
+    "veos",
+    "ceos",
+    "veos-lab"
+  ],
+  "categories": [
+    "switching",
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 30065,
+      "org": "Arista Networks, Inc. (formerly 'Arastra, Inc.')"
+    }
+  ],
+  "coverage": "full",
+  "confidence": "high",
+  "os_families": [
+    {
+      "id": "eos",
+      "name": "Arista EOS",
+      "cli": "ios",
+      "netmiko": "arista_eos",
+      "aliases": [
+        "eos",
+        "arista eos"
+      ],
+      "sysdescr_regex": [
+        "Arista Networks EOS version (?P<version>\\d+\\.\\d+\\.\\d+[A-Za-z]*)(?: running on an Arista Networks (?P<model>\\S+))?"
+      ],
+      "version_regex": "Software image version:\\s*(?P<version>\\d+\\.\\d+\\.\\d+[A-Za-z]*)",
+      "version_scheme": "MAJOR.MINOR.PATCH + suffix, e.g. 4.30.5M (M = maintenance/long-term train, F = feature release).",
+      "examples": {
+        "sysdescr": [
+          "Arista Networks EOS version 4.30.5M running on an Arista Networks DCS-7050SX3-48YC8",
+          "Arista Networks EOS version 4.30.5M running on an Arista Networks vEOS-lab"
+        ],
+        "version": [
+          "4.30.5M",
+          "4.32.1F"
+        ]
+      },
+      "config_model": {
+        "style": "running-startup",
+        "summary": "Changes take effect immediately in the running configuration. They are lost at reload unless they are copied to the startup configuration (NVRAM).",
+        "summary_ar": "التغييرات تسري فورًا على الإعداد الجاري (running) وتضيع عند إعادة التشغيل ما لم تُنسخ إلى إعداد الإقلاع (startup / NVRAM).",
+        "enter": [
+          "configure terminal"
+        ],
+        "save": [
+          "write memory",
+          "copy running-config startup-config"
+        ],
+        "snapshot": [
+          "copy running-config flash:<backup>"
+        ],
+        "safe_change": [
+          "configure session <name>",
+          "commit timer 00:05:00"
+        ],
+        "rollback": [
+          "configure replace flash:<backup>"
+        ],
+        "notes": "Optional config sessions: `configure session <name>`, `show session-config diffs`, then `commit timer 00:05:00` (auto-revert unless confirmed) or `abort`."
+      },
+      "cli_style": "Cisco-like modal CLI. `show ... | json` returns JSON; `| grep` and `| include` filter. Optional config sessions add diff and timed commit. Interfaces: `Ethernet1`, `Ethernet1/1`, `Port-Channel1`, `Management1`.",
+      "cli_style_ar": "واجهة شبيهة بـCisco متعددة الأوضاع. `show ... | json` يعيد JSON، و`| grep` و`| include` للفلترة. جلسات الإعداد الاختيارية تضيف المقارنة والالتزام المؤقت. الواجهات: `Ethernet1` و`Ethernet1/1` و`Port-Channel1` و`Management1`."
+    }
+  ],
+  "series": [
+    {
+      "name": "7010T / 720XP / 720DP",
+      "role": "campus / access",
+      "os": "eos"
+    },
+    {
+      "name": "7050X / 7050X3 / 7050X4",
+      "role": "DC leaf",
+      "os": "eos"
+    },
+    {
+      "name": "7060X / 7060X4 / 7060X5",
+      "role": "DC leaf/spine 100G",
+      "os": "eos"
+    },
+    {
+      "name": "7150S / 7160 / 7170",
+      "role": "low-latency / programmable",
+      "os": "eos"
+    },
+    {
+      "name": "7260X / 7280R / 7280R3",
+      "role": "DC spine / edge (deep buffers on R)",
+      "os": "eos"
+    },
+    {
+      "name": "7300X / 7500R / 7800R3",
+      "role": "modular DC spine / core",
+      "os": "eos"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interfaces status"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interfaces <if>"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interfaces <if> counters errors"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show interfaces <if> transceiver"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlan"
+        ]
+      },
+      "show_trunk": {
+        "read": [
+          "show interfaces trunk"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show mac address-table"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbors"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show processes top once"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show processes top once"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show environment all"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show logging"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show ip arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ip ospf neighbor"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "show ip bgp summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show port-channel summary"
+        ]
+      },
+      "show_errdisable": {
+        "read": [
+          "show interfaces status errdisabled"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "show ntp status"
+        ]
+      },
+      "show_snmp": {
+        "read": [
+          "show snmp"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "clear counters <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "interface <if>",
+          "shutdown",
+          "no shutdown"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "lineproto",
+      "regex": "%LINEPROTO-\\d-UPDOWN:\\s*Line protocol on Interface\\s+(?P<interface>\\S+), changed state to\\s+(?P<state>up|down)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "%LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet1, changed state to down"
+    },
+    {
+      "id": "stp-state",
+      "regex": "%SPANTREE-\\d-INTERFACE_STATE:\\s*Interface\\s+(?P<interface>\\S+) instance \\S+ moved from (?P<from_state>\\w+) to (?P<to_state>\\w+)",
+      "event": "stp_port_state",
+      "severity": "info",
+      "example": "%SPANTREE-6-INTERFACE_STATE: Interface Ethernet1 instance MST0 moved from forwarding to blocking"
+    },
+    {
+      "id": "config-i",
+      "regex": "%SYS-5-CONFIG_I:\\s*Configured from\\s+(?P<source>\\S+)\\s+by\\s+(?P<user>\\S+)",
+      "event": "config_change",
+      "severity": "info",
+      "example": "%SYS-5-CONFIG_I: Configured from console by admin on vty0 (10.0.0.5)"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://www.arista.com/en/support/advisories-notices",
+      "status": "200"
+    }
+  },
+  "notes": "EOS is Linux-based with a Cisco-like CLI and an eAPI (JSON-RPC over HTTPS) for automation.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "eos"
+  ]
+}

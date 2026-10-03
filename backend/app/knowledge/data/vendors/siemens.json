@@ -1,0 +1,61 @@
+{
+  "id": "siemens",
+  "name": "Siemens (SCALANCE)",
+  "aliases": [
+    "siemens",
+    "scalance",
+    "سيمنز"
+  ],
+  "categories": [
+    "switching",
+    "industrial"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 4329,
+      "org": "Siemens AG"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "scalance",
+      "name": "SCALANCE firmware",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "scalance",
+        "siemens"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "SCALANCE X (XB/XC/XR/XM/XP)",
+      "role": "industrial Ethernet",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

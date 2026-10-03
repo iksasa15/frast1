@@ -4,18 +4,38 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
-    rootiq_mode: str = "sim"
-    database_url: str = "postgresql+psycopg://rootiq:rootiq@localhost:5432/rootiq"
-    topology_path: str = "../configs/topology.json"
+    database_url: str
+    topology_state_path: str = "../data/topology-observed.json"
+    topology_path: str = ""  # test/import fixture only; production discovery never sets this
     layout_path: str = "../configs/layout.json"
-    ingest_token: str = "change-me-ingest"
+    ingest_token: str
+    cors_origins: str = "http://localhost:5173,http://localhost:8080"
+    discovery_stale_after_s: int = 180
     lab_agent_url: str = "http://127.0.0.1:9000"
-    lab_agent_token: str = "change-me-agent"
+    lab_agent_token: str
     record_events: bool = False
     llm_enabled: bool = False
+    llm_provider: str = "anthropic"  # anthropic | gemini | groq | openrouter | custom
+    llm_model: str = ""  # empty -> provider default (see app/llm/client.py)
     anthropic_api_key: str = ""
-    llm_model: str = "claude-haiku-4-5-20251001"
+    gemini_api_key: str = ""
+    groq_api_key: str = ""
+    openrouter_api_key: str = ""
+    llm_base_url: str = ""  # provider "custom": any OpenAI-compatible server (Ollama, vLLM, HF endpoint...)
+    custom_llm_api_key: str = ""  # optional for the custom provider
+    # Multi-agent layer
+    rootiq_execution_enabled: bool = False  # False -> live-lab remediation becomes a dry run
+    # Offline sim campus (collectors.simulator + /api/demo inject/reset/mode)
+    rootiq_mode: str = "live"  # sim | live; simulation must be explicitly enabled
     sim_paused: bool = False
+    # Optional live-lab demo controls (separate from sim inject)
+    demo_enabled: bool = False
+    demo_lab_id: str = ""
+    agent_timeout_s: float = 8.0
+    guardrail_max_executions: int = 5  # per 5 minutes
+    verify_grace_s: float = 30.0  # after the 15 s recovery clock, wait up to this long for the playbook criteria
+    rag_min_score: float = 0.10
+    kb_root: str = ""  # folder holding docs/ and lab/configs (auto-detected when empty)
 
 
 settings = Settings()

@@ -1,0 +1,274 @@
+/* ==========================================================================
+   RootIQ — Design tokens v1.0
+   مصدر الحقيقة الوحيد للألوان والخطوط والمسافات والحركة.
+   كل ألوان الواجهة يجب أن تأتي من هنا عبر var(--token) — لا قيم hex داخل المكوّنات.
+
+   الاستيراد:  frontend/src/main.tsx  →  import "./styles/tokens.css";
+   الوضع:      <html data-theme="dark|light" lang="ar|en" dir="rtl|ltr">
+   ========================================================================== */
+
+/* ---------- 1) Primitives: لا تُستخدم مباشرة في المكوّنات ---------- */
+:root {
+  /* Abyss — عائلة النيلي العميق (الخلفيات والنصوص الثانوية) */
+  --abyss-950: #080B22;
+  --abyss-900: #0C1030;
+  --abyss-850: #11163F;
+  --abyss-800: #181E52;
+  --abyss-700: #232B6A;
+  --abyss-600: #343E86;
+  --abyss-500: #5A64A8;
+  --abyss-400: #8089C8;
+  --abyss-300: #A9B0E0;
+  --abyss-200: #CDD2F0;
+  --abyss-100: #E8EBFF;
+  --abyss-50:  #F3F5FD;
+
+  /* Signal — لون العلامة: «الإشارة» التي تجد السبب */
+  --signal-300: #7FE6FA;
+  --signal-400: #3DD6F5;
+  --signal-500: #14B8DC;
+  --signal-600: #0A7C9E;
+  --signal-700: #08708F;
+
+  /* Type */
+  --font-ui:   "Readex Pro Variable", "Readex Pro", "Segoe UI", system-ui, "Noto Sans Arabic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, "Readex Pro Variable", monospace;
+
+  --fs-2xs: 0.6875rem;  /* 11  تسميات الخط الزمني */
+  --fs-xs:  0.75rem;    /* 12  تسميات ثانوية، رؤوس الجداول */
+  --fs-sm:  0.8125rem;  /* 13  جداول كثيفة */
+  --fs-base:0.875rem;   /* 14  نص الواجهة الافتراضي */
+  --fs-md:  1rem;       /* 16  نص الشرح (Explanation) */
+  --fs-lg:  1.25rem;    /* 20  عناوين اللوحات */
+  --fs-xl:  1.5rem;     /* 24  عنوان الصفحة */
+  --fs-2xl: 2rem;      /* 32  */
+  --fs-3xl: 3rem;       /* 48  أرقام KPI في Analytics */
+  --fs-4xl: 4rem;       /* 64  ساعة MTTD في Presenter (72px فعليًا لأن الجذر 18px) */
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+
+  --lh-tight: 1.25;
+  --lh-base:  1.5;
+  --lh-ar:    1.75;
+
+  /* Space (شبكة 4px) */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+  --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-14: 56px;
+
+  /* Radius — شكل أجهزة غرفة تحكم: زوايا حادّة، لا حبوب مستديرة */
+  --r-sm:   2px;
+  --r-md:   3px;
+  --r-lg:   4px;
+  --r-pill: 3px;
+
+  /* Layout */
+  --rail-w:     64px;
+  --topbar-h:   48px;
+  --timeline-h: 88px;
+  --incident-w: 400px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur:      200ms;
+  --dur-slow: 360ms;
+  --dur-converge: 640ms;
+  --ease-out:    cubic-bezier(.2, .8, .2, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+}
+
+/* ---------- 2) Semantic tokens — الوضع الداكن (الافتراضي) ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* الأسطح */
+  --bg-canvas:   var(--abyss-950);              /* خريطة الطوبولوجيا */
+  --bg-app:      var(--abyss-900);              /* خلفية التطبيق */
+  --bg-panel:    var(--abyss-850);              /* لوحات، جداول */
+  --bg-raised:   var(--abyss-800);              /* عنصر مرفوع داخل لوحة */
+  --bg-float:    rgba(17, 22, 63, .82);         /* لوحات عائمة (مع backdrop-filter) */
+  --bg-hover:    rgba(169, 176, 224, .08);
+  --bg-selected: rgba(61, 214, 245, .12);
+
+  /* الحدود */
+  --border-subtle: rgba(169, 176, 224, .12);
+  --border:        rgba(169, 176, 224, .20);
+  --border-strong: rgba(169, 176, 224, .36);
+
+  /* النص */
+  --text-1: var(--abyss-100);   /* 14.7:1 على --bg-panel */
+  --text-2: var(--abyss-300);   /*  8.2:1 */
+  --text-3: #8E97D4;            /*  5.6:1 على --bg-raised (أدنى استخدام للنص) */
+  --text-on-brand: var(--abyss-900);
+
+  /* العلامة */
+  --brand:        var(--signal-400);
+  --brand-hover:  var(--signal-300);
+  --brand-press:  var(--signal-500);
+  --brand-text:   var(--signal-400);
+  --brand-soft:   rgba(61, 214, 245, .14);
+  --focus-ring:   var(--signal-300);
+
+  /* الحالة — لا تُستخدم للزينة أبدًا */
+  --ok:   #4ADE80;   --ok-soft:   rgba(74, 222, 128, .14);
+  --warn: #FFB020;   --warn-soft: rgba(255, 176, 32, .14);
+  --crit: #FF5C7A;   --crit-soft: rgba(255, 92, 122, .14);
+
+  /* الطوبولوجيا */
+  --topo-grid:     rgba(169, 176, 224, .07);
+  --topo-node:     var(--abyss-850);
+  --topo-node-stroke: var(--abyss-300);
+  --topo-link:     rgba(169, 176, 224, .34);
+  --topo-root:     var(--crit);     /* السبب الجذري */
+  --topo-affected: var(--warn);     /* مسار التأثر */
+  --topo-selected: var(--brand);
+
+  /* وضع التشغيل */
+  --mode-sim:  var(--abyss-300);    /* Simulation = حد منقّط */
+  --mode-live: var(--brand);        /* Live lab   = حد متصل + نبض */
+
+  /* الرسوم البيانية */
+  --chart-1: var(--signal-400);
+  --chart-2: #8E9BFF;
+  --chart-3: #E6C58A;
+  --chart-4: #B4BCD8;
+  --chart-ref: var(--warn);         /* خط الهدف 60s */
+
+  /* الظلال */
+  --shadow-float: 0 24px 48px -20px rgba(3, 5, 20, .70), 0 0 0 1px var(--border-subtle);
+  --shadow-pop:   0 12px 28px -12px rgba(3, 5, 20, .70), 0 0 0 1px var(--border);
+}
+
+/* ---------- 3) الوضع الفاتح ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-canvas:   #E9EDFB;
+  --bg-app:      var(--abyss-50);
+  --bg-panel:    #FFFFFF;
+  --bg-raised:   #F7F8FE;
+  --bg-float:    rgba(255, 255, 255, .86);
+  --bg-hover:    rgba(12, 16, 48, .05);
+  --bg-selected: rgba(10, 124, 158, .10);
+
+  --border-subtle: rgba(12, 16, 48, .08);
+  --border:        rgba(12, 16, 48, .14);
+  --border-strong: rgba(12, 16, 48, .30);
+
+  --text-1: var(--abyss-900);   /* 18.5:1 */
+  --text-2: #3A4380;            /*  9.1:1 */
+  --text-3: #525CA0;            /*  5.8:1 على --bg-raised */
+  --text-on-brand: #FFFFFF;
+
+  --brand:        var(--signal-600);   /* خلفية الأزرار: أبيض عليه 4.78:1 */
+  --brand-hover:  var(--signal-700);
+  --brand-press:  #065F78;
+  --brand-text:   var(--signal-700);   /* روابط ونصوص: 5.2:1 */
+  --brand-soft:   rgba(10, 124, 158, .10);
+  --focus-ring:   var(--signal-600);
+
+  --ok:   #15803D;   --ok-soft:   rgba(21, 128, 61, .10);
+  --warn: #B45309;   --warn-soft: rgba(180, 83, 9, .10);
+  --crit: #C81F45;   --crit-soft: rgba(200, 31, 69, .10);
+
+  --topo-grid:     rgba(12, 16, 48, .07);
+  --topo-node:     #FFFFFF;
+  --topo-node-stroke: var(--abyss-500);
+  --topo-link:     rgba(12, 16, 48, .30);
+
+  --mode-sim: var(--abyss-500);
+
+  --chart-1: var(--signal-600);
+  --chart-2: #4B57D6;
+  --chart-3: #A8741A;
+  --chart-4: #6B74A8;
+
+  --shadow-float: 0 20px 40px -22px rgba(12, 16, 48, .35), 0 0 0 1px var(--border-subtle);
+  --shadow-pop:   0 10px 24px -12px rgba(12, 16, 48, .35), 0 0 0 1px var(--border);
+}
+
+/* ---------- 4) Base ---------- */
+html {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-1);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: lining-nums;     /* أرقام لاتينية في الواجهة العربية */
+}
+
+/* العربية: ارتفاع سطر أكبر، ولا تباعد حروف إطلاقًا (يقطع اتصال الحروف) */
+html[lang="ar"] body { line-height: var(--lh-ar); }
+html[lang="ar"] * { letter-spacing: 0; }
+
+/* العناوين */
+h1, h2, h3, h4 { font-weight: var(--fw-semibold); line-height: var(--lh-tight); margin: 0; }
+html[lang="ar"] :is(h1, h2, h3, h4) { line-height: 1.5; }
+html[lang="en"] :is(h1, h2) { letter-spacing: -0.01em; }
+
+/* كل رقم يتغيّر مباشرة (ساعة MTTD، العدّادات، CPU%) يستخدم mono + tabular لمنع الاهتزاز */
+.rq-mono, code, kbd, samp, [data-mono] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "zero" 0;
+}
+.rq-stopwatch {
+  font-family: var(--font-mono);
+  font-size: 3.25rem;                    /* 52px عادي — في Presenter يصير 4rem = 72px */
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* مؤشر لوحة المفاتيح — مرئي دائمًا */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+::selection { background: var(--brand-soft); }
+
+/* Presenter Mode (Shift+P): كل القياسات بوحدة rem فتتكبّر معًا */
+html[data-presenter="on"] { font-size: 18px; }
+html[data-presenter="on"] .rq-stopwatch { font-size: var(--fs-4xl); }
+
+/* الحركة تُحترم تفضيل المستخدم */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------- 5) حركة التوقيع: «التقارب» ----------
+   تُستخدم مرة واحدة عند ظهور السبب الجذري: شارات التنبيهات تنزلق نحو نقطة واحدة
+   ثم تنبض الحلقة (halo) مرة واحدة. لا حركة أخرى تلقائية في التطبيق. */
+@keyframes rq-converge {
+  to { transform: translate(var(--dx, 0), var(--dy, 0)) scale(.2); opacity: 0; }
+}
+@keyframes rq-halo {
+  0%   { transform: scale(.6); opacity: .9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes rq-live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--brand-soft); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ---------- 6) الشعار: تبديل نسخة الوضع الداكن/الفاتح ---------- */
+.rq-logo { display: block; height: var(--logo-h, 28px); width: auto; }
+[data-theme="light"] .rq-logo--dark { display: none; }
+:root:not([data-theme="light"]) .rq-logo--light { display: none; }

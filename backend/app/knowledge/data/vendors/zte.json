@@ -1,0 +1,61 @@
+{
+  "id": "zte",
+  "name": "ZTE",
+  "aliases": [
+    "zte",
+    "zxr10",
+    "زد تي اي"
+  ],
+  "categories": [
+    "switching",
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 3902,
+      "org": "Zhongxing Telecom Co.,ltd. (abbr. ZTE)"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "zxr10",
+      "name": "ZXR10 software",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "zxr10",
+        "zte"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "ZXR10 series",
+      "role": "campus / DC / carrier",
+      "os": "zxr10"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

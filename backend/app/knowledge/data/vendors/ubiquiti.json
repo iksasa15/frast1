@@ -1,0 +1,103 @@
+{
+  "id": "ubiquiti",
+  "name": "Ubiquiti",
+  "aliases": [
+    "ubiquiti",
+    "unifi",
+    "edgeswitch",
+    "edgerouter",
+    "يوبيكويتي"
+  ],
+  "categories": [
+    "switching",
+    "wireless",
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 41112,
+      "org": "Ubiquiti Networks, Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "unifi-switch",
+      "name": "UniFi Switch (controller managed)",
+      "cli": null,
+      "netmiko": "ubiquiti_unifiswitch",
+      "aliases": [
+        "unifi",
+        "usw"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    },
+    {
+      "id": "edgeswitch",
+      "name": "EdgeSwitch",
+      "cli": null,
+      "netmiko": "ubiquiti_edgeswitch",
+      "aliases": [
+        "edgeswitch",
+        "es-"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    },
+    {
+      "id": "edgeos",
+      "name": "EdgeOS (EdgeRouter)",
+      "cli": null,
+      "netmiko": "ubiquiti_edgerouter",
+      "aliases": [
+        "edgeos",
+        "edgerouter"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "USW-Lite / USW-Pro / USW-Enterprise / USW-Aggregation",
+      "role": "UniFi switching",
+      "os": "unifi-switch"
+    },
+    {
+      "name": "ES-8 / ES-16 / ES-24 / ES-48",
+      "role": "EdgeSwitch",
+      "os": "edgeswitch"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

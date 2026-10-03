@@ -1,0 +1,305 @@
+{
+  "id": "juniper",
+  "name": "Juniper Networks",
+  "aliases": [
+    "juniper",
+    "junos",
+    "mist",
+    "srx",
+    "qfx",
+    "جونيبر",
+    "جنيبر",
+    "vqfx",
+    "vmx",
+    "vsrx",
+    "vjunos",
+    "vjunosevolved"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "security",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 2636,
+      "org": "Juniper Networks, Inc."
+    }
+  ],
+  "coverage": "full",
+  "confidence": "high",
+  "os_families": [
+    {
+      "id": "junos",
+      "name": "Junos OS",
+      "cli": "junos",
+      "netmiko": "juniper_junos",
+      "aliases": [
+        "junos",
+        "junos os",
+        "junos evolved"
+      ],
+      "sysdescr_regex": [
+        "Juniper Networks, Inc\\. (?P<model>\\S+)(?: [^,]*?)?, kernel JUNOS (?P<version>\\d+\\.\\d+[RXSFDI]\\d+(?:-[A-Z]\\d+)?(?:\\.\\d+)?)"
+      ],
+      "version_regex": "(?:Junos|JUNOS)[^\\n]*?:\\s*(?P<version>\\d+\\.\\d+[RXSFDI]\\d+(?:-[A-Z]\\d+)?(?:\\.\\d+)?)",
+      "version_scheme": "YY.QRn[-Sn.n]: release year.quarter, R = release, then respin (R3) and service release (-S5.4), e.g. 21.4R3-S5.4. Commonly one release per quarter; EX/QFX trains follow the same scheme.",
+      "examples": {
+        "sysdescr": [
+          "Juniper Networks, Inc. ex4300-48t Ethernet Switch, kernel JUNOS 21.4R3-S5.4, Build date: 2023-06-01 10:00:00 UTC Copyright (c) 1996-2023 Juniper Networks, Inc.",
+          "Juniper Networks, Inc. vqfx-10000 Ethernet Switch, kernel JUNOS 19.4R1.10, Build date: 2019-12-19 03:28:44 UTC Copyright (c) 1996-2019 Juniper Networks, Inc."
+        ],
+        "version": [
+          "21.4R3-S5.4",
+          "23.2R2",
+          "19.4R1.10"
+        ]
+      },
+      "config_model": {
+        "style": "candidate-commit",
+        "summary": "Changes are made in a candidate configuration and become active only on `commit`; a committed configuration is persistent, so there is no separate save step.",
+        "summary_ar": "التغييرات تتم في إعداد مرشّح (candidate) ولا تصير فعّالة إلا عند `commit`؛ والإعداد المُلتزَم به دائم فلا توجد خطوة حفظ منفصلة.",
+        "enter": [
+          "configure"
+        ],
+        "save": [
+          "commit"
+        ],
+        "snapshot": [],
+        "safe_change": [
+          "commit confirmed 5"
+        ],
+        "rollback": [
+          "rollback 1",
+          "commit"
+        ],
+        "notes": "`show | compare` shows the pending changes and `commit check` validates them. `commit confirmed 5` rolls back by itself unless a second `commit` confirms within 5 minutes. Up to 50 earlier versions are kept (`rollback 0` to `rollback 49`)."
+      },
+      "cli_style": "Two modes: operational and configuration (`configure`). Hierarchical `set` / `delete` statements. Useful pipes: `| compare`, `| match`, `| display set`, `| no-more`. `run <cmd>` executes an operational command from configuration mode. Interfaces are `ge-0/0/1`, `xe-0/0/1`, `ae0`, with logical units (`.0`).",
+      "cli_style_ar": "وضعان: تشغيلي وإعدادي (`configure`). أوامر `set` و`delete` هرمية. فلاتر مفيدة: `| compare` و`| match` و`| display set` و`| no-more`. `run <cmd>` ينفّذ أمرًا تشغيليًا من داخل وضع الإعداد. الواجهات `ge-0/0/1` و`xe-0/0/1` و`ae0` مع وحدات منطقية (`.0`)."
+    }
+  ],
+  "series": [
+    {
+      "name": "EX2300 / EX3400",
+      "role": "access",
+      "os": "junos"
+    },
+    {
+      "name": "EX4100 / EX4300 / EX4400",
+      "role": "access / aggregation",
+      "os": "junos"
+    },
+    {
+      "name": "EX4600 / EX4650",
+      "role": "aggregation / DC leaf",
+      "os": "junos"
+    },
+    {
+      "name": "EX9200 / EX9250",
+      "role": "core / campus core",
+      "os": "junos"
+    },
+    {
+      "name": "QFX5100 / QFX5110 / QFX5120",
+      "role": "DC leaf",
+      "os": "junos"
+    },
+    {
+      "name": "QFX5200 / QFX5210 / QFX5220 / QFX5700",
+      "role": "DC spine/leaf 100G",
+      "os": "junos"
+    },
+    {
+      "name": "QFX10002 / QFX10008 / QFX10016",
+      "role": "DC core/spine",
+      "os": "junos"
+    },
+    {
+      "name": "MX / PTX / ACX",
+      "role": "routing (edge/core/aggregation)",
+      "os": "junos"
+    },
+    {
+      "name": "SRX",
+      "role": "firewall / branch",
+      "os": "junos"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "show version"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "show interfaces terse"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "show interfaces <if> extensive"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "show interfaces <if> extensive"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "show interfaces diagnostics optics <if>"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "show vlans"
+        ]
+      },
+      "show_trunk": {
+        "read": [
+          "show ethernet-switching interface"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "show spanning-tree bridge",
+          "show spanning-tree interface"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "show ethernet-switching table"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "show lldp neighbors"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "show chassis routing-engine",
+          "show system processes extensive"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "show chassis routing-engine"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "show chassis environment",
+          "show chassis alarms"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "show log messages"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "show arp"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "show ospf neighbor"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "show bgp summary"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "show lacp interfaces"
+        ]
+      },
+      "show_poe": {
+        "read": [
+          "show poe interface"
+        ]
+      },
+      "show_qos": {
+        "read": [
+          "show class-of-service interface <if>"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "show ntp associations"
+        ]
+      },
+      "show_snmp": {
+        "read": [
+          "show snmp statistics"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "clear interfaces statistics <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "set interfaces <if> disable",
+          "commit",
+          "delete interfaces <if> disable",
+          "commit"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "link-trap",
+      "regex": "SNMP_TRAP_LINK_(?P<state>DOWN|UP):.*?ifName (?P<interface>\\S+)",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "mib2d[1234]: SNMP_TRAP_LINK_DOWN: ifIndex 513, ifAdminStatus up(1), ifOperStatus down(2), ifName ge-0/0/0"
+    },
+    {
+      "id": "ospf-nbrdown",
+      "regex": "RPD_OSPF_NBRDOWN:\\s*OSPF neighbor (?P<neighbor>[\\d.]+) \\(.*? (?P<interface>\\S+) area \\S+\\) state changed from (?P<from_state>\\w+) to (?P<to_state>\\w+)",
+      "event": "ospf_neighbor_change",
+      "severity": "warning",
+      "example": "rpd[500]: RPD_OSPF_NBRDOWN: OSPF neighbor 10.0.0.2 (realm ospf-v2 ge-0/0/1.0 area 0.0.0.0) state changed from Full to Down due to KillNbr (event reason: interface went down)"
+    },
+    {
+      "id": "bgp-state",
+      "regex": "RPD_BGP_NEIGHBOR_STATE_CHANGED:\\s*BGP peer (?P<neighbor>\\S+) \\(.*?\\) changed state from (?P<from_state>\\w+) to (?P<to_state>\\w+)",
+      "event": "bgp_neighbor_change",
+      "severity": "warning",
+      "example": "rpd[500]: RPD_BGP_NEIGHBOR_STATE_CHANGED: BGP peer 10.1.1.1 (External AS 65001) changed state from Established to Idle (event HoldTime)"
+    },
+    {
+      "id": "ui-commit",
+      "regex": "UI_COMMIT:\\s*User '(?P<user>[^']+)' requested 'commit' operation",
+      "event": "config_change",
+      "severity": "info",
+      "example": "mgd[1234]: UI_COMMIT: User 'admin' requested 'commit' operation (comment: fix uplink)"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://supportportal.juniper.net/",
+      "status": "200"
+    }
+  },
+  "notes": "Junos is one OS across EX/QFX/MX/SRX (Junos Evolved on some platforms). Configuration is commit-based: changes are not active until 'commit'.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "junos"
+  ]
+}

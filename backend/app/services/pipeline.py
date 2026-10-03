@@ -13,10 +13,10 @@ class Pipeline:
         self.state = state
         self.detector = detector
         self.incidents = incidents
-        self.known = set(topo.nodes) | set(topo.links) | set(topo.services)
         self.alerts: deque = deque(maxlen=200)
         self._seq = count(1)
         self.recorder = None
+        self.agents = None  # AgentRuntime (set by main); None -> plain detector path
 
     async def ingest(self, ev: Event):
         if (
@@ -27,13 +27,17 @@ class Pipeline:
             link = self.topo.port_to_link.get((ev.source_id, ev.interface))
             if link:
                 ev.source_id, ev.source_type = link, "link"
-        if ev.source_id not in self.known:
+        known = set(self.topo.nodes) | set(self.topo.links) | set(self.topo.services)
+        if ev.source_id not in known:
             raise HTTPException(status_code=422, detail=f"unknown sourceId {ev.source_id}")
+        if self.agents is not None and "non_finite" in self.agents.telemetry.observe(ev):
+            raise HTTPException(status_code=422, detail="non-finite value rejected by telemetry agent")
         ts = ev.timestamp.timestamp()
         self.state.update(ev.source_id, ev.metric, ev.value, ts)
         if self.recorder:
             self.recorder.write(ev)
-        anomaly, raw_level = self.detector.observe(ev.source_id, ev.metric, ev.value, ts)
+        detect = self.agents.detection if self.agents is not None else self.detector
+        anomaly, raw_level = detect.observe(ev.source_id, ev.metric, ev.value, ts)
         if raw_level:
             alert = {
                 "id": f"alr-{next(self._seq):05d}",

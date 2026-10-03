@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "site": "RootIQ multi-vendor lab (example)",
+  "_comment": "Example only: shows how to describe a mixed-vendor network. Copy it over configs/topology.json (or set TOPOLOGY_PATH) and adjust ids, ports and management IPs to your EVE-NG lab. Optional vendor fields per node: vendor (free text hint), sysDescr, sysObjectId, os (a knowledge-base OS id). The default lab (configs/topology.json) is all Cisco.",
+  "vantage": "collector01",
+  "nodes": [
+    {
+      "id": "r1",
+      "type": "router",
+      "label": "R1",
+      "vendor": "Cisco vIOS",
+      "managementIp": "10.10.10.1",
+      "position": { "x": 420, "y": 40 },
+      "interfaces": [
+        { "name": "Gi0/0", "ifIndex": 1, "side": "bottom", "speedMbps": 1000, "description": "TO-SWJUN" },
+        { "name": "Gi0/1", "ifIndex": 2, "side": "bottom", "speedMbps": 1000, "description": "TO-SWARISTA" },
+        { "name": "Gi0/2", "ifIndex": 3, "side": "right", "speedMbps": 1000, "description": "TO-FW1" }
+      ]
+    },
+    {
+      "id": "swjun",
+      "type": "switch",
+      "label": "SW-JUN",
+      "vendor": "Juniper vQFX",
+      "sysDescr": "Juniper Networks, Inc. vqfx-10000 Ethernet Switch, kernel JUNOS 19.4R1.10, Build date: 2019-12-19 03:28:44 UTC Copyright (c) 1996-2019 Juniper Networks, Inc.",
+      "sysObjectId": "1.3.6.1.4.1.2636.1.1.1.4.82.5",
+      "managementIp": "10.10.20.11",
+      "position": { "x": 160, "y": 260 },
+      "interfaces": [
+        { "name": "xe-0/0/0", "ifIndex": 501, "side": "top", "speedMbps": 10000 },
+        { "name": "xe-0/0/1", "ifIndex": 502, "side": "bottom", "speedMbps": 10000 }
+      ]
+    },
+    {
+      "id": "swarista",
+      "type": "switch",
+      "label": "SW-ARISTA",
+      "vendor": "Arista vEOS",
+      "sysDescr": "Arista Networks EOS version 4.30.5M running on an Arista Networks vEOS-lab",
+      "managementIp": "10.10.30.12",
+      "position": { "x": 420, "y": 260 },
+      "interfaces": [
+        { "name": "Ethernet1", "ifIndex": 1, "side": "top", "speedMbps": 1000 },
+        { "name": "Ethernet2", "ifIndex": 2, "side": "bottom", "speedMbps": 1000 }
+      ]
+    },
+    {
+      "id": "fw1",
+      "type": "switch",
+      "label": "FW1",
+      "vendor": "Fortinet FortiGate-VM",
+      "sysDescr": "FortiGate-VM64",
+      "sysObjectId": "1.3.6.1.4.1.12356.101.1.1",
+      "managementIp": "10.10.40.13",
+      "position": { "x": 700, "y": 150 },
+      "interfaces": [
+        { "name": "port1", "ifIndex": 1, "side": "left", "speedMbps": 1000 },
+        { "name": "port2", "ifIndex": 2, "side": "bottom", "speedMbps": 1000 }
+      ]
+    },
+    {
+      "id": "swaruba",
+      "type": "switch",
+      "label": "SW-ARUBA",
+      "vendor": "Aruba AOS-CX",
+      "sysDescr": "Aruba JL659A 6300M 48SR CL6 PoE 4SFP56 Swch FL.10.09.1020",
+      "managementIp": "10.10.50.14",
+      "position": { "x": 700, "y": 360 },
+      "interfaces": [
+        { "name": "1/1/1", "ifIndex": 1, "side": "top", "speedMbps": 1000 },
+        { "name": "1/1/2", "ifIndex": 2, "side": "bottom", "speedMbps": 1000 }
+      ]
+    },
+    {
+      "id": "app01",
+      "type": "server",
+      "label": "APP-01",
+      "vendor": "Ubuntu 24.04",
+      "managementIp": "10.10.20.10",
+      "position": { "x": 160, "y": 480 },
+      "interfaces": [
+        { "name": "eth0", "side": "top", "speedMbps": 10000 }
+      ]
+    },
+    {
+      "id": "collector01",
+      "type": "collector",
+      "label": "COLLECTOR-01",
+      "vendor": "Ubuntu 24.04",
+      "managementIp": "10.10.30.10",
+      "position": { "x": 420, "y": 480 },
+      "interfaces": [
+        { "name": "ens3", "side": "top", "speedMbps": 1000 }
+      ]
+    }
+  ],
+  "links": [
+    { "id": "link-r1-swjun", "source": "r1", "sourcePort": "Gi0/0", "target": "swjun", "targetPort": "xe-0/0/0", "role": "uplink" },
+    { "id": "link-r1-swarista", "source": "r1", "sourcePort": "Gi0/1", "target": "swarista", "targetPort": "Ethernet1", "role": "uplink" },
+    { "id": "link-r1-fw1", "source": "r1", "sourcePort": "Gi0/2", "target": "fw1", "targetPort": "port1", "role": "uplink" },
+    { "id": "link-fw1-swaruba", "source": "fw1", "sourcePort": "port2", "target": "swaruba", "targetPort": "1/1/1", "role": "uplink" },
+    { "id": "link-swjun-app01", "source": "swjun", "sourcePort": "xe-0/0/1", "target": "app01", "targetPort": "eth0", "role": "access" },
+    { "id": "link-swarista-collector01", "source": "swarista", "sourcePort": "Ethernet2", "target": "collector01", "targetPort": "ens3", "role": "access" }
+  ],
+  "services": [
+    { "id": "svc-dns", "label": "Internal DNS", "host": "app01", "port": 53, "dependsOn": [] },
+    { "id": "svc-web", "label": "Web Application", "host": "app01", "port": 80, "dependsOn": ["svc-dns"] }
+  ]
+}

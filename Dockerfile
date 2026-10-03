@@ -14,15 +14,16 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/app ./app
-COPY configs ./configs
+COPY configs/layout.json ./configs/layout.json
+COPY docs ./docs
+COPY lab/configs ./lab/configs
 COPY --from=febuild /fe/dist /usr/share/nginx/html
 COPY deploy/nginx-allinone.conf /etc/nginx/sites-available/default
 RUN rm -f /etc/nginx/sites-enabled/default \
   && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
   && mkdir -p /app/data
-ENV TOPOLOGY_PATH=/app/configs/topology.json
+ENV TOPOLOGY_STATE_PATH=/app/data/topology-observed.json
 ENV LAYOUT_PATH=/app/configs/layout.json
-ENV ROOTIQ_MODE=sim
 EXPOSE 8080
 COPY deploy/start.sh /start.sh
 RUN chmod +x /start.sh

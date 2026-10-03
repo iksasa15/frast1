@@ -1,78 +1,77 @@
 from datetime import datetime, timezone
 from itertools import count
 
+from app.agents.playbooks import PLAYBOOKS, kind_for_entity  # noqa: F401  (kind_for_entity re-exported)
+from app.agents.runtime import AgentRuntime
+from app.core.config import settings
 from app.services.hub import hub
 
+# Backward-compatible view of the playbook catalogue (single source: app/agents/playbooks.py)
 RECOMMENDATIONS = {
-    "link": {
-        "actionType": "apply_qos_policy",
-        "risk": "low",
-        "scenario": "uplink-congestion",
-        "description": (
-            "Apply UPLINK-QOS on R1 Gi0/0: police bulk traffic (port 5201) to 2 Mbps "
-            "and fair-queue critical flows."
-        ),
-        "alternatives": ["Activate an alternate path", "Increase uplink capacity"],
-    },
-    "svc-dns": {
-        "actionType": "restart_dns_service",
-        "risk": "low",
-        "scenario": "dns-failure",
-        "description": "Restart the 'named' DNS service on APP-01.",
-        "alternatives": ["Fail over to secondary DNS"],
-    },
-    "server": {
-        "actionType": "stop_runaway_process",
-        "risk": "medium",
-        "scenario": "server-spike",
-        "description": "Terminate the runaway CPU process on APP-01 (stress-ng).",
-        "alternatives": ["Scale out the web tier", "Move workload to standby node"],
-    },
+    kind: {
+        "actionType": pb["actionType"],
+        "risk": pb["risk"],
+        "scenario": pb["scenario"],
+        "description": pb["description"],
+        "alternatives": pb["alternatives"],
+    }
+    for kind, pb in PLAYBOOKS.items()
 }
-
-EXPECTED_ROOT = {
-    "uplink-congestion": "link-r1-sw1",
-    "dns-failure": "svc-dns",
-    "server-spike": "app01",
-}
-
-
-def kind_for_entity(entity_id: str) -> str:
-    if entity_id.startswith("link-"):
-        return "link"
-    if entity_id == "svc-dns":
-        return "svc-dns"
-    return "server"
-
 
 class ActionService:
-    def __init__(self, incidents, demo_ref, detector, history, simulator_ref, audit):
+    def __init__(
+        self,
+        incidents,
+        detector,
+        history,
+        audit,
+        agents=None,
+        execution_adapter_ref=None,
+        demo_ref=None,
+        simulator_ref=None,
+    ):
         self.incidents = incidents
-        self.demo_ref = demo_ref
         self.detector = detector
         self.history = history
-        self.simulator_ref = simulator_ref  # callable -> Simulator | None
         self.audit = audit
+        self.demo_ref = demo_ref or (lambda: {})
         self.actions: dict[str, dict] = {}
         self.runs: list[dict] = []
         self._seq = count(1)
         self._recovering: dict[str, float] = {}  # incident_id -> clear_since
+        self.agents = agents or AgentRuntime(
+            graph=getattr(incidents, "graph", None),
+            history=history,
+            topology=getattr(incidents, "topology", None),
+            detector=detector,
+            audit=audit,
+        )
+        self.agents.bind(
+            actions=self,
+            execution_adapter_ref=execution_adapter_ref or (lambda: None),
+            demo_ref=self.demo_ref,
+            simulator_ref=simulator_ref or (lambda: None),
+        )
+        if self.agents.audit is not audit:
+            self.agents.audit = audit
 
-    def recommend(self, inc) -> dict:
-        root = (inc.root_cause or {}).get("entityId") or next(iter(inc.members), "unknown")
-        kind = kind_for_entity(root)
-        rec = RECOMMENDATIONS[kind]
+    async def recommend(self, inc) -> dict | None:
+        """Planner agent drafts the playbook; guardrail agent vets it. Nothing runs from here."""
+        fields = await self.agents.remediation.plan(inc)
         aid = f"ACT-{next(self._seq):04d}"
         action = {
             "id": aid,
             "incidentId": inc.id,
-            "actionType": rec["actionType"],
-            "description": rec["description"],
-            "riskLevel": rec["risk"],
+            **fields,
             "approvalStatus": "pending",
-            "scenario": rec["scenario"],
-            "alternatives": rec["alternatives"],
         }
+        verdict = await self.agents.guardrail.check(
+            "recommend", incident=inc, action=action, mode="live"
+        )
+        if not verdict.allowed:
+            self.audit.log("system", "recommendation_blocked", inc.id, {"reason": verdict.denial})
+            return None
+        action["guardrailWarnings"] = verdict.warnings
         self.actions[aid] = action
         inc.action = action
         inc.status = "awaiting_approval"
@@ -86,6 +85,14 @@ class ActionService:
         if not inc:
             raise KeyError(action["incidentId"])
 
+        demo = self.demo_ref() or {}
+        mode = demo.get("mode") or "live"
+        verdict = await self.agents.guardrail.check(
+            "approve", incident=inc, action=action, decided_by=decided_by, mode=mode
+        )
+        if not verdict.allowed:
+            raise PermissionError(verdict.denial)
+
         now = datetime.now(timezone.utc).isoformat()
         action["approvalStatus"] = "approved"
         action["decidedBy"] = decided_by
@@ -95,29 +102,28 @@ class ActionService:
         inc.action = action
         self.audit.log(decided_by, "approve", action_id, {"incidentId": inc.id})
 
-        demo = self.demo_ref()
-        scenario = action.get("scenario") or demo.get("scenario") or "uplink-congestion"
+        scenario = action.get("scenario")
+        if not scenario:
+            raise ValueError("approved action has no execution target")
         try:
-            if demo.get("mode") == "sim":
-                sim = self.simulator_ref()
-                if sim:
-                    sim.remediate()
+            result = await self.agents.execution.execute(action, inc.id, scenario, mode, verdict)
+            if not result["executed"]:
+                action["dryRun"] = True
+                inc.status = "approved"
+                self.audit.log(decided_by, "dry_run", action_id, {"scenario": scenario, "commands": result["commands"]})
             else:
-                from app.services import lab_client
-
-                await lab_client.call(f"/remediate/{scenario}")
-            action["approvalStatus"] = "executed"
-            action["executedAt"] = datetime.now(timezone.utc).isoformat()
-            inc.timings["executedAt"] = action["executedAt"]
-            inc.status = "approved"  # recovery monitor moves to resolved
-            # Drop active anomalies for this blast radius so the 15s recovery clock can start
-            for key in list(self.detector.active):
-                if key[0] in inc.members:
-                    del self.detector.active[key]
-            self._recovering[inc.id] = datetime.now(timezone.utc).timestamp()
-            demo["state"] = "remediating"
-            await hub.broadcast("demo", demo)
-            self.audit.log(decided_by, "execute", action_id, {"scenario": scenario, "ok": True})
+                action["approvalStatus"] = "executed"
+                action["executedAt"] = datetime.now(timezone.utc).isoformat()
+                inc.timings["executedAt"] = action["executedAt"]
+                inc.status = "approved"  # recovery monitor moves to resolved
+                # Drop active anomalies for this blast radius so the 15s recovery clock can start
+                for key in list(self.detector.active):
+                    if key[0] in inc.members:
+                        del self.detector.active[key]
+                self._recovering[inc.id] = datetime.now(timezone.utc).timestamp()
+                demo["state"] = "remediating"
+                await hub.broadcast("demo", demo)
+                self.audit.log(decided_by, "execute", action_id, {"scenario": scenario, "ok": True})
         except Exception as e:
             action["approvalStatus"] = "failed"
             self.audit.log(decided_by, "execute_failed", action_id, {"error": str(e)})
@@ -137,6 +143,11 @@ class ActionService:
         inc = self.incidents.open.get(action["incidentId"])
         if not inc:
             raise KeyError(action["incidentId"])
+        verdict = await self.agents.guardrail.check(
+            "reject", incident=inc, action=action, decided_by=decided_by
+        )
+        if not verdict.allowed:
+            raise PermissionError(verdict.denial)
 
         now = datetime.now(timezone.utc).isoformat()
         action["approvalStatus"] = "rejected"
@@ -190,38 +201,60 @@ class ActionService:
                 continue
             if now - started < 15:
                 continue
-            # Resolved
+            # Give slow-to-recover services a bounded grace: resolve when the playbook's numeric
+            # criteria hold, or once the grace window is over (then recorded as unverified).
+            criteria = ((inc.action or {}).get("plan") or {}).get("verification") or []
+            if (
+                criteria
+                and self.agents.enabled("verification")
+                and now - started < 15 + settings.verify_grace_s
+                and self.agents.verification.evaluate(criteria)["status"] != "verified"
+            ):
+                continue
+            # Resolved — the verification agent checks the playbook's numeric criteria first
+            inc.verification = await self.agents.orchestrator.safe(
+                "verification", "verify_recovery", inc.id, self.agents.verification.verify(inc)
+            )
             recovered_at = datetime.now(timezone.utc).isoformat()
             inc.status = "resolved"
             inc.resolved_at = recovered_at
             inc.timings["recoveredAt"] = recovered_at
             root = (inc.root_cause or {}).get("entityId")
-            if root:
-                self.history.record(root)
-            demo = self.demo_ref()
+            demo = self.demo_ref() or {}
             demo["state"] = "recovered"
             await hub.broadcast("demo", demo)
             self._record_run(inc, demo)
             self._recovering.pop(inc.id, None)
+            self.audit.log("system", "resolved", inc.id, {"root": root})
+            # learning agent: history + postmortem (plain history update if the agent is off)
+            pm = await self.agents.orchestrator.safe(
+                "learning", "close_out", inc.id, self.agents.learning.close_out(inc)
+            )
+            if pm is None and root:
+                self.history.record(root)
+            await self.agents.orchestrator.closed(inc)
             self.incidents.history_list.append(inc)
             del self.incidents.open[inc.id]
             if self.incidents.persist:
                 self.incidents.persist(inc)
+            try:
+                self.agents.knowledge.index_incident(inc.to_dict())
+            except Exception:
+                pass
             await hub.broadcast("incident", inc.to_dict())
-            self.audit.log("system", "resolved", inc.id, {"root": root})
 
-    def _record_run(self, inc, demo: dict):
+    def _record_run(self, inc, context: dict):
         def parse(ts: str | None):
             if not ts:
                 return None
             return datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
 
         t = inc.timings
-        inj = parse(t.get("injectedAt"))
+        inj = parse(t.get("firstAnomalyAt") or t.get("detectedAt"))
         det = parse(t.get("detectedAt"))
         ana = parse(t.get("analyzedAt"))
         rec = parse(t.get("recoveredAt"))
-        scenario = demo.get("scenario") or (inc.action or {}).get("scenario")
+        scenario = context.get("scenario") or (inc.action or {}).get("scenario")
         root = (inc.root_cause or {}).get("entityId")
         metrics = {
             "timeToDetect": (det - inj) if inj and det else None,
@@ -230,12 +263,12 @@ class ActionService:
             "rawAlerts": inc.raw_alert_count,
             "incidents": 1,
             "noiseReduction": 1 - 1 / max(inc.raw_alert_count, 1),
-            "correct": root == EXPECTED_ROOT.get(scenario or "", None),
+            "correct": None,
         }
         self.runs.append(
             {
                 "scenario": scenario,
-                "mode": demo.get("mode"),
+                "mode": context.get("mode") or "live",
                 "incidentId": inc.id,
                 "metrics": metrics,
             }
@@ -248,7 +281,7 @@ class ActionService:
                 s.add(
                     RunRow(
                         scenario=scenario or "unknown",
-                        mode=demo.get("mode") or "sim",
+                        mode="live",
                         incident_id=inc.id,
                         metrics=metrics,
                     )

@@ -32,4 +32,13 @@ export const staticTopology: Topology = {
     status: 'healthy',
     metrics: {},
   })),
+  discovery: {
+    state: 'waiting',
+    source: 'static-test-fixture',
+    observedAt: null,
+    receivedAt: null,
+    collectorId: null,
+    errors: [],
+    staleAfterSeconds: 0,
+  },
 };

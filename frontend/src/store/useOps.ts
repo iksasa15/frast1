@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { DemoState, Incident, RawAlert, Topology, WsMessage } from '@/lib/types';
+import type { AgentStep, DemoState, Incident, RawAlert, Topology, WsMessage } from '@/lib/types';
 import type { WsStatus } from '@/lib/ws';
 
 type Point = { t: number; util: number; lat: number; loss: number };
@@ -10,6 +10,7 @@ interface OpsState {
   linkHistory: Record<string, Point[]>;
   incidents: Record<string, Incident>;
   alerts: RawAlert[];
+  agentSteps: AgentStep[];
   demo: DemoState;
   wsStatus: WsStatus;
   lastUpdate: number;
@@ -24,6 +25,7 @@ export const useOps = create<OpsState>((set) => ({
   linkHistory: {},
   incidents: {},
   alerts: [],
+  agentSteps: [],
   demo: { mode: 'sim', scenario: null, state: 'idle' },
   wsStatus: 'connecting',
   lastUpdate: 0,
@@ -38,7 +40,8 @@ export const useOps = create<OpsState>((set) => ({
           return {
             topology: m.data.topology,
             alerts: m.data.alerts,
-            demo: m.data.demo,
+            // Keep prior demo if a snapshot omits it (avoids undefined → reconnect flicker)
+            demo: m.data.demo ?? s.demo,
             lastUpdate,
             incidents: Object.fromEntries(m.data.incidents.map((i) => [i.id, i])),
           };
@@ -78,8 +81,12 @@ export const useOps = create<OpsState>((set) => ({
           return { alerts: [m.data, ...s.alerts].slice(0, 200), lastUpdate };
         case 'incident':
           return { incidents: { ...s.incidents, [m.data.id]: m.data }, lastUpdate };
+        case 'agent_step':
+          return { agentSteps: [...s.agentSteps, m.data].slice(-400), lastUpdate };
         case 'demo':
           return { demo: m.data, lastUpdate };
+        case 'topology':
+          return { topology: m.data, lastUpdate };
       }
     }),
 }));

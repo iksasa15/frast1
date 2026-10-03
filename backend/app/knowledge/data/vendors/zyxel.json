@@ -1,0 +1,64 @@
+{
+  "id": "zyxel",
+  "name": "Zyxel",
+  "aliases": [
+    "zyxel",
+    "زايسل"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 890,
+      "org": "ZyXEL Communications Corp."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "zyxel-os",
+      "name": "Zyxel switch firmware",
+      "cli": null,
+      "netmiko": "zyxel_os",
+      "aliases": [
+        "zyxel"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "GS1900 (smart)",
+      "role": "SMB",
+      "os": "zyxel-os"
+    },
+    {
+      "name": "GS2210 / XGS4600 / XS3800",
+      "role": "aggregation",
+      "os": "zyxel-os"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

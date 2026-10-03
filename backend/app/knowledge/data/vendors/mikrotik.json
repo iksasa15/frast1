@@ -1,0 +1,249 @@
+{
+  "id": "mikrotik",
+  "name": "MikroTik",
+  "aliases": [
+    "mikrotik",
+    "routeros",
+    "swos",
+    "routerboard",
+    "crs",
+    "ccr",
+    "ميكروتيك"
+  ],
+  "categories": [
+    "switching",
+    "routing",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 14988,
+      "org": "MikroTik"
+    }
+  ],
+  "coverage": "partial",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "routeros",
+      "name": "RouterOS",
+      "cli": "routeros",
+      "netmiko": "mikrotik_routeros",
+      "aliases": [
+        "routeros",
+        "router os"
+      ],
+      "sysdescr_regex": [
+        "^RouterOS (?P<model>\\S+)"
+      ],
+      "version_regex": "version:\\s*(?P<version>\\d+\\.\\d+(?:\\.\\d+)?(?:beta\\d+|rc\\d+)?)",
+      "version_scheme": "MAJOR.MINOR[.PATCH] with channels (long-term, stable, testing), e.g. 7.11.2 or 6.49.10. sysDescr carries only the model; read the version from '/system resource print'.",
+      "examples": {
+        "sysdescr": [
+          "RouterOS CRS326-24G-2S+"
+        ],
+        "version": [
+          "7.11.2",
+          "6.49.10"
+        ]
+      },
+      "config_model": {
+        "style": "auto-save",
+        "summary": "Changes apply immediately and are stored automatically: there is no save step. Use a backup or export before risky changes.",
+        "summary_ar": "التغييرات تسري فورًا وتُخزَّن تلقائيًا: لا توجد خطوة حفظ. استخدم نسخة احتياطية أو export قبل أي تغيير محفوف بالمخاطر.",
+        "enter": [],
+        "save": [],
+        "snapshot": [
+          "/system backup save name=<name>",
+          "/export file=<name>"
+        ],
+        "safe_change": [],
+        "rollback": [
+          "/system backup load name=<name>"
+        ],
+        "notes": "Safe Mode (Ctrl+X in the terminal) reverts every change made in the session if the connection drops."
+      },
+      "cli_style": "Slash-separated menu paths (`/interface ethernet print`); verbs `print`, `set`, `add`, `remove`; `?` and Tab for help; interfaces `ether1`, `sfp-sfpplus1`.",
+      "cli_style_ar": "مسارات قوائم مفصولة بـ`/` (`/interface ethernet print`)؛ أفعال `print` و`set` و`add` و`remove`؛ `?` وTab للمساعدة؛ الواجهات `ether1` و`sfp-sfpplus1`."
+    },
+    {
+      "id": "swos",
+      "name": "SwOS / SwOS Lite",
+      "cli": "web",
+      "netmiko": "mikrotik_switchos",
+      "aliases": [
+        "swos",
+        "swos lite"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "Lightweight switch OS managed by web UI (no full CLI); e.g. SwOS 2.16.",
+      "examples": {
+        "sysdescr": [],
+        "version": [
+          "2.16"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "CRS (Cloud Router Switch) e.g. CRS305 / CRS309 / CRS317 / CRS326 / CRS354",
+      "role": "access / aggregation",
+      "os": "routeros"
+    },
+    {
+      "name": "CCR (Cloud Core Router)",
+      "role": "routing / edge",
+      "os": "routeros"
+    },
+    {
+      "name": "RB (RouterBOARD) / hEX / hAP",
+      "role": "SMB router",
+      "os": "routeros"
+    }
+  ],
+  "commands": {
+    "default": {
+      "show_version": {
+        "read": [
+          "/system resource print",
+          "/system routerboard print"
+        ]
+      },
+      "show_interface_status": {
+        "read": [
+          "/interface print"
+        ]
+      },
+      "show_interface_detail": {
+        "read": [
+          "/interface print stats"
+        ]
+      },
+      "show_interface_errors": {
+        "read": [
+          "/interface print stats"
+        ]
+      },
+      "show_optics": {
+        "read": [
+          "/interface ethernet monitor <if> once"
+        ]
+      },
+      "show_vlan": {
+        "read": [
+          "/interface bridge vlan print",
+          "/interface vlan print"
+        ]
+      },
+      "show_stp": {
+        "read": [
+          "/interface bridge print",
+          "/interface bridge port print"
+        ]
+      },
+      "show_mac_table": {
+        "read": [
+          "/interface bridge host print"
+        ]
+      },
+      "show_neighbors": {
+        "read": [
+          "/ip neighbor print"
+        ]
+      },
+      "show_cpu": {
+        "read": [
+          "/system resource print",
+          "/tool profile"
+        ]
+      },
+      "show_memory": {
+        "read": [
+          "/system resource print"
+        ]
+      },
+      "show_environment": {
+        "read": [
+          "/system health print"
+        ]
+      },
+      "show_logging": {
+        "read": [
+          "/log print"
+        ]
+      },
+      "show_arp": {
+        "read": [
+          "/ip arp print"
+        ]
+      },
+      "show_ospf": {
+        "read": [
+          "/routing ospf neighbor print"
+        ]
+      },
+      "show_bgp": {
+        "read": [
+          "/routing bgp session print"
+        ]
+      },
+      "show_lag": {
+        "read": [
+          "/interface bonding print"
+        ]
+      },
+      "show_poe": {
+        "read": [
+          "/interface ethernet poe print"
+        ]
+      },
+      "show_ntp": {
+        "read": [
+          "/system ntp client print"
+        ]
+      },
+      "show_snmp": {
+        "read": [
+          "/snmp print"
+        ]
+      },
+      "clear_counters": {
+        "change": [
+          "/interface ethernet reset-counters <if>"
+        ]
+      },
+      "bounce_interface": {
+        "change": [
+          "/interface disable <if>",
+          "/interface enable <if>"
+        ]
+      }
+    }
+  },
+  "syslog": [
+    {
+      "id": "link",
+      "regex": "\\b(?P<interface>(?:ether|sfp|sfp-sfpplus|qsfp|combo|wlan)[\\w\\-]*\\d+) link (?P<state>down|up)\\b",
+      "event": "interface_state",
+      "severity": "warning",
+      "example": "ether1 link down"
+    }
+  ],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://mikrotik.com/download",
+      "status": "200 (changelogs)"
+    }
+  },
+  "notes": "RouterOS v6 and v7 differ (routing stack rewritten in v7). Full switching is also available via RouterOS on CRS in bridge mode with hardware offload.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)",
+  "default_for": [
+    "routeros"
+  ]
+}

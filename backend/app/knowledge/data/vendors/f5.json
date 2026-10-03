@@ -1,0 +1,60 @@
+{
+  "id": "f5",
+  "name": "F5 (BIG-IP / load balancers)",
+  "aliases": [
+    "f5",
+    "big-ip",
+    "bigip"
+  ],
+  "categories": [
+    "adc"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 3375,
+      "org": "F5 Labs, Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "tmos",
+      "name": "TMOS / BIG-IP",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "tmos",
+        "big-ip"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "BIG-IP iSeries / rSeries / VE",
+      "role": "application delivery controller",
+      "os": "tmos"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

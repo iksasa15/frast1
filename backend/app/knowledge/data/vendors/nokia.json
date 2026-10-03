@@ -1,0 +1,113 @@
+{
+  "id": "nokia",
+  "name": "Nokia (incl. ex-Alcatel-Lucent)",
+  "aliases": [
+    "nokia",
+    "alcatel",
+    "alcatel-lucent",
+    "sr linux",
+    "srlinux",
+    "sr os",
+    "timos",
+    "7750",
+    "7220",
+    "نوكيا"
+  ],
+  "categories": [
+    "routing",
+    "switching",
+    "data-center"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 6527,
+      "org": "Nokia (formerly 'Alcatel-Lucent')"
+    },
+    {
+      "pen": 94,
+      "org": "Nokia"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "medium",
+  "os_families": [
+    {
+      "id": "sr-linux",
+      "name": "Nokia SR Linux",
+      "cli": "srlinux",
+      "netmiko": "nokia_srl",
+      "aliases": [
+        "sr linux",
+        "srlinux"
+      ],
+      "sysdescr_regex": [
+        "SRLinux-v(?P<version>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "version_regex": "v(?P<version>\\d+\\.\\d+\\.\\d+)",
+      "version_scheme": "vYY.M.P-build, e.g. v23.10.1-218 (data-center NOS, model-driven, gNMI/JSON-RPC).",
+      "examples": {
+        "sysdescr": [
+          "SRLinux-v23.10.1-218-gd6f04d0c0d"
+        ],
+        "version": [
+          "23.10.1"
+        ]
+      }
+    },
+    {
+      "id": "sr-os",
+      "name": "Nokia SR OS (TiMOS)",
+      "cli": "sros",
+      "netmiko": "nokia_sros",
+      "aliases": [
+        "sr os",
+        "timos",
+        "sros"
+      ],
+      "sysdescr_regex": [
+        "TiMOS-[A-Z]-(?P<version>\\d+\\.\\d+\\.[A-Z]\\d+).*?Nokia (?P<model>\\d+\\s?\\S+)"
+      ],
+      "version_regex": "TiMOS-[A-Z]-(?P<version>\\d+\\.\\d+\\.[A-Z]\\d+)",
+      "version_scheme": "TiMOS-<B|C|I>-YY.M.Rn, e.g. TiMOS-B-23.10.R1 (service-provider routers).",
+      "examples": {
+        "sysdescr": [
+          "TiMOS-B-23.10.R1 both/x86_64 Nokia 7750 SR Copyright (c) 2000-2023 Nokia."
+        ],
+        "version": [
+          "23.10.R1"
+        ]
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "7220 IXR / 7250 IXR",
+      "role": "data-center leaf/spine (SR Linux)",
+      "os": "sr-linux"
+    },
+    {
+      "name": "7210 SAS",
+      "role": "carrier access (SR OS)",
+      "os": "sr-os"
+    },
+    {
+      "name": "7750 SR / 7950 XRS",
+      "role": "carrier edge / core (SR OS)",
+      "os": "sr-os"
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": "https://www.nokia.com/networks/",
+      "status": "200 (portal)"
+    }
+  },
+  "notes": "Profile only: identification and versions, no curated command lists yet.",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

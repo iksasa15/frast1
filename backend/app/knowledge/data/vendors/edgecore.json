@@ -1,0 +1,63 @@
+{
+  "id": "edgecore",
+  "name": "Edgecore (Accton)",
+  "aliases": [
+    "edgecore",
+    "accton",
+    "ecs-"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 259,
+      "org": "ACCTON Technology"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "edgecore-os",
+      "name": "Edgecore firmware / SONiC / Cumulus / ONIE",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "edgecore",
+        "accton",
+        "ecs",
+        "as4610",
+        "as5712"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "ECS / AS-series (white-box)",
+      "role": "campus and data center",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

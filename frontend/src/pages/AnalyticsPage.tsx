@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { cssToken } from '@/lib/theme';
 
 type RunsResp = {
   runs: Array<{
@@ -31,9 +32,39 @@ type RunsResp = {
   };
 };
 
+function useChartTokens() {
+  const [tks, setTks] = useState({
+    grid: cssToken('--border-subtle', 'rgba(169,176,224,.12)'),
+    tick: cssToken('--text-3', '#8E97D4'),
+    panel: cssToken('--bg-panel', '#11163F'),
+    border: cssToken('--border', 'rgba(169,176,224,.2)'),
+    text: cssToken('--text-1', '#E8EBFF'),
+    ref: cssToken('--chart-ref', '#FFB020'),
+    bar: cssToken('--chart-1', '#3DD6F5'),
+  });
+  useEffect(() => {
+    const sync = () =>
+      setTks({
+        grid: cssToken('--border-subtle', 'rgba(169,176,224,.12)'),
+        tick: cssToken('--text-3', '#8E97D4'),
+        panel: cssToken('--bg-panel', '#11163F'),
+        border: cssToken('--border', 'rgba(169,176,224,.2)'),
+        text: cssToken('--text-1', '#E8EBFF'),
+        ref: cssToken('--chart-ref', '#FFB020'),
+        bar: cssToken('--chart-1', '#3DD6F5'),
+      });
+    sync();
+    const mo = new MutationObserver(sync);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
+  }, []);
+  return tks;
+}
+
 export function AnalyticsPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<RunsResp | null>(null);
+  const colors = useChartTokens();
 
   useEffect(() => {
     const load = () => {
@@ -78,8 +109,10 @@ export function AnalyticsPage() {
       <div className="grid grid-cols-4 gap-3">
         {cards.map((c) => (
           <div key={c.label} className="rounded-xl border border-noc-line bg-noc-panel/80 px-3 py-3">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500">{c.label}</div>
-            <div className="mt-1 font-mono text-2xl tabular-nums">{c.value}</div>
+            <div className="text-[length:var(--fs-xs)] text-[var(--text-2)]">{c.label}</div>
+            <div className="mt-1 font-mono text-[length:var(--fs-3xl)] tabular-nums leading-none">
+              {c.value}
+            </div>
           </div>
         ))}
       </div>
@@ -87,27 +120,27 @@ export function AnalyticsPage() {
       <div className="h-64 rounded-xl border border-noc-line bg-noc-panel/60 p-3">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart}>
-            <CartesianGrid stroke="#1f2a4d" strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-            <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} unit="s" />
+            <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fill: colors.tick, fontSize: 11 }} />
+            <YAxis tick={{ fill: colors.tick, fontSize: 11 }} unit="s" />
             <Tooltip
-              contentStyle={{ background: '#111831', border: '1px solid #1f2a4d' }}
-              labelStyle={{ color: '#cbd5e1' }}
+              contentStyle={{ background: colors.panel, border: `1px solid ${colors.border}` }}
+              labelStyle={{ color: colors.text }}
             />
             <ReferenceLine
               y={60}
-              stroke="#eab308"
+              stroke={colors.ref}
               strokeDasharray="4 4"
-              label={{ value: t('analytics.target'), fill: '#eab308', fontSize: 11 }}
+              label={{ value: t('analytics.target'), fill: colors.ref, fontSize: 11 }}
             />
-            <Bar dataKey="ttr" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="ttr" fill={colors.bar} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="overflow-auto rounded-xl border border-noc-line">
         <table className="w-full text-left text-sm">
-          <thead className="bg-noc-panel text-[11px] uppercase tracking-wider text-slate-500">
+          <thead className="bg-noc-panel text-[11px] tracking-wider text-[var(--text-2)]">
             <tr>
               <th className="px-3 py-2 font-normal">#</th>
               <th className="px-3 py-2 font-normal">Scenario</th>
@@ -138,8 +171,8 @@ export function AnalyticsPage() {
             ))}
             {(data?.runs?.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-slate-500">
-                  No runs yet — complete a demo loop first.
+                <td colSpan={6} className="px-3 py-8 text-center text-[var(--text-3)]">
+                  {t('analytics.empty')}
                 </td>
               </tr>
             )}

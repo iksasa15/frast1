@@ -1,0 +1,57 @@
+{
+  "id": "peplink",
+  "name": "Peplink",
+  "aliases": [
+    "peplink"
+  ],
+  "categories": [
+    "routing"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 23695,
+      "org": "PePLink Ltd."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "firmware8",
+      "name": "Peplink Firmware 8",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "peplink"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "Balance / MAX routers",
+      "role": "SD-WAN / multi-WAN",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

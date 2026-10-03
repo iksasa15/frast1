@@ -1,0 +1,39 @@
+name: "Copilot Setup Steps"
+
+# Prepares the environment of the GitHub Copilot coding agent (the "Agents" tab) so that it can run
+# the backend tests and the frontend checks. Nothing here needs a secret.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be named copilot-setup-steps or Copilot ignores this file.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      ROOTIQ_MODE: sim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci

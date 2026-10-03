@@ -1,0 +1,68 @@
+{
+  "id": "tp-link",
+  "name": "TP-Link",
+  "aliases": [
+    "tp-link",
+    "tplink",
+    "jetstream",
+    "omada",
+    "تي بي لينك"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 11863,
+      "org": "TP-Link Systems Inc."
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "jetstream",
+      "name": "JetStream / Omada",
+      "cli": null,
+      "netmiko": "tplink_jetstream",
+      "aliases": [
+        "jetstream",
+        "omada"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "JetStream managed switches",
+      "role": "SMB managed",
+      "os": "jetstream"
+    },
+    {
+      "name": "Omada SDN switches",
+      "role": "SMB, controller managed",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

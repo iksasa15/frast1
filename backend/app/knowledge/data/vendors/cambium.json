@@ -1,0 +1,60 @@
+{
+  "id": "cambium",
+  "name": "Cambium Networks",
+  "aliases": [
+    "cambium",
+    "cnmatrix"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 17713,
+      "org": "Cambium Networks Limited (formerly 'PipingHot Networks Limited')"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "cn-os",
+      "name": "cnMatrix / cnPilot firmware",
+      "cli": null,
+      "netmiko": null,
+      "aliases": [
+        "cambium",
+        "cnmatrix"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "cnMatrix switches",
+      "role": "SMB switching",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

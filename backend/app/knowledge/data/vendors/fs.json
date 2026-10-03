@@ -1,0 +1,60 @@
+{
+  "id": "fs",
+  "name": "FS.COM",
+  "aliases": [
+    "fs.com",
+    "fs switch",
+    "fiberstore"
+  ],
+  "categories": [
+    "switching"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 52642,
+      "org": "FS.COM INC"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "fsos",
+      "name": "FSOS",
+      "cli": null,
+      "netmiko": "fiberstore_fsos",
+      "aliases": [
+        "fsos",
+        "fs.com"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [
+    {
+      "name": "S-series managed switches",
+      "role": "SMB / DC",
+      "os": null
+    }
+  ],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}

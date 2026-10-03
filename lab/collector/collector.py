@@ -1,225 +1,147 @@
-"""RootIQ collector — runs on COLLECTOR-01, polls every 2s and pushes event batches to the backend."""
+"""RootIQ live collector: discovers topology and sends observed telemetry."""
+from __future__ import annotations
+
 import asyncio
+import json
 import os
 import re
 import subprocess
 import time
 from datetime import datetime, timezone
 
-import dns.resolver
 import httpx
 
-BACKEND = os.environ["ROOTIQ_BACKEND"]  # e.g. http://192.168.100.20:8000
+from discovery import Discoverer, Seed, interface_is_up
+
+BACKEND = os.environ["ROOTIQ_BACKEND"].rstrip("/")
 TOKEN = os.environ["ROOTIQ_INGEST_TOKEN"]
-COMMUNITY = os.environ.get("SNMP_COMMUNITY", "rootiq-ro")
-INTERVAL = 2.0
-# (device, mgmt_ip, interface, ifIndex, speed_mbps) — same values as topology.json
-PORTS = [
-    ("r1", "10.10.10.1", "Gi0/0", 1, 10),
-    ("r1", "10.10.10.1", "Gi0/1", 2, 1000),
-]
-# per link: (near hop, far hop) for differential latency
-HOPS = {
-    "link-r1-sw2": (None, "10.10.30.1"),
-    "link-r1-sw1": ("10.10.30.1", "10.10.20.11"),
-    "link-sw1-app01": ("10.10.20.11", "10.10.20.10"),
-}
-OID = {
-    "in": "1.3.6.1.2.1.31.1.1.1.6",
-    "out": "1.3.6.1.2.1.31.1.1.1.10",
-    "disc": "1.3.6.1.2.1.2.2.1.19",
-    "oper": "1.3.6.1.2.1.2.2.1.8",
-}
-prev: dict = {}
+SITE = os.environ.get("ROOTIQ_SITE", "eve-ng-lab")
+COLLECTOR_ID = os.environ.get("ROOTIQ_COLLECTOR_ID", os.uname().nodename)
+DISCOVERY_INTERVAL = float(os.environ.get("ROOTIQ_DISCOVERY_INTERVAL", "60"))
+POLL_INTERVAL = float(os.environ.get("ROOTIQ_POLL_INTERVAL", "5"))
 
 
-def ev(source_id, source_type, metric, value, unit, interface=None, **meta):
-    return {
-        "sourceId": source_id,
-        "sourceType": source_type,
-        "metric": metric,
-        "value": round(value, 3),
-        "unit": unit,
-        "interface": interface,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "metadata": meta,
-    }
+def load_services(node_ids: set[str]) -> list[dict]:
+    """Load real monitored services declared by the operator, never sample defaults."""
+    path = os.environ.get("ROOTIQ_SERVICES_FILE", "")
+    if not path:
+        return []
+    with open(path, encoding="utf-8") as handle:
+        services = json.load(handle)
+    if not isinstance(services, list):
+        raise ValueError("ROOTIQ_SERVICES_FILE must contain a JSON array")
+    unknown = {item.get("host") for item in services} - node_ids
+    if unknown:
+        raise ValueError(f"service hosts were not discovered: {sorted(unknown)}")
+    return services
 
 
-def snmpget(ip: str, oids: list[str]) -> list[int]:
-    out = subprocess.run(
-        ["snmpget", "-v2c", "-c", COMMUNITY, "-t", "1", "-r", "0", "-Oqv", ip, *oids],
-        capture_output=True,
-        text=True,
-        timeout=3,
-    )
-    return [int(re.sub(r"\D", "", x) or 0) for x in out.stdout.split()]
+def load_seeds() -> list[Seed]:
+    raw = os.environ.get("ROOTIQ_SEEDS", "")
+    if not raw:
+        raise RuntimeError("ROOTIQ_SEEDS is required (comma-separated management IPs)")
+    username = os.environ["ROOTIQ_DEVICE_USERNAME"]
+    password = os.environ["ROOTIQ_DEVICE_PASSWORD"]
+    device_type = os.environ.get("ROOTIQ_DEVICE_TYPE", "cisco_ios")
+    port = int(os.environ.get("ROOTIQ_DEVICE_PORT", "22"))
+    return [Seed(host.strip(), username, password, device_type, port) for host in raw.split(",") if host.strip()]
 
 
-def poll_ports():
-    events, now = [], time.time()
-    for dev, ip, ifname, idx, speed in PORTS:
-        try:
-            i, o, d, op = snmpget(
-                ip,
-                [
-                    f'{OID["in"]}.{idx}',
-                    f'{OID["out"]}.{idx}',
-                    f'{OID["disc"]}.{idx}',
-                    f'{OID["oper"]}.{idx}',
-                ],
-            )
-        except Exception:
-            events.append(ev(dev, "router", "poll_timeout", 1, "bool", ifname))
-            continue
-        key = (dev, ifname)
-        if key in prev:
-            t0, i0, o0, d0 = prev[key]
-            dt = max(now - t0, 0.5)
-            util = max(i - i0, o - o0) * 8 / (dt * speed * 1e6) * 100
-            events += [
-                ev(
-                    dev,
-                    "router",
-                    "link_utilization",
-                    min(util, 100),
-                    "percent",
-                    ifname,
-                    collector="snmp",
-                ),
-                ev(
-                    dev,
-                    "router",
-                    "if_out_discards_rate",
-                    max(d - d0, 0) / dt,
-                    "pps",
-                    ifname,
-                    collector="snmp",
-                ),
-            ]
-        events.append(
-            ev(dev, "router", "if_oper_status", 1 if op == 1 else 0, "bool", ifname, collector="snmp")
-        )
-        prev[key] = (now, i, o, d)
-    return events
+def event(source_id: str, source_type: str, metric: str, value: float, unit: str, **metadata):
+    return {"sourceId": source_id, "sourceType": source_type, "metric": metric, "value": value,
+            "unit": unit, "timestamp": datetime.now(timezone.utc).isoformat(), "metadata": metadata}
 
 
 def ping(ip: str) -> tuple[float, float]:
-    out = subprocess.run(
-        ["ping", "-n", "-q", "-c", "5", "-i", "0.2", "-W", "1", ip],
-        capture_output=True,
-        text=True,
-    ).stdout
-    loss_m = re.search(r"([\d.]+)% packet loss", out)
-    loss = float(loss_m.group(1)) if loss_m else 100.0
-    m = re.search(r"= [\d.]+/([\d.]+)/", out)
-    return (float(m.group(1)) if m else 1000.0), loss
+    result = subprocess.run(["ping", "-n", "-q", "-c", "3", "-W", "1", ip], capture_output=True,
+                            text=True, timeout=5)
+    loss_match = re.search(r"([\d.]+)% packet loss", result.stdout)
+    timing_match = re.search(r"= [\d.]+/([\d.]+)/", result.stdout)
+    return (float(timing_match.group(1)) if timing_match else 1000.0,
+            float(loss_match.group(1)) if loss_match else 100.0)
 
 
-def poll_hops():
-    rtt = {}
-    for ip in {"10.10.30.1", "10.10.20.11", "10.10.20.10"}:
-        rtt[ip] = ping(ip)
+def poll_nodes(topology: dict) -> list[dict]:
     events = []
-    for link, (near, far) in HOPS.items():
-        lat_far, loss_far = rtt[far]
-        lat_near, loss_near = rtt[near] if near else (0.0, 0.0)
-        events += [
-            ev(
-                link,
-                "link",
-                "link_latency_ms",
-                max(lat_far - lat_near, 0),
-                "ms",
-                collector="icmp",
-            ),
-            ev(
-                link,
-                "link",
-                "link_packet_loss",
-                max(loss_far - loss_near, 0),
-                "percent",
-                collector="icmp",
-            ),
-        ]
-    return events
-
-
-def poll_services():
-    events = []
-    r = dns.resolver.Resolver(configure=False)
-    r.nameservers = ["10.10.20.10"]
-    r.lifetime = 1.0
-    ok, t0 = 0, time.perf_counter()
-    for _ in range(5):
+    for node in topology.get("nodes", []):
+        ip = node.get("managementIp")
+        if not ip:
+            continue
         try:
-            r.resolve("app.rootiq.lab", "A")
-            ok += 1
+            latency, loss = ping(ip)
         except Exception:
-            pass
-    events += [
-        ev("svc-dns", "service", "dns_success_rate", ok * 20, "percent", collector="dns"),
-        ev(
-            "svc-dns",
-            "service",
-            "dns_latency_ms",
-            (time.perf_counter() - t0) * 1000 / 5,
-            "ms",
-            collector="dns",
-        ),
-    ]
-    try:
-        ip = r.resolve("app.rootiq.lab", "A")[0].to_text()
-        t0 = time.perf_counter()
-        resp = httpx.get(f"http://{ip}/health", headers={"Host": "app.rootiq.lab"}, timeout=2.0)
-        events += [
-            ev(
-                "svc-web",
-                "service",
-                "http_ok",
-                1 if resp.status_code == 200 else 0,
-                "bool",
-                collector="http",
-            ),
-            ev(
-                "svc-web",
-                "service",
-                "http_latency_ms",
-                (time.perf_counter() - t0) * 1000,
-                "ms",
-                collector="http",
-            ),
-        ]
-    except Exception:
-        events.append(ev("svc-web", "service", "http_ok", 0, "bool", collector="http"))
-    try:
-        h = httpx.get("http://10.10.20.10:9100/metrics", timeout=1.5).json()
-        events += [
-            ev("app01", "server", "cpu_percent", h["cpu"], "percent", collector="agent"),
-            ev("app01", "server", "mem_percent", h["mem"], "percent", collector="agent"),
-        ]
-    except Exception:
-        events.append(ev("app01", "server", "poll_timeout", 1, "bool", collector="agent"))
+            latency, loss = 1000.0, 100.0
+        events.extend([
+            event(node["id"], node["type"], "reachability", 0 if loss == 100 else 1, "bool", collector="icmp"),
+            event(node["id"], node["type"], "icmp_latency_ms", latency, "ms", collector="icmp"),
+            event(node["id"], node["type"], "icmp_packet_loss", loss, "percent", collector="icmp"),
+        ])
     return events
+
+
+def poll_link_oper(topology: dict, seeds: list[Seed]) -> list[dict]:
+    """Poll the observed source port of every link.
+
+    A failed SSH poll is skipped rather than reported as a down interface, so a
+    collector/connectivity problem cannot manufacture a link-down incident.
+    Credentials stay on COLLECTOR-01.
+    """
+    if not seeds:
+        return []
+    out = []
+    for link in topology.get("links", []):
+        node = next((n for n in topology.get("nodes", []) if n["id"] == link["source"]), None)
+        if not node or node.get("type") not in ("router", "switch") or not node.get("managementIp"):
+            continue
+        seed = Seed(node["managementIp"], seeds[0].username, seeds[0].password, seeds[0].device_type, seeds[0].port)
+        try:
+            conn = Discoverer._netmiko_connect(seed)
+            raw = conn.send_command(f"show interfaces {link['sourcePort']}")
+            conn.disconnect()
+            value = interface_is_up(raw)
+        except Exception:
+            continue
+        out.append(event(node["id"], node["type"], "if_oper_status", value, "bool", interface=link["sourcePort"], collector="netmiko"))
+    return out
+
+
+async def push_discovery(client: httpx.AsyncClient, discoverer: Discoverer) -> dict:
+    topology = await asyncio.to_thread(discoverer.run, SITE, COLLECTOR_ID)
+    if not any(node["type"] in ("router", "switch") for node in topology["nodes"]):
+        raise RuntimeError("no network seed was reachable; keeping the backend's last observed topology")
+    topology["services"] = load_services({node["id"] for node in topology["nodes"]})
+    response = await client.post(f"{BACKEND}/api/topology/discovery", json=topology,
+                                 headers={"x-rootiq-token": TOKEN})
+    response.raise_for_status()
+    return topology
 
 
 async def main():
-    async with httpx.AsyncClient(timeout=3.0) as client:
+    seeds = load_seeds()
+    discoverer = Discoverer(seeds)
+    topology: dict = {"nodes": []}
+    next_discovery = 0.0
+    async with httpx.AsyncClient(timeout=15.0) as client:
         while True:
-            t0 = time.time()
-            batch = await asyncio.gather(
-                *(asyncio.to_thread(f) for f in (poll_ports, poll_hops, poll_services))
-            )
-            events = [e for part in batch for e in part]
-            try:
-                await client.post(
-                    f"{BACKEND}/api/events/batch",
-                    json={"events": events},
-                    headers={"x-rootiq-token": TOKEN},
-                )
-            except Exception as ex:
-                print("push failed:", ex)
-            await asyncio.sleep(max(0.0, INTERVAL - (time.time() - t0)))
+            started = time.monotonic()
+            if started >= next_discovery:
+                try:
+                    topology = await push_discovery(client, discoverer)
+                    print(json.dumps({"event": "topology_discovered", "nodes": len(topology["nodes"]),
+                                      "links": len(topology["links"]), "errors": topology["errors"]}))
+                except Exception as exc:
+                    print(json.dumps({"event": "discovery_failed", "error": str(exc)}))
+                next_discovery = started + DISCOVERY_INTERVAL
+            events = await asyncio.to_thread(poll_nodes, topology)
+            events.extend(await asyncio.to_thread(poll_link_oper, topology, seeds))
+            if events:
+                try:
+                    response = await client.post(f"{BACKEND}/api/events/batch", json={"events": events},
+                                                 headers={"x-rootiq-token": TOKEN})
+                    response.raise_for_status()
+                except Exception as exc:
+                    print(json.dumps({"event": "telemetry_push_failed", "error": str(exc)}))
+            await asyncio.sleep(max(0.0, POLL_INTERVAL - (time.monotonic() - started)))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,142 @@
+{
+  "by_lang": {
+    "ar": 2576,
+    "en": 2576
+  },
+  "by_task": {
+    "command_lookup": {
+      "test_seen": 44,
+      "test_unseen": 44,
+      "train": 721,
+      "val": 35
+    },
+    "command_translate": {
+      "test_seen": 61,
+      "test_unseen": 56,
+      "train": 1131,
+      "val": 52
+    },
+    "config_model": {
+      "test_seen": 20,
+      "test_unseen": 26,
+      "train": 311,
+      "val": 15
+    },
+    "identify": {
+      "test_seen": 47,
+      "test_unseen": 42,
+      "train": 708,
+      "val": 39
+    },
+    "incident_vendor_plan": {
+      "test_seen": 7,
+      "test_unseen": 36,
+      "train": 154,
+      "val": 7
+    },
+    "problem_diagnose": {
+      "test_seen": 38,
+      "test_unseen": 36,
+      "train": 683,
+      "val": 43
+    },
+    "safety_refusal": {
+      "test_seen": 2,
+      "test_unseen": 3,
+      "train": 30,
+      "val": 3
+    },
+    "syslog": {
+      "test_seen": 22,
+      "train": 546,
+      "val": 30
+    },
+    "vendor_profile": {
+      "test_seen": 3,
+      "test_unseen": 4,
+      "train": 77,
+      "val": 2
+    },
+    "version_parse": {
+      "test_seen": 4,
+      "test_unseen": 4,
+      "train": 64,
+      "val": 2
+    }
+  },
+  "files": {
+    "test_seen.jsonl": "17cbb7ef18328c9ae76dc8e3b80f777a1ca4f8fb62582c4314347518950e3de0",
+    "test_unseen.jsonl": "c52b2b2122652fc3bc7766f178bf90fefd06bc903ca54c2ad065e5aa59d4a162",
+    "train.jsonl": "1e617fe8687661ed226511f3fa4233a54600de96a64164a27ef4ce90ceffee71",
+    "val.jsonl": "43c1810e934f3256d84adab0a8e9c1ef58745532e34f6972fd0f13da20f3d588"
+  },
+  "generator_version": 2,
+  "kb_fingerprint": "759772649bd24f7ada4ff7d081f782b7c25a8af101bf75a84904055438c0260e",
+  "kb_stats": {
+    "capabilities": 26,
+    "commandEntries": 246,
+    "coverage": {
+      "full": 5,
+      "partial": 7,
+      "profile-only": 31
+    },
+    "osFamilies": 59,
+    "problems": 25,
+    "seriesFamilies": 103,
+    "syslogPatterns": 26,
+    "vendors": 43
+  },
+  "seed": 20260929,
+  "splits": {
+    "test_seen": 248,
+    "test_unseen": 251,
+    "train": 4425,
+    "val": 228
+  },
+  "total": 5152,
+  "vendors_covered": [
+    "adtran",
+    "alcatel-lucent-enterprise",
+    "allied-telesis",
+    "arista",
+    "brocade",
+    "calix",
+    "cambium",
+    "checkpoint",
+    "ciena",
+    "cisco",
+    "d-link",
+    "dell",
+    "edgecore",
+    "ericsson",
+    "extreme",
+    "f5",
+    "fortinet",
+    "fs",
+    "h3c",
+    "hirschmann",
+    "hpe-aruba",
+    "huawei",
+    "juniper",
+    "lenovo",
+    "linux",
+    "mikrotik",
+    "moxa",
+    "netgear",
+    "nokia",
+    "nvidia",
+    "paloalto",
+    "peplink",
+    "planet",
+    "ruckus",
+    "ruijie",
+    "siemens",
+    "sonic",
+    "supermicro",
+    "teltonika",
+    "tp-link",
+    "ubiquiti",
+    "zte",
+    "zyxel"
+  ]
+}

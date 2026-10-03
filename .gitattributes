@@ -1,0 +1,3 @@
+# Generated training data is byte-exact (sha256 in manifest.json): never convert its line endings.
+training/data/generated/* text eol=lf
+backend/app/knowledge/data/**/*.json text eol=lf

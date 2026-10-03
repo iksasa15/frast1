@@ -2,7 +2,9 @@ import { useState } from 'react';
 import type { Action } from '@/lib/types';
 import clsx from 'clsx';
 import { api } from '@/lib/api';
+import { useTranslation } from 'react-i18next';
 import { RejectDialog } from './RejectDialog';
+import { PlanDetails } from './PlanDetails';
 
 interface Props {
   action: Action & { alternatives?: string[]; scenario?: string };
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export function ActionCard({ action, engineer, incidentStatus, needsInvestigation }: Props) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +63,7 @@ export function ActionCard({ action, engineer, incidentStatus, needsInvestigatio
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-noc-line bg-noc-bg/50 p-3">
+    <div className="space-y-3 border border-[var(--border)] bg-[var(--bg-raised)] p-3">
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs leading-relaxed text-slate-200">{action.description}</p>
         <span className={clsx('shrink-0 rounded px-1.5 py-0.5 text-[10px] uppercase', riskColor)}>
@@ -76,12 +79,16 @@ export function ActionCard({ action, engineer, incidentStatus, needsInvestigatio
         </ul>
       )}
 
-      <p className="text-[11px] italic text-slate-500">
-        No change is applied without engineer approval
+      {action.plan && <PlanDetails plan={action.plan} warnings={action.guardrailWarnings} />}
+
+      <p className="text-[11px] text-[var(--text-3)]">
+        لا يُنفَّذ أي تغيير دون موافقة مهندس. · No change runs without engineer approval.
       </p>
 
       {needsInvestigation && (
-        <p className="text-[11px] text-warn">Low confidence — approve only after review.</p>
+        <p className="text-[11px] text-warn">
+          Low confidence. More investigation is needed before acting.
+        </p>
       )}
 
       {pending && (
@@ -90,27 +97,32 @@ export function ActionCard({ action, engineer, incidentStatus, needsInvestigatio
             type="button"
             disabled={busy}
             onClick={() => void approve()}
-            className="flex-1 rounded-lg bg-ok/90 px-3 py-2 text-xs font-semibold text-black hover:bg-ok disabled:opacity-50"
+            className="rq-btn-primary flex-1 px-3"
           >
-            {busy ? 'Executing…' : 'Approve Remediation'}
+            {busy ? '…' : t('incident.approve')}
           </button>
           <button
             type="button"
             disabled={busy}
             onClick={() => setRejectOpen(true)}
-            className="rounded-lg border border-noc-line px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+            className="rq-btn-secondary px-3"
           >
-            Reject
+            {t('incident.reject')}
           </button>
         </div>
       )}
 
-      {(status === 'approved' || status === 'executed' || busy) && incidentStatus !== 'resolved' && (
+      {(status === 'approved' || status === 'executed' || busy) && !action.dryRun && incidentStatus !== 'resolved' && (
         <div className="text-xs text-info">
           {status === 'executed' ? 'Executed ✓ — Recovering…' : 'Executing on R1…'}
         </div>
       )}
 
+      {action.dryRun && (
+        <div className="text-xs text-warn">
+          Dry run — execution is switched off, your approval was recorded but nothing was changed.
+        </div>
+      )}
       {status === 'failed' && <div className="text-xs text-crit">Execution failed</div>}
       {error && <div className="text-[11px] text-crit">{error}</div>}
 

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Service, TopoNode } from '@/lib/types';
 import { STATUS_COLOR } from '@/lib/colors';
+import { zoneOf } from '@/lib/zones';
 import { X } from 'lucide-react';
 
 interface Props {
@@ -10,7 +12,9 @@ interface Props {
 }
 
 export function DeviceInspector({ device, services, onClose }: Props) {
+  const { i18n } = useTranslation();
   const hosted = services.filter((s) => s.host === device.id);
+  const zone = zoneOf(device.zone);
 
   return (
     <aside className="absolute right-0 top-0 z-10 flex h-full w-[360px] flex-col border-l border-noc-line bg-noc-panel/98 shadow-xl">
@@ -27,6 +31,17 @@ export function DeviceInspector({ device, services, onClose }: Props) {
       <div className="flex-1 space-y-4 overflow-y-auto p-4 text-sm">
         <Row label="Vendor" value={device.vendor ?? '—'} />
         <Row label="Management IP" value={device.managementIp} mono />
+        {zone && (
+          <Row
+            label="Building / Zone"
+            value={
+              <span className="inline-flex items-center gap-1.5" style={{ color: zone.color }}>
+                <span className="inline-block size-2.5 rounded-sm" style={{ background: zone.color }} />
+                {i18n.language === 'ar' ? zone.labelAr : zone.label}
+              </span>
+            }
+          />
+        )}
         <Row
           label="Status"
           value={

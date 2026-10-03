@@ -1,0 +1,55 @@
+{
+  "id": "ruijie",
+  "name": "Ruijie Networks",
+  "aliases": [
+    "ruijie",
+    "rgos",
+    "روي جي"
+  ],
+  "categories": [
+    "switching",
+    "wireless"
+  ],
+  "enterprise_oids": [
+    {
+      "pen": 4881,
+      "org": "Ruijie Networks Co., Ltd. (formerly 'Start Network Technology Co., Ltd.')"
+    }
+  ],
+  "coverage": "profile-only",
+  "confidence": "low",
+  "os_families": [
+    {
+      "id": "rgos",
+      "name": "RGOS",
+      "cli": null,
+      "netmiko": "ruijie_os",
+      "aliases": [
+        "rgos",
+        "ruijie os"
+      ],
+      "sysdescr_regex": [],
+      "version_regex": null,
+      "version_scheme": "",
+      "examples": {
+        "sysdescr": [],
+        "version": []
+      }
+    }
+  ],
+  "series": [],
+  "commands": {},
+  "syslog": [],
+  "advisories": {
+    "eol": {
+      "url": null,
+      "status": "not embedded"
+    },
+    "security": {
+      "url": null,
+      "status": "not embedded"
+    }
+  },
+  "notes": "",
+  "pen_verification": "verified against https://www.iana.org/assignments/enterprise-numbers.txt (2026-09-25)"
+}
