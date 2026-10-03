@@ -4,8 +4,8 @@ import type { ZoneNodeT } from '@/components/topology/ZoneNode';
 import type { Topology } from './types';
 import { ZONES, type ZoneId, zoneOf } from './zones';
 
-const PAD_X = 40;
-const PAD_Y_TOP = 40;
+const PAD_X = 48;
+const PAD_Y_TOP = 44;
 const PAD_Y_BOTTOM = 32;
 const NODE_W = 168;
 const NODE_H = 78;

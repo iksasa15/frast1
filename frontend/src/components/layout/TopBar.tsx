@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOps } from '@/store/useOps';
+import { api } from '@/lib/api';
 import clsx from 'clsx';
 
 export function TopBar() {
@@ -9,6 +10,7 @@ export function TopBar() {
   const lastUpdate = useOps((s) => s.lastUpdate);
   const discovery = useOps((s) => s.topology?.discovery);
   const demo = useOps((s) => s.demo);
+  const [busy, setBusy] = useState(false);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -32,30 +34,47 @@ export function TopBar() {
     void i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar');
   };
 
+  const toggleMode = () => {
+    if (busy) return;
+    setBusy(true);
+    void api
+      .setMode(simMode ? 'live' : 'sim')
+      .catch(console.error)
+      .finally(() => setBusy(false));
+  };
+
   return (
     <header className="flex items-center justify-between border-b border-noc-line bg-noc-panel px-4">
       <div className="flex items-center gap-3">
         <span className="text-lg font-semibold tracking-wide text-info">{t('appName')}</span>
         <span className="text-xs text-slate-400">{t('topbar.operations')}</span>
-        {simMode ? (
-          <span className="rounded bg-info/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-info">
-            {t('topbar.sim')}
-          </span>
-        ) : (
-          <span
-            title={discovery?.errors.join('\n') || 'Live topology discovery status'}
-            className={clsx(
-              'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-              discoveryState === 'live'
-                ? 'animate-pulse bg-ok/20 text-ok'
+        <button
+          type="button"
+          onClick={toggleMode}
+          disabled={busy}
+          title={simMode ? t('topbar.switchToLive') : t('topbar.switchToSim')}
+          className={clsx(
+            'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider transition-opacity disabled:opacity-50',
+            simMode
+              ? 'bg-info/20 text-info hover:bg-info/30'
+              : discoveryState === 'live'
+                ? 'animate-pulse bg-ok/20 text-ok hover:bg-ok/30'
                 : discoveryState === 'degraded'
-                  ? 'bg-warn/20 text-warn'
-                  : 'bg-slate-700 text-slate-300',
-            )}
-          >
-            {discoveryState === 'live' ? t('topbar.live') : discoveryState ?? 'waiting'}
-          </span>
-        )}
+                  ? 'bg-warn/20 text-warn hover:bg-warn/30'
+                  : 'bg-ok/20 text-ok hover:bg-ok/30',
+          )}
+        >
+          {simMode
+            ? t('topbar.sim')
+            : discoveryState === 'live'
+              ? t('topbar.live')
+              : discoveryState === 'waiting' || !discoveryState
+                ? t('topbar.live')
+                : discoveryState}
+        </button>
+        <span className="hidden text-[10px] text-slate-500 sm:inline">
+          {simMode ? t('topbar.switchHintLive') : t('topbar.switchHintSim')}
+        </span>
       </div>
       <div className="flex items-center gap-3 text-xs text-slate-400">
         <span className="flex items-center gap-1.5">

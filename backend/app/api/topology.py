@@ -69,9 +69,19 @@ async def ingest_discovery(
             observed_at=body.observed_at.isoformat(),
             errors=body.errors,
         )
-        request.app.state.refresh_graph()
+        # In sim mode discovery is persisted for LIVE LAB but the campus fixture stays on screen.
+        if request.app.state.topology.source_mode != "sim":
+            request.app.state.refresh_graph()
     except (TopologyError, NetworkXException, ValueError, KeyError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if request.app.state.topology.source_mode == "sim":
+        return {
+            "accepted": True,
+            "deferred": True,
+            "nodes": len(body.nodes),
+            "links": len(body.links),
+            "services": len(body.services),
+        }
     snapshot = request.app.state.snapshot()["topology"]
     await hub.broadcast("topology", snapshot)
     return {

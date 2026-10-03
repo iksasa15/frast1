@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -39,15 +39,27 @@ export function TopologyCanvas({
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(flow.nodes);
 
+  const layoutKey = useMemo(
+    () =>
+      topology.nodes
+        .map((n) => `${n.id}:${Math.round(n.position.x)}:${Math.round(n.position.y)}`)
+        .sort()
+        .join('|'),
+    [topology.nodes],
+  );
+  const prevLayoutKey = useRef(layoutKey);
+
   useEffect(() => {
+    const layoutChanged = prevLayoutKey.current !== layoutKey;
+    prevLayoutKey.current = layoutKey;
     setNodes((cur) =>
       flow.nodes.map((n) => {
-        if (n.type === 'zone') return n;
+        if (n.type === 'zone' || layoutChanged) return n;
         const prev = cur.find((c) => c.id === n.id);
-        return { ...n, position: prev?.position ?? n.position };
+        return prev ? { ...n, position: prev.position } : n;
       }),
     );
-  }, [flow.nodes, setNodes]);
+  }, [flow.nodes, layoutKey, setNodes]);
 
   return (
     <div dir="ltr" className="h-full w-full">
