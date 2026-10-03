@@ -24,8 +24,8 @@ def api_request(s):
 def test_lab_devices_are_identified_from_their_topology_hints(tmp_path):
     s = build_stack(tmp_path)
     inv = {d["id"]: d for d in s.agents.vendor.inventory()}
-    assert (inv["r1"]["vendor"], inv["r1"]["os"]) == ("cisco", "ios")
-    assert (inv["sw1"]["vendor"], inv["sw1"]["os"]) == ("cisco", "ios")
+    assert (inv["r1"]["vendor"], inv["r1"]["os"]) == ("cisco", "ios-xe")
+    assert (inv["sw1"]["vendor"], inv["sw1"]["os"]) == ("cisco", "ios-xe")
     assert inv["app01"]["vendor"] == "linux"
     assert all(d["coverage"] for d in inv.values() if d["vendor"])
 
@@ -68,9 +68,9 @@ async def test_link_congestion_lists_the_interface_on_both_ends_with_its_own_syn
     s = build_stack(tmp_path)
     inc = await run_scenario(s, "uplink-congestion")
     diag = {d["device"]: d for d in inc.action["plan"]["vendorCommands"]["diagnose"]}
-    assert set(diag) == {"r1", "sw1"}
+    assert set(diag) == {"r1", "sw-core"}
     assert any("Gi0/0" in c for chk in diag["r1"]["checks"] for c in chk["commands"])
-    assert any("Gi0/1" in c for chk in diag["sw1"]["checks"] for c in chk["commands"])
+    assert any("Gi0/1" in c for chk in diag["sw-core"]["checks"] for c in chk["commands"])
 
 
 def test_swapping_the_vendor_changes_the_commands_not_the_logic(tmp_path):
@@ -92,7 +92,7 @@ def test_unknown_vendor_is_reported_not_guessed(tmp_path):
     s = build_stack(tmp_path)
     s.topo.nodes["sw1"]["vendor"] = "Acme Widgets 9000"
     s.agents.vendor.forget()
-    ctx = s.agents.vendor.build_context("link-r1-sw1", ["link_utilization"])
+    ctx = s.agents.vendor.build_context("link-dist-a-sw1", ["link_utilization"])
     sw1 = next(d for d in ctx["devices"] if d["id"] == "sw1")
     assert sw1["vendor"] is None
     d = next(d for d in ctx["problems"][0]["diagnose"] if d["device"] == "sw1")
@@ -104,7 +104,7 @@ def test_profile_only_vendor_is_identified_without_invented_commands(tmp_path):
     s = build_stack(tmp_path)
     s.topo.nodes["sw2"]["vendor"] = "TP-Link JetStream"
     s.agents.vendor.forget()
-    ctx = s.agents.vendor.build_context("link-r1-sw2", ["link_utilization"])
+    ctx = s.agents.vendor.build_context("link-dist-a-sw2", ["link_utilization"])
     sw2 = next(d for d in ctx["problems"][0]["diagnose"] if d["device"] == "sw2")
     assert sw2["vendor"] == "tp-link" and sw2["coverage"] == "profile-only"
     assert all(not c["available"] and c["commands"] == [] for c in sw2["checks"])

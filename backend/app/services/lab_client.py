@@ -11,3 +11,10 @@ async def call(path: str) -> dict:
         )
         r.raise_for_status()
         return r.json()
+
+
+async def demo(path: str) -> dict:
+    """Call a fixed lab-agent demo endpoint; no user supplied command is accepted."""
+    if not settings.demo_enabled or not settings.demo_lab_id:
+        raise PermissionError("Live demo controls are disabled; set DEMO_ENABLED=1 and DEMO_LAB_ID on the isolated lab")
+    return await call(path)

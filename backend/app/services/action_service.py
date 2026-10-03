@@ -19,11 +19,22 @@ RECOMMENDATIONS = {
 }
 
 class ActionService:
-    def __init__(self, incidents, detector, history, audit, agents=None, execution_adapter_ref=None):
+    def __init__(
+        self,
+        incidents,
+        detector,
+        history,
+        audit,
+        agents=None,
+        execution_adapter_ref=None,
+        demo_ref=None,
+        simulator_ref=None,
+    ):
         self.incidents = incidents
         self.detector = detector
         self.history = history
         self.audit = audit
+        self.demo_ref = demo_ref or (lambda: {})
         self.actions: dict[str, dict] = {}
         self.runs: list[dict] = []
         self._seq = count(1)
@@ -35,7 +46,12 @@ class ActionService:
             detector=detector,
             audit=audit,
         )
-        self.agents.bind(actions=self, execution_adapter_ref=execution_adapter_ref or (lambda: None))
+        self.agents.bind(
+            actions=self,
+            execution_adapter_ref=execution_adapter_ref or (lambda: None),
+            demo_ref=self.demo_ref,
+            simulator_ref=simulator_ref or (lambda: None),
+        )
         if self.agents.audit is not audit:
             self.agents.audit = audit
 
@@ -69,7 +85,8 @@ class ActionService:
         if not inc:
             raise KeyError(action["incidentId"])
 
-        mode = "live"
+        demo = self.demo_ref() or {}
+        mode = demo.get("mode") or "live"
         verdict = await self.agents.guardrail.check(
             "approve", incident=inc, action=action, decided_by=decided_by, mode=mode
         )
@@ -89,7 +106,7 @@ class ActionService:
         if not scenario:
             raise ValueError("approved action has no execution target")
         try:
-            result = await self.agents.execution.execute(action, inc.id, scenario, verdict)
+            result = await self.agents.execution.execute(action, inc.id, scenario, mode, verdict)
             if not result["executed"]:
                 action["dryRun"] = True
                 inc.status = "approved"
@@ -104,6 +121,8 @@ class ActionService:
                     if key[0] in inc.members:
                         del self.detector.active[key]
                 self._recovering[inc.id] = datetime.now(timezone.utc).timestamp()
+                demo["state"] = "remediating"
+                await hub.broadcast("demo", demo)
                 self.audit.log(decided_by, "execute", action_id, {"scenario": scenario, "ok": True})
         except Exception as e:
             action["approvalStatus"] = "failed"
@@ -201,8 +220,10 @@ class ActionService:
             inc.resolved_at = recovered_at
             inc.timings["recoveredAt"] = recovered_at
             root = (inc.root_cause or {}).get("entityId")
-            runtime = {"mode": "live", "scenario": (inc.action or {}).get("scenario")}
-            self._record_run(inc, runtime)
+            demo = self.demo_ref() or {}
+            demo["state"] = "recovered"
+            await hub.broadcast("demo", demo)
+            self._record_run(inc, demo)
             self._recovering.pop(inc.id, None)
             self.audit.log("system", "resolved", inc.id, {"root": root})
             # learning agent: history + postmortem (plain history update if the agent is off)
@@ -247,7 +268,7 @@ class ActionService:
         self.runs.append(
             {
                 "scenario": scenario,
-                "mode": "live",
+                "mode": context.get("mode") or "live",
                 "incidentId": inc.id,
                 "metrics": metrics,
             }

@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 from app.agents.runtime import AgentRuntime
 from app.api import actions, agents as agents_api, demo, events, health, incidents, topology, vendors, ws
+from app.collectors.simulator import Simulator
 from app.core.config import settings
 from app.intelligence.correlate import Correlator
 from app.intelligence.detector import Detector
@@ -80,7 +81,7 @@ def build_snapshot(app: FastAPI) -> dict:
         "topology": snap,
         "incidents": app.state.incidents.list_incidents(),
         "alerts": list(app.state.pipeline.alerts),
-        "demo": app.state.demo,
+        "demo": getattr(app.state, "demo", {"mode": "sim", "scenario": None, "state": "idle"}),
     }
 
 
@@ -105,7 +106,7 @@ async def lifespan(app: FastAPI):
     audit = AuditLog()
 
     demo_state = {
-        "mode": "live",
+        "mode": "sim" if settings.rootiq_mode == "sim" else "live",
         "scenario": None,
         "state": "idle",
         "injectedAt": None,
@@ -169,9 +170,11 @@ async def lifespan(app: FastAPI):
         history=history,
         audit=audit,
         agents=agents,
+        demo_ref=lambda: demo_state,
+        simulator_ref=lambda: getattr(app.state, "simulator", None),
     )
     incidents_svc.actions = action_svc
-    agents.bind(state=state)
+    agents.bind(state=state, demo_ref=lambda: demo_state, simulator_ref=lambda: getattr(app.state, "simulator", None))
 
     pipeline = Pipeline(topo, state, detector, incidents_svc)
     pipeline.recorder = Recorder()
@@ -188,6 +191,7 @@ async def lifespan(app: FastAPI):
     app.state.history = history
     app.state.pipeline = pipeline
     app.state.demo = demo_state
+
     def refresh_graph():
         fresh = TopologyGraph(topo.raw)
         correlator.g = fresh
@@ -202,6 +206,14 @@ async def lifespan(app: FastAPI):
         # build the RAG index in the background so the first incident is not slowed down
         asyncio.create_task(asyncio.to_thread(agents.knowledge.reindex)),
     ]
+
+    # Simulator runs only in sim mode — never start it beside a live lab session.
+    if settings.rootiq_mode == "sim" and not settings.sim_paused:
+        sim = Simulator(pipeline)
+        app.state.simulator = sim
+        app.state.tasks.append(asyncio.create_task(sim.run()))
+    else:
+        app.state.simulator = None
 
     yield
 
@@ -225,9 +237,9 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api")
 app.include_router(topology.router, prefix="/api")
 app.include_router(events.router, prefix="/api")
-app.include_router(demo.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")
+app.include_router(demo.router, prefix="/api")
 app.include_router(agents_api.router, prefix="/api")
 app.include_router(vendors.router, prefix="/api")
 app.include_router(ws.router)

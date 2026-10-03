@@ -18,8 +18,15 @@ export const api = {
   linkMetrics: (id: string) =>
     j<Record<string, [number, number][]>>(`/api/links/${id}/metrics?minutes=5`),
   incidents: () => j<Incident[]>('/api/incidents'),
+  // Simulator campus
   inject: (s: Scenario) => j<DemoState>(`/api/demo/inject/${s}`, { method: 'POST' }),
   reset: () => j<DemoState>('/api/demo/reset', { method: 'POST' }),
+  setMode: (mode: 'live' | 'sim') =>
+    j<DemoState>('/api/demo/mode', { method: 'POST', body: JSON.stringify({ mode }) }),
+  // Live lab (opt-in DEMO_ENABLED) — separate from simulator inject
+  demoStatus: () => j<{ enabled: boolean; labId: string | null }>('/api/demo/status'),
+  triggerUplinkDown: () => j('/api/demo/uplink-down/trigger', { method: 'POST' }),
+  restoreUplinkDown: () => j('/api/demo/uplink-down/restore', { method: 'POST' }),
   incidentReplay: (id: string) =>
     j<{ incidentId: string; steps: Array<{ ts: number; kind: string; label: string; entityId?: string; value?: number }> }>(
       `/api/incidents/${id}/replay`,

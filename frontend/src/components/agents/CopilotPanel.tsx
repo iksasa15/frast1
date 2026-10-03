@@ -16,8 +16,22 @@ interface Props {
   incidentId?: string;
 }
 
-const SUGGEST_EN = ['What happened?', 'Why is this the root cause?', 'Why not DNS?', 'What should I do?', 'Which services are affected?', 'How do I reset the demo?'];
-const SUGGEST_AR = ['ما الذي حدث؟', 'لماذا هذا هو السبب الجذري؟', 'لماذا ليس DNS هو السبب؟', 'ماذا أفعل الآن؟', 'ما الخدمات المتأثرة؟', 'ما هي عتبات الكشف؟'];
+const SUGGEST_EN = [
+  'How many devices are there?',
+  'What services do we have?',
+  'What happened?',
+  'Uplink congestion — what should I check?',
+  'Why is this the root cause?',
+  'What should I do?',
+];
+const SUGGEST_AR = [
+  'كم عدد الأجهزة؟',
+  'وش الخدمات الموجودة؟',
+  'ما الذي حدث؟',
+  'ازدحام الـ uplink — وش أفحص؟',
+  'لماذا هذا هو السبب الجذري؟',
+  'ماذا أفعل الآن؟',
+];
 
 export function CopilotPanel({ incidentId }: Props) {
   const { t, i18n } = useTranslation();
@@ -90,12 +104,19 @@ export function CopilotPanel({ incidentId }: Props) {
                     <span>· {m.meta.source === 'llm' ? 'LLM (grounded)' : t('agents.copilot.deterministic')}</span>
                   </div>
                   {m.meta.sources.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {m.meta.sources.map((s) => (
-                        <span key={`${s.n}-${s.source}`} className="rounded bg-white/5 px-1.5 py-0.5 font-mono" title={s.title}>
-                          [{s.n}] {s.source}
-                        </span>
-                      ))}
+                    <div className="space-y-0.5">
+                      <div className="text-slate-400">{ar ? 'المصادر' : 'Sources'}</div>
+                      <div className="flex flex-wrap gap-1">
+                        {m.meta.sources.map((s) => (
+                          <span
+                            key={`${s.n}-${s.source}`}
+                            className="rounded bg-white/5 px-1.5 py-0.5 font-mono"
+                            title={s.title}
+                          >
+                            [{s.n}] {s.title || s.source}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {m.meta.warnings.map((w) => (

@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from discovery import Discoverer, Seed
+from discovery import Discoverer, Seed, interface_is_up
 
 BACKEND = os.environ["ROOTIQ_BACKEND"].rstrip("/")
 TOKEN = os.environ["ROOTIQ_INGEST_TOKEN"]
@@ -79,6 +79,32 @@ def poll_nodes(topology: dict) -> list[dict]:
     return events
 
 
+def poll_link_oper(topology: dict, seeds: list[Seed]) -> list[dict]:
+    """Poll the observed source port of every link.
+
+    A failed SSH poll is skipped rather than reported as a down interface, so a
+    collector/connectivity problem cannot manufacture a link-down incident.
+    Credentials stay on COLLECTOR-01.
+    """
+    if not seeds:
+        return []
+    out = []
+    for link in topology.get("links", []):
+        node = next((n for n in topology.get("nodes", []) if n["id"] == link["source"]), None)
+        if not node or node.get("type") not in ("router", "switch") or not node.get("managementIp"):
+            continue
+        seed = Seed(node["managementIp"], seeds[0].username, seeds[0].password, seeds[0].device_type, seeds[0].port)
+        try:
+            conn = Discoverer._netmiko_connect(seed)
+            raw = conn.send_command(f"show interfaces {link['sourcePort']}")
+            conn.disconnect()
+            value = interface_is_up(raw)
+        except Exception:
+            continue
+        out.append(event(node["id"], node["type"], "if_oper_status", value, "bool", interface=link["sourcePort"], collector="netmiko"))
+    return out
+
+
 async def push_discovery(client: httpx.AsyncClient, discoverer: Discoverer) -> dict:
     topology = await asyncio.to_thread(discoverer.run, SITE, COLLECTOR_ID)
     if not any(node["type"] in ("router", "switch") for node in topology["nodes"]):
@@ -91,7 +117,8 @@ async def push_discovery(client: httpx.AsyncClient, discoverer: Discoverer) -> d
 
 
 async def main():
-    discoverer = Discoverer(load_seeds())
+    seeds = load_seeds()
+    discoverer = Discoverer(seeds)
     topology: dict = {"nodes": []}
     next_discovery = 0.0
     async with httpx.AsyncClient(timeout=15.0) as client:
@@ -106,6 +133,7 @@ async def main():
                     print(json.dumps({"event": "discovery_failed", "error": str(exc)}))
                 next_discovery = started + DISCOVERY_INTERVAL
             events = await asyncio.to_thread(poll_nodes, topology)
+            events.extend(await asyncio.to_thread(poll_link_oper, topology, seeds))
             if events:
                 try:
                     response = await client.post(f"{BACKEND}/api/events/batch", json={"events": events},

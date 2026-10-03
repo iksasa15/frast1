@@ -2,7 +2,7 @@
 
 RootIQ is a live infrastructure-observability and incident-analysis platform. It discovers the network from Cisco CDP and IEEE LLDP observations, renders the observed topology, ingests real telemetry and syslog, correlates symptoms into incidents, and keeps remediation behind explicit human approval.
 
-There is no simulation mode in the production application. On a clean start the topology is empty and reports `waiting`; it becomes `live` only after an authenticated collector snapshot is accepted. The last observed snapshot is persisted at `data/topology-observed.json` so a backend restart does not invent or lose topology state.
+Production defaults to `ROOTIQ_MODE=live`. On a clean live start the topology is empty and reports `waiting`; it becomes `live` only after an authenticated collector snapshot is accepted. The last observed snapshot is persisted at `data/topology-observed.json` so a backend restart does not invent or lose topology state. An offline simulator exists for isolated demos and tests, but it is opt-in with `ROOTIQ_MODE=sim` and is never selected by the production defaults.
 
 ## Runtime flow
 

@@ -113,7 +113,7 @@ def test_repo_index_contains_docs_topology_playbooks_and_no_secrets():
     idx = KnowledgeIndex()
     idx.load_static(playbooks=PLAYBOOKS)
     st = idx.stats()
-    assert st["byKind"].get("doc", 0) > 10 and st["byKind"].get("playbook") == 3
+    assert st["byKind"].get("doc", 0) > 10 and st["byKind"].get("playbook") == 4
     assert st["byKind"].get("lab-config", 0) > 0
     blob = "\n".join(c.text for c in idx.chunks.values())
     assert "RootIQ-Lab-2026" not in blob and "rootiq-ro" not in blob

@@ -269,8 +269,12 @@ class KnowledgeIndex:
             cfg_files = sorted(cfg_dir.glob("*.cfg")) + sorted(cfg_dir.glob("*.yaml"))
             for p in cfg_files:  # learn credential literals first, so they are masked in every source
                 self.secrets |= learn_secrets(p.read_text(encoding="utf-8", errors="ignore"))
-            for p in sorted((self.root / "docs").glob("*.md")):
-                self._add_md(p, "doc")
+            # Top-level docs/*.md plus curated packs under docs/** (e.g. docs/network/)
+            docs_dir = self.root / "docs"
+            md_files = sorted({*docs_dir.glob("*.md"), *docs_dir.glob("**/*.md")})
+            for p in md_files:
+                if p.is_file():
+                    self._add_md(p, "doc")
             for name, kind in (("README.md", "doc"), ("RootIQ_Daily_Plan.md", "plan"), ("lab/eve/README.md", "doc")):
                 p = self.root / name
                 if p.exists():

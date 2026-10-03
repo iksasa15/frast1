@@ -70,6 +70,8 @@ class IncidentState:
 
 def _title_for(root_id: str, metric: str) -> str:
     if root_id.startswith("link-"):
+        if metric == "if_oper_status":
+            return f"Uplink down on {root_id}"
         return "Uplink congestion on R1 Gi0/0" if "r1-sw1" in root_id else f"Link congestion on {root_id}"
     if root_id == "svc-dns" or metric.startswith("dns_"):
         return "DNS service failure on APP-01"

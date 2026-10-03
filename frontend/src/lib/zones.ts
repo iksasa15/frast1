@@ -1,15 +1,12 @@
-/** Campus zone colors — distinguish buildings / fabric areas on the topology map. */
-export type ZoneId = 'edge' | 'core' | 'building-a' | 'building-b' | 'demo' | 'datacenter';
+/** Campus zone colors — buildings / fabric areas on the topology map. */
+export type ZoneId = 'edge' | 'core' | 'building-a' | 'building-b' | 'datacenter';
 
 export type ZoneMeta = {
   id: ZoneId;
   label: string;
   labelAr: string;
-  /** Accent for device borders / badges */
   color: string;
-  /** Translucent panel fill behind devices */
   fill: string;
-  /** Soft border for the zone panel */
   border: string;
 };
 
@@ -32,32 +29,24 @@ export const ZONES: Record<ZoneId, ZoneMeta> = {
   },
   'building-a': {
     id: 'building-a',
-    label: 'Building A',
-    labelAr: 'المبنى أ',
+    label: 'Building 1 — Apps',
+    labelAr: 'المبنى 1 — التطبيقات',
     color: '#4ADE80',
     fill: 'rgba(74, 222, 128, 0.08)',
     border: 'rgba(74, 222, 128, 0.35)',
   },
   'building-b': {
     id: 'building-b',
-    label: 'Building B',
-    labelAr: 'المبنى ب',
+    label: 'Building 2 — Data',
+    labelAr: 'المبنى 2 — البيانات',
     color: '#A78BFA',
     fill: 'rgba(167, 139, 250, 0.08)',
     border: 'rgba(167, 139, 250, 0.35)',
   },
-  demo: {
-    id: 'demo',
-    label: 'Demo Lab',
-    labelAr: 'مختبر العرض',
-    color: '#FBBF24',
-    fill: 'rgba(251, 191, 36, 0.10)',
-    border: 'rgba(251, 191, 36, 0.40)',
-  },
   datacenter: {
     id: 'datacenter',
-    label: 'Data Center',
-    labelAr: 'مركز البيانات',
+    label: 'Building 3 — Compute',
+    labelAr: 'المبنى 3 — الحوسبة',
     color: '#FB7185',
     fill: 'rgba(251, 113, 133, 0.08)',
     border: 'rgba(251, 113, 133, 0.35)',
@@ -67,4 +56,19 @@ export const ZONES: Record<ZoneId, ZoneMeta> = {
 export function zoneOf(id: string | undefined | null): ZoneMeta | null {
   if (!id || !(id in ZONES)) return null;
   return ZONES[id as ZoneId];
+}
+
+export function zoneBadge(id: ZoneId): string {
+  switch (id) {
+    case 'building-a':
+      return 'B1';
+    case 'building-b':
+      return 'B2';
+    case 'datacenter':
+      return 'B3';
+    case 'edge':
+      return 'EDGE';
+    case 'core':
+      return 'CORE';
+  }
 }

@@ -23,6 +23,12 @@ def normalize_port(value: str) -> str:
     return port
 
 
+def interface_is_up(output: str) -> float:
+    """Cisco `show interfaces` -> normalized IF-MIB operational state."""
+    first = output.splitlines()[0].lower() if output else ""
+    return 1.0 if " is up, line protocol is up" in first else 0.0
+
+
 def _blocks(text: str, marker: str) -> list[str]:
     starts = [m.start() for m in re.finditer(marker, text, re.I | re.M)]
     return [text[start : starts[i + 1] if i + 1 < len(starts) else None] for i, start in enumerate(starts)]

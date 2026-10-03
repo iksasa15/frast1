@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Service, TopoNode } from '@/lib/types';
 import { STATUS_COLOR } from '@/lib/colors';
 import { zoneOf } from '@/lib/zones';
 import { X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   device: TopoNode;
@@ -33,13 +33,11 @@ export function DeviceInspector({ device, services, onClose }: Props) {
         <Row label="Management IP" value={device.managementIp} mono />
         {zone && (
           <Row
-            label="Zone"
+            label="Building / Zone"
             value={
-              <span className="inline-flex items-center gap-2">
-                <span className="inline-block size-2.5" style={{ background: zone.color }} />
-                <span style={{ color: zone.color }}>
-                  {i18n.language === 'ar' ? zone.labelAr : zone.label}
-                </span>
+              <span className="inline-flex items-center gap-1.5" style={{ color: zone.color }}>
+                <span className="inline-block size-2.5 rounded-sm" style={{ background: zone.color }} />
+                {i18n.language === 'ar' ? zone.labelAr : zone.label}
               </span>
             }
           />

@@ -6,7 +6,12 @@ from app.services.topology_service import TopologyService
 
 COLLECTOR_DIR = Path(__file__).resolve().parents[2] / "lab" / "collector"
 sys.path.insert(0, str(COLLECTOR_DIR))
-from discovery import parse_cdp  # noqa: E402
+from discovery import interface_is_up, parse_cdp  # noqa: E402
+
+
+def test_interface_oper_status_parser_distinguishes_up_and_down():
+    assert interface_is_up("Ethernet0/0 is up, line protocol is up\n  Hardware is Ethernet") == 1.0
+    assert interface_is_up("Ethernet0/0 is administratively down, line protocol is down") == 0.0
 
 
 def test_cdp_parser_uses_observed_names_ports_and_management_address():
@@ -32,6 +37,7 @@ Holdtime : 122 sec
 
 
 def test_topology_can_be_replaced_atomically_from_live_observation(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings, "rootiq_mode", "live")
     monkeypatch.setattr(settings, "topology_path", "")
     monkeypatch.setattr(settings, "topology_state_path", str(tmp_path / "observed.json"))
     monkeypatch.setattr(settings, "layout_path", str(tmp_path / "layout.json"))

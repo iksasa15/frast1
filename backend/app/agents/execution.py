@@ -8,7 +8,7 @@ from .roster import SPECS
 class ExecutionAgent(Agent):
     spec = SPECS["execution"]
 
-    async def execute(self, action: dict, incident_id: str, scenario: str, verdict: Verdict) -> dict:
+    async def execute(self, action: dict, incident_id: str, scenario: str, mode: str, verdict: Verdict) -> dict:
         """Run an approved playbook. Refuses without a fresh, allowing Guardrail verdict."""
         async with self.step("execute_playbook", incident_id) as st:
             if not verdict.allowed:
@@ -23,6 +23,13 @@ class ExecutionAgent(Agent):
                 adapter.remediate()
                 result = {"executed": True, "dryRun": False, "target": "test-adapter", "commands": commands}
                 st.summary = f"test execution adapter completed '{scenario}'"
+            elif mode == "sim":
+                sim = self.rt.simulator_ref()
+                if sim:
+                    sim.remediate()
+                    await sim.push_baseline()
+                result = {"executed": True, "dryRun": False, "target": "simulator", "commands": commands}
+                st.summary = f"simulator remediation for '{scenario}' triggered (approved by {action.get('decidedBy')})"
             elif not verdict.execute:
                 result = {"executed": False, "dryRun": True, "target": "lab-agent", "commands": commands}
                 st.decision = "dry_run"

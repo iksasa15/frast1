@@ -26,7 +26,7 @@ export const useOps = create<OpsState>((set) => ({
   incidents: {},
   alerts: [],
   agentSteps: [],
-  demo: { mode: 'live', scenario: null, state: 'idle' },
+  demo: { mode: 'sim', scenario: null, state: 'idle' },
   wsStatus: 'connecting',
   lastUpdate: 0,
   selection: null,
@@ -40,6 +40,7 @@ export const useOps = create<OpsState>((set) => ({
           return {
             topology: m.data.topology,
             alerts: m.data.alerts,
+            // Keep prior demo if a snapshot omits it (avoids undefined → reconnect flicker)
             demo: m.data.demo ?? s.demo,
             lastUpdate,
             incidents: Object.fromEntries(m.data.incidents.map((i) => [i.id, i])),
@@ -82,10 +83,10 @@ export const useOps = create<OpsState>((set) => ({
           return { incidents: { ...s.incidents, [m.data.id]: m.data }, lastUpdate };
         case 'agent_step':
           return { agentSteps: [...s.agentSteps, m.data].slice(-400), lastUpdate };
-        case 'topology':
-          return { topology: m.data, lastUpdate };
         case 'demo':
           return { demo: m.data, lastUpdate };
+        case 'topology':
+          return { topology: m.data, lastUpdate };
       }
     }),
 }));

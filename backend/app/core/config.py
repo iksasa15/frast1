@@ -15,15 +15,22 @@ class Settings(BaseSettings):
     lab_agent_token: str
     record_events: bool = False
     llm_enabled: bool = False
-    llm_provider: str = "anthropic"  # anthropic | gemini | groq
+    llm_provider: str = "anthropic"  # anthropic | gemini | groq | openrouter | custom
     llm_model: str = ""  # empty -> provider default (see app/llm/client.py)
     anthropic_api_key: str = ""
     gemini_api_key: str = ""
     groq_api_key: str = ""
+    openrouter_api_key: str = ""
     llm_base_url: str = ""  # provider "custom": any OpenAI-compatible server (Ollama, vLLM, HF endpoint...)
     custom_llm_api_key: str = ""  # optional for the custom provider
     # Multi-agent layer
     rootiq_execution_enabled: bool = False  # False -> live-lab remediation becomes a dry run
+    # Offline sim campus (collectors.simulator + /api/demo inject/reset/mode)
+    rootiq_mode: str = "live"  # sim | live; simulation must be explicitly enabled
+    sim_paused: bool = False
+    # Optional live-lab demo controls (separate from sim inject)
+    demo_enabled: bool = False
+    demo_lab_id: str = ""
     agent_timeout_s: float = 8.0
     guardrail_max_executions: int = 5  # per 5 minutes
     verify_grace_s: float = 30.0  # after the 15 s recovery clock, wait up to this long for the playbook criteria

@@ -193,10 +193,10 @@ async def test_execution_agent_refuses_without_approval_or_verdict(tmp_path):
     inc = await run_scenario(s)
     ok_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="Ahmed", mode="live")
     with pytest.raises(PermissionError):  # action is still pending (not approved by a human)
-        await s.agents.execution.execute(inc.action, inc.id, "uplink-congestion", ok_verdict)
+        await s.agents.execution.execute(inc.action, inc.id, "uplink-congestion", "live", ok_verdict)
     bad_verdict = s.agents.guardrail.evaluate("approve", action=inc.action, incident=inc, decided_by="system", mode="live")
     with pytest.raises(PermissionError):
-        await s.agents.execution.execute({**inc.action, "approvalStatus": "approved"}, inc.id, "x", bad_verdict)
+        await s.agents.execution.execute({**inc.action, "approvalStatus": "approved"}, inc.id, "x", "live", bad_verdict)
     assert s.sim.recovering is False
 
 
@@ -226,13 +226,17 @@ async def test_topology_agent_impact_and_drift(tmp_path):
     assert {"svc-dns", "svc-web"} <= set(imp["services"]) and "app01" in imp["impactPath"]
     assert ta.path("collector01", "app01")[0] == "collector01" and ta.path("collector01", "nope") == []
 
-    good = [{"device": "r1", "port": "Gi0/0", "neighbor": "sw1", "neighborPort": "Gi0/1"}]
-    assert ta.reconcile(good)["ok"] is False  # r1 reported one neighbour but declares two
-    full = good + [{"device": "r1", "port": "Gi0/1", "neighbor": "sw2", "neighborPort": "Gi0/1"}]
+    # DC edge: r1 declares three neighbours (core / collector / firewall)
+    partial = [{"device": "r1", "port": "Gi0/0", "neighbor": "sw-core", "neighborPort": "Gi0/1"}]
+    assert ta.reconcile(partial)["ok"] is False
+    full = partial + [
+        {"device": "r1", "port": "Gi0/1", "neighbor": "collector01", "neighborPort": "ens3"},
+        {"device": "r1", "port": "Gi0/2", "neighbor": "fw1", "neighborPort": "port1"},
+    ]
     assert ta.reconcile(full)["ok"] is True
-    rogue = full + [{"device": "r1", "port": "Gi0/1", "neighbor": "sw9", "neighborPort": "Gi0/7"}]
+    rogue = full + [{"device": "r1", "port": "Gi0/0", "neighbor": "sw9", "neighborPort": "Gi0/7"}]
     drift = ta.reconcile(rogue)
-    assert drift["ok"] is False and drift["unexpected"][0]["neighbor"] == "sw9"
+    assert drift["ok"] is False and any(u["neighbor"] == "sw9" for u in drift["unexpected"])
 
 
 @pytest.mark.asyncio

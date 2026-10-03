@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -13,7 +13,6 @@ import { ZoneNode } from './ZoneNode';
 import { PortEdge } from './PortEdge';
 import { toFlow, type FlowNode } from '@/lib/layout';
 import type { Topology } from '@/lib/types';
-import { cssToken } from '@/lib/theme';
 import { zoneOf } from '@/lib/zones';
 
 const nodeTypes = { device: DeviceNode, zone: ZoneNode };
@@ -39,28 +38,31 @@ export function TopologyCanvas({
     [topology, focus, i18n.language],
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(flow.nodes);
-  const [grid, setGrid] = useState(() => cssToken('--topo-grid', 'rgba(169, 176, 224, .07)'));
+
+  const layoutKey = useMemo(
+    () =>
+      topology.nodes
+        .map((n) => `${n.id}:${Math.round(n.position.x)}:${Math.round(n.position.y)}`)
+        .sort()
+        .join('|'),
+    [topology.nodes],
+  );
+  const prevLayoutKey = useRef(layoutKey);
 
   useEffect(() => {
-    const sync = () => setGrid(cssToken('--topo-grid', 'rgba(169, 176, 224, .07)'));
-    sync();
-    const mo = new MutationObserver(sync);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => mo.disconnect();
-  }, []);
-
-  useEffect(() => {
+    const layoutChanged = prevLayoutKey.current !== layoutKey;
+    prevLayoutKey.current = layoutKey;
     setNodes((cur) =>
       flow.nodes.map((n) => {
-        if (n.type === 'zone') return n;
+        if (n.type === 'zone' || layoutChanged) return n;
         const prev = cur.find((c) => c.id === n.id);
-        return { ...n, position: prev?.position ?? n.position };
+        return prev ? { ...n, position: prev.position } : n;
       }),
     );
-  }, [flow.nodes, setNodes]);
+  }, [flow.nodes, layoutKey, setNodes]);
 
   return (
-    <div dir="ltr" className="h-full w-full bg-[var(--bg-canvas)]">
+    <div dir="ltr" className="h-full w-full">
       <ReactFlow
         nodes={nodes}
         edges={flow.edges}
@@ -70,8 +72,8 @@ export function TopologyCanvas({
         connectionMode={ConnectionMode.Loose}
         nodesConnectable={false}
         fitView
-        fitViewOptions={{ padding: 0.12, maxZoom: 1.1 }}
-        minZoom={0.2}
+        fitViewOptions={{ padding: 0.1, maxZoom: 1.05 }}
+        minZoom={0.15}
         maxZoom={2}
         onNodeClick={(_, n) => {
           if (n.type === 'zone') return;
@@ -91,7 +93,7 @@ export function TopologyCanvas({
         }}
         proOptions={{ hideAttribution: true }}
       >
-        <Background color={grid} gap={24} />
+        <Background color="#1f2a4d" gap={28} />
         <MiniMap
           pannable
           zoomable
@@ -99,8 +101,8 @@ export function TopologyCanvas({
           className="!bg-noc-panel !m-2"
           nodeColor={(n) => {
             if (n.type === 'zone') return 'transparent';
-            const device = (n.data as { device?: { zone?: string; status?: string } })?.device;
-            return zoneOf(device?.zone)?.color ?? cssToken('--text-3', '#8E97D4');
+            const device = (n.data as { device?: { zone?: string } })?.device;
+            return zoneOf(device?.zone)?.color ?? '#64748b';
           }}
         />
         <Controls position="bottom-left" className="!m-2" />

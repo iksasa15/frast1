@@ -17,8 +17,19 @@ class TopologyService:
     def __init__(self):
         self._lock = threading.RLock()
         self.state_path = Path(settings.topology_state_path)
+        # Which graph is currently in memory: sim fixture vs live discovery.
+        self.source_mode = "sim" if settings.rootiq_mode == "sim" else "live"
         self.raw = self._load_observed()
         self.metadata = self.raw.pop("discovery", self._empty_metadata())
+        if self.source_mode == "sim":
+            self.metadata = {
+                "state": "sim",
+                "source": "fixture",
+                "observedAt": None,
+                "receivedAt": None,
+                "collectorId": None,
+                "errors": [],
+            }
         self.nodes: dict[str, dict] = {}
         self.links: dict[str, dict] = {}
         self.services: dict[str, dict] = {}
@@ -37,11 +48,14 @@ class TopologyService:
             "errors": [],
         }
 
-    def _load_observed(self) -> dict:
-        if settings.topology_path:
-            data = json.loads(Path(settings.topology_path).read_text(encoding="utf-8"))
-            self._validate(data)
-            return data
+    def _load_fixture(self) -> dict:
+        if not settings.topology_path:
+            raise TopologyError("TOPOLOGY_PATH is not configured for simulation")
+        data = json.loads(Path(settings.topology_path).read_text(encoding="utf-8"))
+        self._validate(data)
+        return data
+
+    def _load_live_file(self) -> dict:
         if not self.state_path.exists():
             return {"site": "undiscovered", "vantage": "", "nodes": [], "links": [], "services": []}
         try:
@@ -50,6 +64,40 @@ class TopologyService:
             return data
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise TopologyError(f"invalid observed topology state: {exc}") from exc
+
+    def _load_observed(self) -> dict:
+        # Fixture topology is sim-only. Live uses discovery state so we never
+        # overwrite a connected EVE/collector topology with configs/topology.json.
+        if self.source_mode == "sim":
+            return self._load_fixture()
+        return self._load_live_file()
+
+    def activate_sim(self):
+        """Hot-switch in-memory graph to the sim campus fixture (does not touch live discovery file)."""
+        data = self._load_fixture()
+        with self._lock:
+            self.source_mode = "sim"
+            self.raw = data
+            self.metadata = {
+                "state": "sim",
+                "source": "fixture",
+                "observedAt": None,
+                "receivedAt": None,
+                "collectorId": None,
+                "errors": [],
+            }
+            self._index()
+            self._apply_layout()
+
+    def activate_live(self):
+        """Hot-switch in-memory graph to the last discovered live topology."""
+        data = self._load_live_file()
+        with self._lock:
+            self.source_mode = "live"
+            self.metadata = data.pop("discovery", self._empty_metadata())
+            self.raw = data
+            self._index()
+            self._apply_layout()
 
     def _index(self):
         self._validate(self.raw)
@@ -110,6 +158,11 @@ class TopologyService:
             "errors": errors or [],
         }
         with self._lock:
+            # While the UI shows the sim campus, keep accepting collector snapshots onto disk
+            # so LIVE LAB stays warm — but do not displace the in-memory fixture.
+            if self.source_mode == "sim":
+                self._persist_blob(candidate, metadata)
+                return
             old_positions = {nid: n.get("position") for nid, n in self.nodes.items()}
             for node in candidate["nodes"]:
                 if old_positions.get(node["id"]):
@@ -120,12 +173,15 @@ class TopologyService:
             self._apply_layout()
             self._persist()
 
-    def _persist(self):
+    def _persist_blob(self, raw: dict, metadata: dict):
         self.state_path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=self.state_path.parent, suffix=".json")
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump({**self.raw, "discovery": self.metadata}, f, indent=2)
+            json.dump({**raw, "discovery": metadata}, f, indent=2)
         os.replace(tmp, self.state_path)
+
+    def _persist(self):
+        self._persist_blob(self.raw, self.metadata)
 
     def _apply_layout(self):
         p = Path(settings.layout_path)

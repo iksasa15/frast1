@@ -4,16 +4,14 @@ from datetime import datetime, timezone
 
 from app.schemas.event import Event
 
+# Aligned with configs/topology.json campus spine (edge uplink keeps id link-r1-sw1).
 BASELINE = [
     ("link-r1-sw1", "link", "link_utilization", "percent", 14, 3),
     ("link-r1-sw1", "link", "link_latency_ms", "ms", 2.5, 0.6),
     ("link-r1-sw1", "link", "link_packet_loss", "percent", 0, 0),
     ("link-r1-sw1", "link", "if_out_discards_rate", "pps", 0, 0),
-    ("link-r1-sw2", "link", "link_utilization", "percent", 6, 2),
-    ("link-r1-sw2", "link", "link_latency_ms", "ms", 1.2, 0.3),
     ("link-sw1-app01", "link", "link_utilization", "percent", 9, 2),
     ("link-sw1-app01", "link", "link_latency_ms", "ms", 0.8, 0.2),
-    ("link-sw2-collector01", "link", "link_utilization", "percent", 5, 1),
     ("app01", "server", "cpu_percent", "percent", 18, 4),
     ("app01", "server", "mem_percent", "percent", 41, 1),
     ("svc-web", "service", "http_latency_ms", "ms", 42, 8),

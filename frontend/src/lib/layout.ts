@@ -4,11 +4,11 @@ import type { ZoneNodeT } from '@/components/topology/ZoneNode';
 import type { Topology } from './types';
 import { ZONES, type ZoneId, zoneOf } from './zones';
 
-const PAD_X = 36;
-const PAD_Y_TOP = 36;
-const PAD_Y_BOTTOM = 28;
+const PAD_X = 48;
+const PAD_Y_TOP = 44;
+const PAD_Y_BOTTOM = 32;
 const NODE_W = 168;
-const NODE_H = 72;
+const NODE_H = 78;
 
 export type FlowNode = DeviceNodeT | ZoneNodeT;
 

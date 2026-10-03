@@ -1,4 +1,4 @@
-"""Provider-neutral LLM client (Anthropic / Gemini / Groq).
+"""Provider-neutral LLM client (Anthropic / Gemini / Groq / OpenRouter / custom).
 
 Every caller in RootIQ treats the LLM as an optional *wording* layer:
 `complete()` never raises and returns None when the LLM is disabled, missing a key,
@@ -20,6 +20,7 @@ DEFAULT_MODELS = {
     "gemini": "gemini-2.5-flash",
     "custom": "rootiq-network",  # your own fine-tuned model behind an OpenAI-compatible server
     "groq": "qwen/qwen3.8-27b",  # checked against GET /openai/v1/models on 2026-09-28; model ids change, re-check
+    "openrouter": "openai/gpt-4o-mini",
 }
 PROVIDERS = tuple(DEFAULT_MODELS)
 
@@ -29,6 +30,7 @@ def _key(provider: str) -> str:
         "anthropic": settings.anthropic_api_key,
         "gemini": settings.gemini_api_key,
         "groq": settings.groq_api_key,
+        "openrouter": settings.openrouter_api_key,
         "custom": settings.custom_llm_api_key,
     }.get(provider, "")
 
@@ -160,7 +162,36 @@ async def _custom(system: str, user: str, max_tokens: int, timeout: float) -> st
     return data["choices"][0]["message"]["content"]
 
 
-_IMPL = {"anthropic": _anthropic, "gemini": _gemini, "groq": _groq, "custom": _custom}
+async def _openrouter(system: str, user: str, max_tokens: int, timeout: float) -> str:
+    data = await _post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+            "authorization": f"Bearer {settings.openrouter_api_key}",
+            "content-type": "application/json",
+            "HTTP-Referer": "https://rootiq.local",
+            "X-Title": "RootIQ Copilot",
+        },
+        {
+            "model": model_name("openrouter"),
+            "max_tokens": max_tokens,
+            "temperature": 0.1,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        },
+        timeout,
+    )
+    return data["choices"][0]["message"]["content"]
+
+
+_IMPL = {
+    "anthropic": _anthropic,
+    "gemini": _gemini,
+    "groq": _groq,
+    "custom": _custom,
+    "openrouter": _openrouter,
+}
 
 
 async def complete(

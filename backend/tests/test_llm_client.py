@@ -61,6 +61,9 @@ async def test_disabled_returns_none_without_network(monkeypatch):
         ("groq", "groq_api_key", {"choices": [{"message": {"content": "hi from groq"}}]},
          lambda url, h, p: "groq.com" in url and h["authorization"] == "Bearer test-key"
          and p["messages"][0] == {"role": "system", "content": "SYS"}),
+        ("openrouter", "openrouter_api_key", {"choices": [{"message": {"content": "hi from openrouter"}}]},
+         lambda url, h, p: "openrouter.ai" in url and h["authorization"] == "Bearer test-key"
+         and p["messages"][0] == {"role": "system", "content": "SYS"}),
     ],
 )
 async def test_each_provider_builds_the_right_request(monkeypatch, provider, key_attr, reply, check):

@@ -45,6 +45,6 @@ def test_cpu_spike_ranks_server_first():
 
 
 def test_isolated_anomaly_without_service_impact_is_low_confidence():
-    an = [A("link-r1-sw2", "link_utilization", 90, 6, 1.0, 100)]
+    an = [A("link-dist-a-sw2", "link_utilization", 90, 6, 1.0, 100)]
     _, conf = rank(an, [], g, NoHistory())
     assert conf < 0.55

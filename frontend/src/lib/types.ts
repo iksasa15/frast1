@@ -16,9 +16,8 @@ export interface TopoNode {
   id: string;
   type: NodeType;
   label: string;
-  /** Campus zone / building id for map coloring (e.g. building-a, datacenter). */
-  zone?: string;
   vendor?: string;
+  zone?: string;
   managementIp: string;
   position: { x: number; y: number };
   interfaces: Iface[];
@@ -32,7 +31,7 @@ export interface TopoLink {
   sourcePort: string;
   target: string;
   targetPort: string;
-  role: 'uplink' | 'access' | 'backup';
+  role: 'uplink' | 'access' | 'backup' | 'discovered';
   speedMbps: number;
   status: Health;
   utilization: number;
@@ -56,6 +55,15 @@ export interface Topology {
   nodes: TopoNode[];
   links: TopoLink[];
   services: Service[];
+  discovery: {
+    state: 'waiting' | 'live' | 'degraded';
+    source: string;
+    observedAt: string | null;
+    receivedAt: string | null;
+    collectorId: string | null;
+    errors: string[];
+    staleAfterSeconds: number;
+  };
 }
 
 export type IncidentStatus =
@@ -180,20 +188,13 @@ export interface VendorProblem {
   fixes: VendorFix[];
 }
 
-export interface AiReference {
-  text: string;
-  source: 'llm' | string;
-  gap: string;
-  agent?: string;
-}
-
 export interface VendorContext {
   rootEntity: string;
   kind: string;
   devices: VendorDevice[];
   problems: VendorProblem[];
   known: number;
-  aiReference?: AiReference | null;
+  aiReference?: AIReference | null;
 }
 
 export interface ActionPlan {
@@ -226,6 +227,11 @@ export interface KnowledgeHit {
   title: string;
   score: number;
   snippet: string;
+}
+
+export interface AIReference {
+  gap: string;
+  text: string;
 }
 
 export interface Action {
@@ -270,7 +276,7 @@ export interface Incident {
   knowledge?: {
     similar: KnowledgeHit[];
     references: KnowledgeHit[];
-    aiReference?: AiReference | null;
+    aiReference?: AIReference | null;
   } | null;
   vendorContext?: VendorContext | null;
   timings: {
@@ -305,8 +311,7 @@ export interface Snapshot {
   topology: Topology;
   incidents: Incident[];
   alerts: RawAlert[];
-  /** Present when backend exposes /api/demo; live-only backends omit this. */
-  demo?: DemoState;
+  demo: DemoState;
 }
 
 export interface AgentStats {
@@ -383,10 +388,10 @@ export interface CopilotAnswer {
 export type WsMessage =
   | { type: 'agent_step'; ts: number; data: AgentStep }
   | { type: 'snapshot'; ts: number; data: Snapshot }
-  | { type: 'topology'; ts: number; data: Topology }
   | { type: 'link'; ts: number; data: Pick<TopoLink, 'id' | 'status' | 'utilization' | 'latencyMs' | 'packetLoss'> }
   | { type: 'node'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'service'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'alert'; ts: number; data: RawAlert }
   | { type: 'incident'; ts: number; data: Incident }
-  | { type: 'demo'; ts: number; data: DemoState };
+  | { type: 'demo'; ts: number; data: DemoState }
+  | { type: 'topology'; ts: number; data: Topology };
