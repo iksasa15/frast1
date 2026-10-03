@@ -38,9 +38,11 @@ def build_stack(tmp_path, mode: str = "sim") -> SimpleNamespace:
     actions = ActionService(
         incidents, detector=detector, history=history, audit=audit, agents=agents,
         execution_adapter_ref=lambda: holder.get("sim") if mode != "live" else None,
+        demo_ref=lambda: demo,
+        simulator_ref=lambda: holder.get("sim"),
     )
     incidents.actions = actions
-    agents.bind(state=state)
+    agents.bind(state=state, demo_ref=lambda: demo, simulator_ref=lambda: holder.get("sim"))
     pipeline = Pipeline(topo, state, detector, incidents)
     pipeline.agents = agents
     agents.bind(pipeline=pipeline)

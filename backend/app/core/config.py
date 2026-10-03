@@ -24,8 +24,10 @@ class Settings(BaseSettings):
     custom_llm_api_key: str = ""  # optional for the custom provider
     # Multi-agent layer
     rootiq_execution_enabled: bool = True  # False -> live-lab remediation becomes a dry run
-    # Demo fault injection is deliberately off by default. It is a lab-only control,
-    # separate from remediation approval, and must be enabled on both services.
+    # Offline sim campus (collectors.simulator + /api/demo inject/reset/mode)
+    rootiq_mode: str = "sim"  # sim | live
+    sim_paused: bool = False
+    # Optional live-lab demo controls (separate from sim inject)
     demo_enabled: bool = False
     demo_lab_id: str = ""
     agent_timeout_s: float = 8.0

@@ -8,6 +8,7 @@ export function TopBar() {
   const wsStatus = useOps((s) => s.wsStatus);
   const lastUpdate = useOps((s) => s.lastUpdate);
   const discovery = useOps((s) => s.topology?.discovery);
+  const demo = useOps((s) => s.demo);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export function TopBar() {
       : discovery?.state;
   const dot =
     wsStatus === 'open' ? 'bg-ok' : wsStatus === 'connecting' ? 'bg-warn' : 'bg-crit';
+  const simMode = demo.mode === 'sim';
 
   const toggleLang = () => {
     void i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar');
@@ -35,16 +37,25 @@ export function TopBar() {
       <div className="flex items-center gap-3">
         <span className="text-lg font-semibold tracking-wide text-info">{t('appName')}</span>
         <span className="text-xs text-slate-400">{t('topbar.operations')}</span>
-        <span
-          title={discovery?.errors.join('\n') || 'Live topology discovery status'}
-          className={clsx(
-            'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-            discoveryState === 'live' ? 'animate-pulse bg-ok/20 text-ok' :
-              discoveryState === 'degraded' ? 'bg-warn/20 text-warn' : 'bg-slate-700 text-slate-300',
-          )}
-        >
-          {discoveryState === 'live' ? t('topbar.live') : discoveryState ?? 'waiting'}
-        </span>
+        {simMode ? (
+          <span className="rounded bg-info/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-info">
+            {t('topbar.sim')}
+          </span>
+        ) : (
+          <span
+            title={discovery?.errors.join('\n') || 'Live topology discovery status'}
+            className={clsx(
+              'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+              discoveryState === 'live'
+                ? 'animate-pulse bg-ok/20 text-ok'
+                : discoveryState === 'degraded'
+                  ? 'bg-warn/20 text-warn'
+                  : 'bg-slate-700 text-slate-300',
+            )}
+          >
+            {discoveryState === 'live' ? t('topbar.live') : discoveryState ?? 'waiting'}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-3 text-xs text-slate-400">
         <span className="flex items-center gap-1.5">

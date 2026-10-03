@@ -1,4 +1,4 @@
-import type { AgentInfo, AgentsResponse, AgentStep, CopilotAnswer, Incident, Topology } from './types';
+import type { AgentInfo, AgentsResponse, AgentStep, CopilotAnswer, DemoState, Incident, Topology } from './types';
 
 async function j<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, {
@@ -9,16 +9,22 @@ async function j<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export type Scenario = 'uplink-congestion' | 'dns-failure' | 'server-spike';
+
 export const api = {
-  demoStatus: () => j<{ enabled: boolean; labId: string | null }>('/api/demo/status'),
-  triggerUplinkDown: () => j('/api/demo/uplink-down/trigger', { method: 'POST' }),
-  restoreUplinkDown: () => j('/api/demo/uplink-down/restore', { method: 'POST' }),
   topology: () => j<Topology>('/api/topology'),
   saveLayout: (positions: Record<string, { x: number; y: number }>) =>
     j('/api/topology/layout', { method: 'PUT', body: JSON.stringify({ positions }) }),
   linkMetrics: (id: string) =>
     j<Record<string, [number, number][]>>(`/api/links/${id}/metrics?minutes=5`),
   incidents: () => j<Incident[]>('/api/incidents'),
+  // Simulator campus (ROOTIQ_MODE=sim only)
+  inject: (s: Scenario) => j<DemoState>(`/api/demo/inject/${s}`, { method: 'POST' }),
+  reset: () => j<DemoState>('/api/demo/reset', { method: 'POST' }),
+  // Live lab (opt-in DEMO_ENABLED) — separate from simulator
+  demoStatus: () => j<{ enabled: boolean; labId: string | null }>('/api/demo/status'),
+  triggerUplinkDown: () => j('/api/demo/uplink-down/trigger', { method: 'POST' }),
+  restoreUplinkDown: () => j('/api/demo/uplink-down/restore', { method: 'POST' }),
   incidentReplay: (id: string) =>
     j<{ incidentId: string; steps: Array<{ ts: number; kind: string; label: string; entityId?: string; value?: number }> }>(
       `/api/incidents/${id}/replay`,

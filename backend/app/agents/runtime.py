@@ -50,6 +50,8 @@ class AgentRuntime:
         self.actions = None
         self.pipeline = None
         self.execution_adapter_ref = lambda: None
+        self.simulator_ref = lambda: None
+        self.demo_ref = lambda: {}
 
         self.trace = TraceStore()
         self._disabled: set[str] = set()

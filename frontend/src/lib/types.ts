@@ -17,6 +17,7 @@ export interface TopoNode {
   type: NodeType;
   label: string;
   vendor?: string;
+  zone?: string;
   managementIp: string;
   position: { x: number; y: number };
   interfaces: Iface[];
@@ -288,10 +289,18 @@ export interface RawAlert {
   ts: string;
 }
 
+export interface DemoState {
+  mode: 'live' | 'sim';
+  scenario: string | null;
+  state: 'idle' | 'injected' | 'remediating' | 'recovered';
+  injectedAt?: string;
+}
+
 export interface Snapshot {
   topology: Topology;
   incidents: Incident[];
   alerts: RawAlert[];
+  demo: DemoState;
 }
 
 export interface AgentStats {
@@ -373,4 +382,5 @@ export type WsMessage =
   | { type: 'service'; ts: number; data: { id: string; status: Health; metrics: Record<string, number> } }
   | { type: 'alert'; ts: number; data: RawAlert }
   | { type: 'incident'; ts: number; data: Incident }
+  | { type: 'demo'; ts: number; data: DemoState }
   | { type: 'topology'; ts: number; data: Topology };

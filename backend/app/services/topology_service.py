@@ -38,7 +38,9 @@ class TopologyService:
         }
 
     def _load_observed(self) -> dict:
-        if settings.topology_path:
+        # Fixture topology is sim-only. Live lab always uses discovery state so we never
+        # overwrite a connected EVE/collector topology with configs/topology.json.
+        if settings.rootiq_mode == "sim" and settings.topology_path:
             data = json.loads(Path(settings.topology_path).read_text(encoding="utf-8"))
             self._validate(data)
             return data
