@@ -15,11 +15,12 @@ class Settings(BaseSettings):
     lab_agent_token: str
     record_events: bool = False
     llm_enabled: bool = False
-    llm_provider: str = "anthropic"  # anthropic | gemini | groq
+    llm_provider: str = "anthropic"  # anthropic | gemini | groq | openrouter | custom
     llm_model: str = ""  # empty -> provider default (see app/llm/client.py)
     anthropic_api_key: str = ""
     gemini_api_key: str = ""
     groq_api_key: str = ""
+    openrouter_api_key: str = ""
     llm_base_url: str = ""  # provider "custom": any OpenAI-compatible server (Ollama, vLLM, HF endpoint...)
     custom_llm_api_key: str = ""  # optional for the custom provider
     # Multi-agent layer

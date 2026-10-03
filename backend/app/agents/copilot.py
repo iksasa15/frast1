@@ -31,6 +31,23 @@ INTENTS: list[tuple[str, list[str]]] = [
     ("why_not", ["why not", "why isn't", "why isnt", "why is not", "لماذا ليس", "ليش مو", "ليش ما", "لماذا لم", "لماذا لا يكون", "ليس هو السبب"]),
     ("audit", ["who approved", "who rejected", "audit", "approval log", "من وافق", "من رفض", "سجل الموافقات", "التدقيق", "سجل التدقيق"]),
     ("action_request", ["approve it", "approve the", "approve this", "please approve", "execute", "go ahead and", "run the fix", "apply the fix", "reject it", "reject the", "وافق على", "اعتمد", "نفّذ", "نفذ", "طبّق الإجراء", "طبق الإجراء"]),
+    ("inventory", [
+        "how many", "how many devices", "how many switches", "how many servers", "how many routers",
+        "device count", "number of devices", "count devices", "list devices", "inventory",
+        "list services", "list switches", "list servers",
+        "what services do we", "which services do we", "services do we have",
+        "كم جهاز", "كم عدد", "عدد الأجهزة", "عدد الاجهزه", "كم سويتش", "كم سيرفر", "كم راوتر",
+        "وش الأجهزة", "وش الاجهزه", "ما الأجهزة", "ما الاجهزه", "قائمة الأجهزة", "جرد",
+        "كم خدمة", "وش الخدمات الموجودة", "قائمة الخدمات", "المباني", "buildings", "zones",
+    ]),
+    # Scenario / runbook questions → RAG (docs/network, playbooks). Must precede "recommend"
+    # so "uplink congestion — what should I check?" does not latch onto the active incident.
+    ("docs", [
+        "uplink", "congestion", "ازدحام", "dns failure", "فشل dns", "فشل الdns",
+        "server spike", "cpu spike", "troubleshooting", "ops faq", "ops-faq",
+        "وش أسوي", "وش اسوي", "وش أفحص", "وش افحص", "ماذا أفحص", "ماذا افحص",
+        "documentation", "في الوثائق", "runbook", "how to check uplink",
+    ]),
     ("kpi", ["mttd", "mttr", "time to", "noise", "accuracy", "kpi", "how fast", "زمن", "الضجيج", "دقة", "سرعة", "مؤشر"]),
     ("similar", ["similar", "happened before", "past incident", "previous incident", "history", "مشابه", "من قبل", "تكرر", "سابقة", "حوادث سابقة"]),
     ("recommend", ["what should", "what do i do", "how do i fix", "fix", "remediat", "recommend", "rollback", "playbook", "ماذا أفعل", "ماذا افعل", "الحل", "توصية", "إجراء", "اجراء", "معالجة", "تراجع", "إصلاح", "اصلاح"]),
@@ -282,6 +299,65 @@ class CopilotAgent(Agent):
                 t += " Not healthy: " + ", ".join(bad) + "."
         return t, facts
 
+    def _search_knowledge(self, question: str, k: int = 4) -> list[dict]:
+        """TF-IDF search with a Latin/Arabic cue fallback for mixed-language ops questions."""
+        hits = self.rt.knowledge.search(question, k=k)
+        if hits:
+            return hits
+        latin = " ".join(re.findall(r"[A-Za-z][A-Za-z0-9_-]{1,}", question))
+        cues = [c for c in ("ازدحام", "فشل", "ارتفاع", "حمل", "رابط", "سويتش", "سيرفر") if c in question]
+        alt = " ".join(x for x in (latin, *cues) if x).strip()
+        if alt and alt != question.strip():
+            return self.rt.knowledge.search(alt, k=k)
+        return hits
+
+    def _inventory(self, ar: bool) -> tuple[str, dict]:
+        """Authoritative device/service counts from the in-memory topology graph."""
+        topo = self.rt.topology
+        if topo is None or not topo.nodes:
+            empty = ("لا توجد طوبولوجيا محمّلة حاليًا." if ar else "No topology is loaded right now.")
+            return empty, {"devices": 0}
+        by_type: dict[str, int] = {}
+        by_zone: dict[str, int] = {}
+        for n in topo.nodes.values():
+            by_type[n.get("type", "unknown")] = by_type.get(n.get("type", "unknown"), 0) + 1
+            z = n.get("zone") or "unassigned"
+            by_zone[z] = by_zone.get(z, 0) + 1
+        n_links = len(topo.links)
+        services = list(topo.services.values())
+        svc_names = [s.get("label") or s["id"] for s in services]
+        open_incs = [
+            i for i in (self.rt.incidents.list_incidents() if self.rt.incidents else [])
+            if i["status"] != "resolved"
+        ]
+        facts = {
+            "devices": len(topo.nodes),
+            "byType": by_type,
+            "byZone": by_zone,
+            "links": n_links,
+            "services": len(services),
+            "serviceNames": svc_names,
+            "site": topo.raw.get("site"),
+            "openIncidents": len(open_incs),
+        }
+        type_bits = ", ".join(f"{k}={v}" for k, v in sorted(by_type.items()))
+        zone_bits = ", ".join(f"{k}={v}" for k, v in sorted(by_zone.items()))
+        if ar:
+            t = (
+                f"الموقع: {facts['site'] or '—'}. الأجهزة: {facts['devices']} "
+                f"({type_bits}). الروابط: {n_links}. الخدمات: {len(services)}"
+                f"{(' — ' + '، '.join(svc_names)) if svc_names else ''}. "
+                f"حسب المنطقة/المبنى: {zone_bits or '—'}. الحوادث المفتوحة: {len(open_incs)}."
+            )
+        else:
+            t = (
+                f"Site: {facts['site'] or '—'}. Devices: {facts['devices']} "
+                f"({type_bits}). Links: {n_links}. Services: {len(services)}"
+                f"{(' — ' + ', '.join(svc_names)) if svc_names else ''}. "
+                f"By zone/building: {zone_bits or '—'}. Open incidents: {len(open_incs)}."
+            )
+        return t, facts
+
     # ---------------------------------------------------------------- main entry
     async def ask(self, question: str, incident_id: str | None = None, lang: str | None = None) -> dict:
         question = (question or "").strip()
@@ -360,11 +436,21 @@ class CopilotAgent(Agent):
                 text, facts = self._audit(inc, ar)
             elif intent == "kpi":
                 text, facts = self._kpi(ar)
+            elif intent == "inventory":
+                text, facts = self._inventory(ar)
+                sources.append({
+                    "source": "topology (live snapshot)",
+                    "title": "طوبولوجيا حية / live topology",
+                })
             elif intent == "status":
                 text, facts = self._status(ar)
+                sources.append({
+                    "source": "topology + metrics",
+                    "title": "حالة حية / live health",
+                })
 
             # ---- knowledge retrieval (always: gives citations; is the whole answer for 'docs')
-            hits = self.rt.knowledge.search(question, k=4)
+            hits = self._search_knowledge(question, k=4)
             safe = [h for h in hits if not h["suspicious"]]
             if len(safe) != len(hits):
                 warnings.append("A retrieved passage looked like an instruction and was ignored." if not ar else "تم تجاهل مقطع مسترجَع يشبه تعليمات موجّهة.")
@@ -385,12 +471,18 @@ class CopilotAgent(Agent):
                         "I could not find this in the RootIQ knowledge base (docs, topology, incidents). Try rephrasing or ask about an incident."
                     )
                     confidence = "none"
-            strong = [h for h in safe if h["score"] >= 0.3]
+            # Docs/network passages often score ~0.15–0.25 on short ops questions — cite them.
+            strong = [h for h in safe if h["score"] >= (0.12 if intent == "docs" else 0.3)]
             if intent == "docs":
                 sources = [{"source": h["source"], "title": h["title"], "score": h["score"]} for h in safe[:3]]
+            elif intent == "inventory":
+                # Keep topology as primary; append strong network-doc hits as secondary citations.
+                for h in strong[:2]:
+                    if h["source"] not in {s["source"] for s in sources}:
+                        sources.append({"source": h["source"], "title": h["title"], "score": h["score"]})
             elif not sources and intent != "action_request":
                 sources = [{"source": h["source"], "title": h["title"], "score": h["score"]} for h in strong[:2]]
-            if inc is not None and intent not in ("docs", "action_request", "vendor_help"):
+            if inc is not None and intent not in ("docs", "action_request", "vendor_help", "inventory"):
                 sources.insert(0, {"source": f"incident/{inc['id']}", "title": "live incident state"})
 
             answer_source = "deterministic"
